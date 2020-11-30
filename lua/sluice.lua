@@ -6,6 +6,7 @@ local api = vim.api
 local winid = nil
 local bufnr = api.nvim_create_buf(false, true)
 local ns = api.nvim_create_namespace('nvim-sluice')
+local utils = require('sluice_utils')
 
 local get_gutter_width = function()
   local saved_view = api.nvim_call_function('winsaveview', {})
@@ -58,16 +59,17 @@ end
 
 function M.open()
   if winid ~= nil and api.nvim_win_is_valid(winid) then
+    M.refresh_buffer()
     return
   end
 
   local gutter_width = get_gutter_width()
-  local win_width = api.nvim_win_get_width(0) - gutter_width
+  local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
 
   winid = api.nvim_open_win(bufnr, false, {
     relative = 'win',
-    width = 2,
+    width = 1,
     height = win_height,
     row = 0,
     col = win_width,
@@ -75,7 +77,15 @@ function M.open()
     style = 'minimal',
   })
 
-  -- ▁▂▃▄▅▆▇█
+  M.refresh_buffer()
+end
+
+function M.refresh_buffer()
+  local win_height = api.nvim_win_get_height(0)
+  local buf_height = api.nvim_buf_line_count(0)
+  local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
+  local lines = utils.signs_to_lines(get_placed[1], buf_height, win_height)
+  vim.fn.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, lines)
 end
 
 function M.enable()
@@ -101,7 +111,8 @@ end
 
 -- Setup
 
-M.enable()
+-- TODO have a setting to enable or disable by default
+-- M.enable()
 
 api.nvim_command('command! SluiceEnable  lua require("sluice").enable()')
 api.nvim_command('command! SluiceDisable lua require("sluice").disable()')
