@@ -1,26 +1,24 @@
-# nvim-treesitter-context
+# nvim-sluice
 
-Very basic alternative to [context.vim](https://github.com/wellle/context.vim)
-implemented with [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter).
+A signs gutter for the right side of the window.
 
 ## Install
 
 ```vim
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'romgrk/nvim-treesitter-context'
+Plug 'dsummersl/nvim-sluice'
 ```
 
 ## Screenshot
 
-![theme](./static/demo.gif)
+![theme](./static/demo.png)
 
-### Notes
-
-Currently only updates the context on `CursorMoved` because there is no good scroll
-event, and trying to remap basic movement mappings like context.vim does ends up being
-brittle.
 
 ## Commands
 
-`TSContextEnable` and `TSContextDisable`.
+`SluiceEnable` and `SluiceDisable`.
 
+## Development
+
+Run tests:
+
+    lua tests/suite.lua
