@@ -58,25 +58,30 @@ function M.close()
 end
 
 function M.open()
-  if winid ~= nil and api.nvim_win_is_valid(winid) then
-    M.refresh()
-    return
-  end
-
   local gutter_width = get_gutter_width()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
 
-  local width = gutter_width
-  winid = api.nvim_open_win(bufnr, false, {
-    relative = 'win',
-    width = width,
-    height = win_height,
-    row = 0,
-    col = win_width - width + 1,
-    focusable = false,
-    style = 'minimal',
-  })
+  if winid == nil or not api.nvim_win_is_valid(winid) then
+    winid = api.nvim_open_win(bufnr, false, {
+      relative = 'win',
+      width = gutter_width,
+      height = win_height,
+      row = 0,
+      col = win_width - gutter_width + 1,
+      focusable = false,
+      style = 'minimal',
+    })
+  else
+    api.nvim_win_set_config(winid, {
+      win = api.nvim_get_current_win(),
+      relative = 'win',
+      width = gutter_width,
+      height = win_height,
+      row = 0,
+      col = win_width - gutter_width + 1,
+    })
+  end
 
   M.refresh()
 end
