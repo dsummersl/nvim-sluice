@@ -59,7 +59,7 @@ end
 
 function M.open()
   if winid ~= nil and api.nvim_win_is_valid(winid) then
-    M.refresh_buffer()
+    M.refresh()
     return
   end
 
@@ -67,25 +67,54 @@ function M.open()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
 
+  local width = gutter_width
   winid = api.nvim_open_win(bufnr, false, {
     relative = 'win',
-    width = 1,
+    width = width,
     height = win_height,
     row = 0,
-    col = win_width,
+    col = win_width - width + 1,
     focusable = false,
     style = 'minimal',
   })
 
-  M.refresh_buffer()
+  M.refresh()
 end
 
-function M.refresh_buffer()
+function M.refresh()
   local win_height = api.nvim_win_get_height(0)
-  local buf_height = api.nvim_buf_line_count(0)
+  local buf_lines = api.nvim_buf_line_count(0)
   local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
-  local lines = utils.signs_to_lines(get_placed[1], buf_height, win_height)
-  vim.fn.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, lines)
+  local get_defined = vim.fn.sign_getdefined()
+  local window_top = vim.fn.line('w0')
+  local cursor_position = vim.api.nvim_win_get_cursor(0)
+  local lines = utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
+
+
+  M.refresh_buffer(lines)
+  M.refresh_visible_area(lines)
+end
+
+function M.refresh_visible_area(lines)
+  -- TODO merge the linehl and texthl to make a properly colored line.
+  for i,v in ipairs(lines) do
+    if v["linehl"] ~= "" then
+      api.nvim_buf_add_highlight(bufnr, ns, v["linehl"], i - 1, 0, -1)
+    elseif v["texthl"] ~= "" then
+      api.nvim_buf_add_highlight(bufnr, ns, v["texthl"], i - 1, 0, -1)
+    end
+  end
+end
+
+function M.refresh_buffer(lines)
+  local win_height = api.nvim_win_get_height(0)
+
+  local strings = {}
+  for _,v in ipairs(lines) do
+    table.insert(strings, v["text"])
+  end
+
+  vim.fn.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
 function M.enable()
@@ -111,8 +140,7 @@ end
 
 -- Setup
 
--- TODO have a setting to enable or disable by default
--- M.enable()
+M.enable()
 
 api.nvim_command('command! SluiceEnable  lua require("sluice").enable()')
 api.nvim_command('command! SluiceDisable lua require("sluice").disable()')

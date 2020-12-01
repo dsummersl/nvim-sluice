@@ -1,16 +1,49 @@
-lu = require('luaunit')
-utils = require('lua/sluice_utils')
+local lu = require('luaunit')
+local utils = require('lua/sluice_utils')
 
-TestUtils = {} --class
+local sign_getdefined = {
+  {
+    linehl = "SluiceColumn",
+    name = "ALEWarningSign",
+    numhl = "",
+    text = "W ",
+    texthl = "WarnHL"
+  },
+  {
+    linehl = "SluiceColumn",
+    name = "GitGutterLineRemoved",
+    numhl = "",
+    text = "- ",
+    texthl = "LineRemovedHL"
+  },
+  {
+    linehl = "SluiceColumn",
+    name = "GitGutterLineAdded",
+    numhl = "",
+    text = "+ ",
+    texthl = "LineAddedHL"
+  },
+}
 
-    function TestUtils:test_signs_no_signs()
+TestSignsToLines = {}
+
+    function TestSignsToLines:test_no_signs()
       local sign_getplaced = {bufnr = 6}
-      lu.assertEquals(utils.signs_to_lines(sign_getplaced, 100, 10), {
-          "", "", "", "", "", "", "", "", "", "",
+      lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+          { texthl = "", linehl = "SluiceCursor"     , text = "  " },
+          { texthl = "", linehl = "SluiceVisibleArea", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
         })
     end
 
-    function TestUtils:test_signs_to_lines_no_overlaps()
+    function TestSignsToLines:test_to_lines_no_overlaps()
       local sign_getplaced = {signs = {
           {lnum = 21, id = 1, name = 'GitGutterLineAdded', priority = 10, group = 'gitgutter'},
           {lnum = 33, id = 2, name = 'GitGutterLineRemoved', priority = 10, group = 'gitgutter'},
@@ -18,21 +51,21 @@ TestUtils = {} --class
           {lnum = 84, id = 1000009, name = 'ALEWarningSign', priority = 30, group = 'ale'},
       }, bufnr = 6}
 
-      lu.assertEquals(utils.signs_to_lines(sign_getplaced, 100, 10), {
-        "",
-        "GitGutterLineAdded",
-        "GitGutterLineRemoved",
-        "",
-        "",
-        "",
-        "ALEWarningSign",
-        "ALEWarningSign",
-        "",
-        "",
+      lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+        { texthl = ""             , linehl = "SluiceCursor"     , text = "  " } ,
+        { texthl = ""             , linehl = "SluiceVisibleArea", text = "  " } ,
+        { texthl = "LineAddedHL"  , linehl = "SluiceColumn", text = "+ " },
+        { texthl = "LineRemovedHL", linehl = "SluiceColumn", text = "- " },
+        { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
+        { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
+        { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
+        { texthl = "WarnHL"       , linehl = "SluiceColumn", text = "W " },
+        { texthl = "WarnHL"       , linehl = "SluiceColumn", text = "W " },
+        { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
       })
     end
 
-    function TestUtils:test_signs_to_lines_with_overlaps()
+    function TestSignsToLines:test_to_lines_with_overlaps()
       local sign_getplaced = {signs = {
           {lnum = 21, id = 1, name = 'GitGutterLineAdded', priority = 10, group = 'gitgutter'},
           {lnum = 22, id = 1, name = 'GitGutterLineAdded', priority = 10, group = 'gitgutter'},
@@ -40,12 +73,21 @@ TestUtils = {} --class
           {lnum = 24, id = 1, name = 'GitGutterLineAdded', priority = 10, group = 'gitgutter'},
       }, bufnr = 6}
 
-      lu.assertEquals(utils.signs_to_lines(sign_getplaced, 100, 10), {
-        "", "GitGutterLineAdded", "", "", "", "", "", "", "", "",
+      lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+        { texthl = ""            , linehl = "SluiceCursor" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceVisibleArea" , text = "  " } ,
+        { texthl = "LineAddedHL" , linehl = "SluiceColumn" , text = "+ " },
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
       })
     end
 
-    function TestUtils:test_signs_to_lines_longer_matches()
+    function TestSignsToLines:test_to_lines_longer_matches()
       local sign_getplaced = {
         bufnr = 1,
         signs = { {
@@ -147,12 +189,17 @@ TestUtils = {} --class
           } }
       }
 
-      lu.assertEquals(utils.signs_to_lines(sign_getplaced, 119, 50), {
-          "", "", "", "", "", "", "", "GitGutterLineAdded", "", "", "", "",
-          "GitGutterLineRemoved", "", "", "", "", "", "", "", "", "", "", "",
-          "", "", "", "", "", "", "", "ALEWarningSign", "", "",
-          "ALEWarningSign", "", "", "ALEWarningSign", "", "", "", "", "", "",
-          "GitGutterLineAdded", "GitGutterLineAdded", "GitGutterLineAdded", "",
-          "GitGutterLineRemoved", "ALEWarningSign"
+      lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 119, 11), {
+        {linehl="SluiceCursor"     , text="  " , texthl=""}             ,
+        {linehl="SluiceVisibleArea", text="+ ", texthl="LineAddedHL"}  ,
+        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
+        {linehl="SluiceColumn"                 , text="- ", texthl="LineRemovedHL"},
+        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
+        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
+        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
+        {linehl="SluiceColumn"                 , text="W ", texthl="WarnHL"}       ,
+        {linehl="SluiceColumn"                 , text="W ", texthl="WarnHL"}       ,
+        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
+        {linehl="SluiceColumn"                 , text="+ ", texthl="LineAddedHL"}
       })
     end
