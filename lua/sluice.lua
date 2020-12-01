@@ -61,6 +61,11 @@ function M.open()
   local gutter_width = get_gutter_width()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
+  local buf_lines = api.nvim_buf_line_count(0)
+
+  if win_height >= buf_lines then
+    return M.close()
+  end
 
   if winid == nil or not api.nvim_win_is_valid(winid) then
     winid = api.nvim_open_win(bufnr, false, {
@@ -101,6 +106,7 @@ function M.refresh()
 end
 
 function M.refresh_visible_area(lines)
+  -- synIDattr(synIDtrans(hlID("Comment")), "bg")
   -- TODO merge the linehl and texthl to make a properly colored line.
   for i,v in ipairs(lines) do
     if v["linehl"] ~= "" then
