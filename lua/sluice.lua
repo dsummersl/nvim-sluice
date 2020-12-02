@@ -35,10 +35,9 @@ end
 local M = {}
 
 function M.update_context()
-  if api.nvim_get_option('buftype') ~= '' or vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
-    M.close()
-    return
-  end
+  if api.nvim_get_option('buftype') ~= '' then return M.close() end
+  if vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.close() end
+  if vim.fn.getwinvar(0, '&diff') ~= 0 then return M.close() end
 
   M.open()
 
