@@ -105,14 +105,37 @@ function M.refresh()
   M.refresh_visible_area(lines)
 end
 
+function M.copy_highlight(highlight, new_name, mode, override_bg)
+  -- define the new hl
+  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg, false)
+
+  local attribs = { "bg", "fg", "sp", "bold", "italic", "reverse", "inverse",
+    "standout", "underline", "undercurl", "strikethrough" }
+
+  for _,v in ipairs(attribs) do
+    local attrib = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(highlight)), v, mode)
+    if attrib ~= "" then
+      vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. v .. "=" .. attrib, false)
+    end
+  end
+
+  -- one more time to override the bg color
+  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg, false)
+end
+
 function M.refresh_visible_area(lines)
-  -- synIDattr(synIDtrans(hlID("Comment")), "bg")
-  -- TODO merge the linehl and texthl to make a properly colored line.
   for i,v in ipairs(lines) do
-    if v["linehl"] ~= "" then
+    if v["texthl"] ~= "" then
+      local line_text_hl = v["linehl"] .. v["texthl"]
+      local mode = "cterm"
+      if vim.o.termguicolors then
+        mode = "gui"
+      end
+      local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(v["linehl"])), "bg", mode)
+      M.copy_highlight(v["texthl"], line_text_hl, mode, line_bg)
+      api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
+    else
       api.nvim_buf_add_highlight(bufnr, ns, v["linehl"], i - 1, 0, -1)
-    elseif v["texthl"] ~= "" then
-      api.nvim_buf_add_highlight(bufnr, ns, v["texthl"], i - 1, 0, -1)
     end
   end
 end
@@ -129,6 +152,7 @@ function M.refresh_buffer(lines)
 end
 
 function M.enable()
+  -- TODO buftype nofile -- don't open
   nvim_augroup('sluice', {
     {'WinScrolled', '*',               'silent lua require("sluice").update_context()'},
     {'CursorMoved', '*',               'silent lua require("sluice").update_context()'},
