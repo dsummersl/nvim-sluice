@@ -9,7 +9,12 @@ local function find_definition(definitions, name)
 end
 
 local function line_to_gutter_line(line, buffer_lines, height)
-  return math.floor(line / buffer_lines * height) + 1
+  local gutter_line = math.floor(line / buffer_lines * height)
+  if gutter_line == 0 then
+    return 1
+  end
+
+  return gutter_line
 end
 
 local function get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
@@ -53,7 +58,13 @@ local function signs_to_lines(definitions, signs, window_top, cursor, buffer_lin
     if mappings[line] == nil then
       table.insert(lines, { texthl = "", linehl = linehl, text = "  " })
     else
-      local name = mappings[line][1]["name"]
+      local max = mappings[line][1]
+      for _,v in ipairs(mappings[line]) do
+        if v["priority"] > max["priority"] then
+          max = v
+        end
+      end
+      local name = max["name"]
       local definition = find_definition(definitions, name)
       table.insert(lines, { texthl = definition["texthl"], linehl = linehl, text = definition["text"] })
     end

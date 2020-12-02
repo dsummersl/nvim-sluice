@@ -31,7 +31,7 @@ TestSignsToLines = {}
       local sign_getplaced = {bufnr = 6}
       lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
           { texthl = "", linehl = "SluiceCursor"     , text = "  " },
-          { texthl = "", linehl = "SluiceVisibleArea", text = "  " },
+          { texthl = "", linehl = "SluiceColumn", text = "  " },
           { texthl = "", linehl = "SluiceColumn", text = "  " },
           { texthl = "", linehl = "SluiceColumn", text = "  " },
           { texthl = "", linehl = "SluiceColumn", text = "  " },
@@ -53,7 +53,6 @@ TestSignsToLines = {}
 
       lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
         { texthl = ""             , linehl = "SluiceCursor"     , text = "  " } ,
-        { texthl = ""             , linehl = "SluiceVisibleArea", text = "  " } ,
         { texthl = "LineAddedHL"  , linehl = "SluiceColumn", text = "+ " },
         { texthl = "LineRemovedHL", linehl = "SluiceColumn", text = "- " },
         { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
@@ -61,6 +60,7 @@ TestSignsToLines = {}
         { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
         { texthl = "WarnHL"       , linehl = "SluiceColumn", text = "W " },
         { texthl = "WarnHL"       , linehl = "SluiceColumn", text = "W " },
+        { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
         { texthl = ""             , linehl = "SluiceColumn", text = "  " } ,
       })
     end
@@ -75,8 +75,8 @@ TestSignsToLines = {}
 
       lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
         { texthl = ""            , linehl = "SluiceCursor" , text = "  " } ,
-        { texthl = ""            , linehl = "SluiceVisibleArea" , text = "  " } ,
         { texthl = "LineAddedHL" , linehl = "SluiceColumn" , text = "+ " },
+        { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
         { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
         { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
         { texthl = ""            , linehl = "SluiceColumn" , text = "  " } ,
@@ -178,28 +178,28 @@ TestSignsToLines = {}
             group = "gitgutter",
             id = 9,
             lnum = 118,
-            name = "GitGutterLineRemoved",
-            priority = 10
+            name = "ALEWarningSign",
+            priority = 30
           }, {
             group = "ale",
             id = 1000004,
             lnum = 119,
-            name = "ALEWarningSign",
-            priority = 30
+            name = "GitGutterLineRemoved",
+            priority = 10
           } }
       }
 
       lu.assertEquals(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 119, 11), {
-        {linehl="SluiceCursor"     , text="  " , texthl=""}             ,
-        {linehl="SluiceVisibleArea", text="+ ", texthl="LineAddedHL"}  ,
-        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
-        {linehl="SluiceColumn"                 , text="- ", texthl="LineRemovedHL"},
-        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
-        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
-        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
-        {linehl="SluiceColumn"                 , text="W ", texthl="WarnHL"}       ,
-        {linehl="SluiceColumn"                 , text="W ", texthl="WarnHL"}       ,
-        {linehl="SluiceColumn"                 , text="  " , texthl=""}             ,
-        {linehl="SluiceColumn"                 , text="+ ", texthl="LineAddedHL"}
+        {linehl="SluiceCursor", text="+ ", texthl="LineAddedHL"},
+        {linehl="SluiceColumn", text="  ", texthl=""},
+        {linehl="SluiceColumn", text="- ", texthl="LineRemovedHL"},
+        {linehl="SluiceColumn", text="  ", texthl=""},
+        {linehl="SluiceColumn", text="  ", texthl=""},
+        {linehl="SluiceColumn", text="  ", texthl=""},
+        {linehl="SluiceColumn", text="W ", texthl="WarnHL"},
+        {linehl="SluiceColumn", text="W ", texthl="WarnHL"},
+        {linehl="SluiceColumn", text="  ", texthl=""},
+        {linehl="SluiceColumn", text="W ", texthl="WarnHL"},
+        {linehl="SluiceColumn", text="- ", texthl="LineRemovedHL"}
       })
     end
