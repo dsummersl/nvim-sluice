@@ -96,6 +96,8 @@ function M.refresh()
   local buf_lines = api.nvim_buf_line_count(0)
   local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
   local get_defined = vim.fn.sign_getdefined()
+  -- TODO cache the get_defined value or compute a sha. Only refresh when there
+  -- have been updates
   local window_top = vim.fn.line('w0')
   local cursor_position = vim.api.nvim_win_get_cursor(0)
   local lines = utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
@@ -152,10 +154,11 @@ function M.refresh_buffer(lines)
 end
 
 function M.enable()
-  -- TODO buftype nofile -- don't open
   nvim_augroup('sluice', {
     {'WinScrolled', '*',               'silent lua require("sluice").update_context()'},
     {'CursorMoved', '*',               'silent lua require("sluice").update_context()'},
+    {'CursorHold',  '*',               'silent lua require("sluice").update_context()'},
+    {'CursorHoldI', '*',               'silent lua require("sluice").update_context()'},
     {'BufEnter',    '*',               'silent lua require("sluice").update_context()'},
     {'WinEnter',    '*',               'silent lua require("sluice").update_context()'},
     {'WinLeave',    '*',               'silent lua require("sluice").close()'},
