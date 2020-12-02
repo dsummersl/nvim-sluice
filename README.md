@@ -1,6 +1,6 @@
 # nvim-sluice
 
-A signs gutter for the right side of the window.
+A signs 'macro view' gutter for the right side of the window.
 
 ## Install
 
@@ -10,7 +10,7 @@ Plug 'dsummersl/nvim-sluice'
 
 ## Screenshot
 
-![theme](./static/demo.png)
+[![asciicast](https://asciinema.org/a/EVPJgGpjO0KEVsLiR2p56u1IJ.svg)](https://asciinema.org/a/EVPJgGpjO0KEVsLiR2p56u1IJ)
 
 
 ## Commands
@@ -22,3 +22,9 @@ Plug 'dsummersl/nvim-sluice'
 Run tests:
 
     lua tests/suite.lua
+
+## Notes
+
+Thanks to [nvim-treesitter-context](https://github.com/romgrk/nvim-treesitter-context) which I based the lua windowing that this plugin uses.
+
+The idea behind this project is based on [vim-sluice](https://github.com/dsummersl/vim-sluice) -- a buggier and more feature-ful version of this plugin for vim/gvim.
