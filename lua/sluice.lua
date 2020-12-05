@@ -4,6 +4,7 @@ local api = vim.api
 
 -- Script variables
 
+local throttle_ms = 100
 local winid = nil
 local bufnr = api.nvim_create_buf(false, true)
 local ns = api.nvim_create_namespace('nvim-sluice')
@@ -58,6 +59,8 @@ function M.close()
 end
 
 function M.should_throttle()
+  -- TODO ideally this should be a 'tail' throttle rather than a leading edge
+  -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
   local var_exists, last_update_str = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
   local reltime = vim.fn.reltime()
 
@@ -66,10 +69,9 @@ function M.should_throttle()
     return false
   end
 
-  local threshold_ms = 200
   local last_update = vim.tbl_map(tonumber, vim.split(last_update_str, " "))
 
-  local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < threshold_ms
+  local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < throttle_ms
 
   if not should_throttle then
     vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
@@ -142,7 +144,7 @@ end
 
 function M.copy_highlight(highlight, new_name, mode, override_bg)
   -- define the new hl
-  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg, false)
+  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "fg=white", false)
 
   local attribs = { "bg", "fg", "sp", "bold", "italic", "reverse", "inverse",
     "standout", "underline", "undercurl", "strikethrough" }
@@ -155,6 +157,9 @@ function M.copy_highlight(highlight, new_name, mode, override_bg)
   end
 
   -- one more time to override the bg color
+  if override_bg == "" then
+    override_bg = 'NONE'
+  end
   vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg, false)
 end
 
@@ -188,16 +193,16 @@ end
 
 function M.enable()
   nvim_augroup('sluice', {
-    {'WinScrolled', '*',               'lua require("sluice").update_context()'},
-    {'CursorMoved', '*',               'lua require("sluice").update_context()'},
-    {'CursorHold',  '*',               'lua require("sluice").update_context()'},
-    {'CursorHoldI', '*',               'lua require("sluice").update_context()'},
-    {'BufEnter',    '*',               'lua require("sluice").update_context()'},
-    {'WinEnter',    '*',               'lua require("sluice").update_context()'},
-    {'WinLeave',    '*',               'lua require("sluice").close()'},
-    {'VimResized',  '*',               'lua require("sluice").open()'},
-    {'User',        'SessionSavePre',  'lua require("sluice").close()'},
-    {'User',        'SessionSavePost', 'lua require("sluice").open()'},
+    {'WinScrolled', '*',               'silent lua require("sluice").update_context()'},
+    {'CursorMoved', '*',               'silent lua require("sluice").update_context()'},
+    {'CursorHold',  '*',               'silent lua require("sluice").update_context()'},
+    {'CursorHoldI', '*',               'silent lua require("sluice").update_context()'},
+    {'BufEnter',    '*',               'silent lua require("sluice").update_context()'},
+    {'WinEnter',    '*',               'silent lua require("sluice").update_context()'},
+    {'WinLeave',    '*',               'silent lua require("sluice").close()'},
+    {'VimResized',  '*',               'silent lua require("sluice").open()'},
+    {'User',        'SessionSavePre',  'silent lua require("sluice").close()'},
+    {'User',        'SessionSavePost', 'silent lua require("sluice").open()'},
   })
 
   M.update_context()
