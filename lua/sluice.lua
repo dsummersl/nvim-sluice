@@ -1,3 +1,4 @@
+local xxh32 = require("luaxxhash")
 local vim = vim
 local api = vim.api
 
@@ -35,7 +36,7 @@ end
 local M = {}
 
 function M.update_context()
-  if api.nvim_get_option('buftype') ~= '' then return M.close() end
+  if vim.fn.getwinvar(0, '&buftype') ~= '' then return M.close() end
   if vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.close() end
   if vim.fn.getwinvar(0, '&diff') ~= 0 then return M.close() end
 
@@ -56,7 +57,49 @@ function M.close()
   winid = nil
 end
 
+function M.should_throttle()
+  local var_exists, last_update_str = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
+  local reltime = vim.fn.reltime()
+
+  if not var_exists then
+    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    return false
+  end
+
+  local threshold_ms = 200
+  local last_update = vim.tbl_map(tonumber, vim.split(last_update_str, " "))
+
+  local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < threshold_ms
+
+  if not should_throttle then
+    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+  end
+
+  return should_throttle
+end
+
+function M.signs_changed()
+  local get_defined = vim.fn.sign_getdefined()
+  local new_hash = xxh32(vim.inspect(get_defined))
+  if vim.b.sluice_last_defined ~= nil and new_hash == vim.b.sluice_last_defined then
+    return false
+  end
+
+  vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
+
+  return get_defined
+end
+
 function M.open()
+  if M.should_throttle() then
+    return
+  end
+
+  local get_defined = M.signs_changed()
+  if get_defined == false then
+    return
+  end
+
   local gutter_width = get_gutter_width()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
@@ -87,16 +130,7 @@ function M.open()
     })
   end
 
-  M.refresh()
-end
-
-function M.refresh()
-  local win_height = api.nvim_win_get_height(0)
-  local buf_lines = api.nvim_buf_line_count(0)
   local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
-  local get_defined = vim.fn.sign_getdefined()
-  -- TODO cache the get_defined value or compute a sha. Only refresh when there
-  -- have been updates
   local window_top = vim.fn.line('w0')
   local cursor_position = vim.api.nvim_win_get_cursor(0)
   local lines = utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
@@ -154,16 +188,16 @@ end
 
 function M.enable()
   nvim_augroup('sluice', {
-    {'WinScrolled', '*',               'silent lua require("sluice").update_context()'},
-    {'CursorMoved', '*',               'silent lua require("sluice").update_context()'},
-    {'CursorHold',  '*',               'silent lua require("sluice").update_context()'},
-    {'CursorHoldI', '*',               'silent lua require("sluice").update_context()'},
-    {'BufEnter',    '*',               'silent lua require("sluice").update_context()'},
-    {'WinEnter',    '*',               'silent lua require("sluice").update_context()'},
-    {'WinLeave',    '*',               'silent lua require("sluice").close()'},
-    {'VimResized',  '*',               'silent lua require("sluice").open()'},
-    {'User',        'SessionSavePre',  'silent lua require("sluice").close()'},
-    {'User',        'SessionSavePost', 'silent lua require("sluice").open()'},
+    {'WinScrolled', '*',               'lua require("sluice").update_context()'},
+    {'CursorMoved', '*',               'lua require("sluice").update_context()'},
+    {'CursorHold',  '*',               'lua require("sluice").update_context()'},
+    {'CursorHoldI', '*',               'lua require("sluice").update_context()'},
+    {'BufEnter',    '*',               'lua require("sluice").update_context()'},
+    {'WinEnter',    '*',               'lua require("sluice").update_context()'},
+    {'WinLeave',    '*',               'lua require("sluice").close()'},
+    {'VimResized',  '*',               'lua require("sluice").open()'},
+    {'User',        'SessionSavePre',  'lua require("sluice").close()'},
+    {'User',        'SessionSavePost', 'lua require("sluice").open()'},
   })
 
   M.update_context()
