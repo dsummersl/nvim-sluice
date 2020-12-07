@@ -11,13 +11,7 @@ local ns = api.nvim_create_namespace('nvim-sluice')
 local utils = require('sluice_utils')
 
 local get_gutter_width = function()
-  local saved_view = api.nvim_call_function('winsaveview', {})
-
-  api.nvim_call_function('cursor', { 0, 1 })
-  local gutter_width = api.nvim_call_function('wincol', {}) - 1
-
-  api.nvim_call_function('winrestview', { saved_view })
-  return gutter_width
+  return 2
 end
 
 local nvim_augroup = function(group_name, definitions)
