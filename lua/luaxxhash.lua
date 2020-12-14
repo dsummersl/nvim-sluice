@@ -13,7 +13,7 @@ local P5 = (0x165667B1)
 
 -- multiplication with modulo2 semantics
 -- see https://github.com/luapower/murmurhash3
-local function mmul(a, b) 
+local function mmul(a, b)
 	local type = 'uint32_t'
 	return tonumber(ffi.cast(type, ffi.cast(type, a) * ffi.cast(type, b)))
 end
@@ -30,7 +30,7 @@ local function xxhash32(data, len, seed)
 		local v = ffi.new("uint32_t[4]")
 		v[0], v[1] = seed + P1 + P2, seed + P2
 		v[2], v[3] = seed, seed - P1
-		while i <= limit do 
+		while i <= limit do
 			for j=0, 3 do
 				v[j] = v[j] + words[n] * P2
 				v[j] = rotl(v[j], 13); v[j] = v[j] * P1

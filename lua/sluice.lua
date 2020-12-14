@@ -94,7 +94,7 @@ function M.open()
     return
   end
 
-  local changed, get_defined = M.signs_changed()
+  local _, get_defined = M.signs_changed()
 
   local gutter_width = get_gutter_width()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
