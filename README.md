@@ -19,9 +19,14 @@ Plug 'dsummersl/nvim-sluice'
 
 ## Development
 
+Install dependencies:
+
+    luarocks install busted
+
 Run tests:
 
-    lua tests/suite.lua
+    make lint
+    make test
 
 ## Notes
 

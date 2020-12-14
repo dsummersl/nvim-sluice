@@ -1,5 +1,5 @@
 test:
-	lua tests/suite.lua
+	busted tests
 
 lint:
 	luacheck lua/*
