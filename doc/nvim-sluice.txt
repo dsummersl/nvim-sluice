@@ -1,0 +1,74 @@
+*nvim-sluice.txt*         View +signs for the entire buffer on the right side of the window.
+
+
+              View +signs for the entire buffer on the right side of the window.
+
+==============================================================================
+CONTENTS                                                    *NvimSluiceContents*
+
+    1. Intro ...................... |NvimSluiceIntro|
+    2.1 Commands .................. |NvimSluiceCommands|
+        2.1 :SluiceEnable .............. |:SluiceEnable|
+        2.2 :SluiceDisable .............. |:SluiceDisable|
+    3. Configuration .............. |NvimSluiceConfig|
+        3.1 dash_activate ......... |NvimSluiceConfig_activate|
+    4. License .................... |NvimSluiceLicense|
+    5. Credits .................... |NvimSluiceCredits|
+
+==============================================================================
+1. Intro                                                       *NvimSluiceIntro*
+
+TODO
+
+==============================================================================
+2. Commands                                                 *NvimSluiceCommands*
+
+------------------------------------------------------------------------------
+2.1 :SluiceEnable                                                *:SluiceEnable*
+
+Usage:
+    >
+    :SluiceEnable
+<
+------------------------------------------------------------------------------
+2.2 :SluiceDisable                                              *:SluiceDisable*
+
+
+Usage:
+    >
+    :SluiceDisable
+
+==============================================================================
+3. Configuration                                              *NvimSluiceConfig*
+
+------------------------------------------------------------------------------
+3.1 g:dash_activate                                  *NvimSluiceConfig_activate*
+
+This flag configures if the NvimSluice.app (OS X) will be activated to the
+foreground whenever dash.vim sends it a search.
+
+Tip: If you use NvimSluice.app in Standard mode, setting this flag to 0 can save
+you a lot of Command+Tabs back to Vim.
+Tip 2: If you like to use NvimSluice.app in HUD mode, setting this flag to 0 will
+not show the window of the search result.
+
+Default: 1
+
+
+==============================================================================
+4. License                                                   *NvimSluiceLicense*
+
+Released under the MIT License.
+
+==============================================================================
+5. Credits                                                   *NvimSluiceCredits*
+
+Thanks to
+[nvim-treesitter-context](https://github.com/romgrk/nvim-treesitter-context)
+which I based the lua windowing that this plugin uses.
+
+The idea behind this project is based on an older plugin I wrote called
+[vim-sluice](https://github.com/dsummersl/vim-sluice) -- it was a buggier and
+more feature-ful version of this plugin for vim/gvim.
+
+" vim: ft=help

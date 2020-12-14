@@ -4,7 +4,7 @@ local api = vim.api
 
 -- Script variables
 
-local throttle_ms = 100
+local throttle_ms = 200
 local winid = nil
 local bufnr = api.nvim_create_buf(false, true)
 local ns = api.nvim_create_namespace('nvim-sluice')
@@ -77,13 +77,16 @@ end
 function M.signs_changed()
   local get_defined = vim.fn.sign_getdefined()
   local new_hash = xxh32(vim.inspect(get_defined))
-  if vim.b.sluice_last_defined ~= nil and new_hash == vim.b.sluice_last_defined then
-    return false
+
+  local _, old_hash = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
+
+  if new_hash == old_hash then
+    return false, get_defined
   end
 
   vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
 
-  return get_defined
+  return true, get_defined
 end
 
 function M.open()
@@ -91,10 +94,7 @@ function M.open()
     return
   end
 
-  local get_defined = M.signs_changed()
-  if get_defined == false then
-    return
-  end
+  local changed, get_defined = M.signs_changed()
 
   local gutter_width = get_gutter_width()
   local win_width = api.nvim_win_get_width(0) - gutter_width + 1
@@ -130,7 +130,7 @@ function M.open()
   local window_top = vim.fn.line('w0')
   local cursor_position = vim.api.nvim_win_get_cursor(0)
   local lines = utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
-
+  -- TODO need to cache 'lines'
 
   M.refresh_buffer(lines)
   M.refresh_visible_area(lines)
@@ -187,16 +187,16 @@ end
 
 function M.enable()
   nvim_augroup('sluice', {
-    {'WinScrolled', '*',               'silent lua require("sluice").update_context()'},
-    {'CursorMoved', '*',               'silent lua require("sluice").update_context()'},
-    {'CursorHold',  '*',               'silent lua require("sluice").update_context()'},
-    {'CursorHoldI', '*',               'silent lua require("sluice").update_context()'},
-    {'BufEnter',    '*',               'silent lua require("sluice").update_context()'},
-    {'WinEnter',    '*',               'silent lua require("sluice").update_context()'},
-    {'WinLeave',    '*',               'silent lua require("sluice").close()'},
-    {'VimResized',  '*',               'silent lua require("sluice").open()'},
-    {'User',        'SessionSavePre',  'silent lua require("sluice").close()'},
-    {'User',        'SessionSavePost', 'silent lua require("sluice").open()'},
+    {'WinScrolled', '*',               'lua require("sluice").update_context()'},
+    {'CursorMoved', '*',               'lua require("sluice").update_context()'},
+    {'CursorHold',  '*',               'lua require("sluice").update_context()'},
+    {'CursorHoldI', '*',               'lua require("sluice").update_context()'},
+    {'BufEnter',    '*',               'lua require("sluice").update_context()'},
+    {'WinEnter',    '*',               'lua require("sluice").update_context()'},
+    {'WinLeave',    '*',               'lua require("sluice").close()'},
+    {'VimResized',  '*',               'lua require("sluice").open()'},
+    {'User',        'SessionSavePre',  'lua require("sluice").close()'},
+    {'User',        'SessionSavePost', 'lua require("sluice").open()'},
   })
 
   M.update_context()
