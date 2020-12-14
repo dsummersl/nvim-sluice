@@ -1,3 +1,15 @@
+local vim = vim
+
+
+
+local function set_vim(new_vim)
+  vim = new_vim
+end
+
+local function get_vim()
+  return vim
+end
+
 local function find_definition(definitions, name)
   for _,v in ipairs(definitions) do
     if v["name"] == name then
@@ -72,6 +84,49 @@ local function signs_to_lines(definitions, signs, window_top, cursor, buffer_lin
   return lines
 end
 
+-- mode == gui or cterm boolean
+local function copy_highlight(highlight, new_name, is_gui_mode, override_bg)
+  local mode = "cterm"
+  if is_gui_mode then
+    mode = "gui"
+  end
+
+  -- define the new hl
+  get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. "fg=white", false)
+
+  local cterms = { "bold", "italic", "reverse", "inverse", "standout", "underline", "undercurl",
+    "strikethrough" }
+  local attribs = { "bg", "fg", "sp" }
+
+  for _,v in ipairs(attribs) do
+    local attrib = get_vim().fn.synIDattr(get_vim().fn.synIDtrans(get_vim().fn.hlID(highlight)), v, mode)
+    if attrib ~= "" then
+      get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. v .. "=" .. attrib, false)
+    end
+  end
+
+  local cterm_attribs = {}
+  for _,v in ipairs(cterms) do
+    local attrib = get_vim().fn.synIDattr(get_vim().fn.synIDtrans(get_vim().fn.hlID(highlight)), v, mode)
+    if attrib ~= "" then
+      table.insert(cterm_attribs, v)
+    end
+  end
+
+  -- one more time to override the bg color
+  if override_bg == "" then
+    override_bg = 'NONE'
+  end
+
+  local cterm_vals = mode .. "=NONE"
+  if #cterm_attribs > 0 then
+    cterm_vals = mode .. "=" .. table.concat(cterm_attribs, ",")
+  end
+  get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg .. " " .. cterm_vals, false)
+end
+
 return {
-  signs_to_lines = signs_to_lines
+  signs_to_lines = signs_to_lines,
+  copy_highlight = copy_highlight,
+  set_vim = set_vim
 }

@@ -203,12 +203,149 @@ describe("signs_to_lines()", function()
   end)
 end)
 
---
---
--- TestCopyHighlight = {}
---
--- -- function M.copy_highlight(highlight, new_name, mode, override_bg)
---     function TestCopyHighlight:test_link()
---       utils.copy_highlight("Cursor", "NewCursor", "gui", true)
---       assert true
---     end
+describe("copy_highlight()", function()
+  it("creates a new cursor without properties", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function()
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guifg=white", false)
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
+  end)
+
+  it("creates a new cursor without properties", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function()
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
+  end)
+
+  it("respects function params background color", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function()
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=NONE", false)
+  end)
+
+  it("adds background of source", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function(id, attrib)
+            if attrib == "bg" then
+              return "Orange"
+            end
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Orange", false)
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
+  end)
+
+  it("function overrides background of any source", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function(id, attrib)
+            if attrib == "bg" then
+              return "Orange"
+            end
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=NONE", false)
+  end)
+
+  it("includes gui settings of source highlight", function()
+    local vim_mock = mock({
+        api = {
+          nvim_exec = function()
+            return "exec-id"
+          end
+        },
+        fn = {
+          synIDattr = function(id, attrib)
+            if attrib == "bold" or attrib == "italic" then
+              return "1"
+            end
+            return ""
+          end,
+          synIDtrans = function() end,
+          hlID = function() end
+        }
+      })
+
+    utils.set_vim(vim_mock)
+    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
+
+    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=bold,italic", false)
+  end)
+
+  -- TODO nocombine
+end)

@@ -136,27 +136,6 @@ function M.open()
   M.refresh_visible_area(lines)
 end
 
-function M.copy_highlight(highlight, new_name, mode, override_bg)
-  -- define the new hl
-  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "fg=white", false)
-
-  local attribs = { "bg", "fg", "sp", "bold", "italic", "reverse", "inverse",
-    "standout", "underline", "undercurl", "strikethrough" }
-
-  for _,v in ipairs(attribs) do
-    local attrib = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(highlight)), v, mode)
-    if attrib ~= "" then
-      vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. v .. "=" .. attrib, false)
-    end
-  end
-
-  -- one more time to override the bg color
-  if override_bg == "" then
-    override_bg = 'NONE'
-  end
-  vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg, false)
-end
-
 function M.refresh_visible_area(lines)
   for i,v in ipairs(lines) do
     if v["texthl"] ~= "" then
@@ -166,7 +145,7 @@ function M.refresh_visible_area(lines)
         mode = "gui"
       end
       local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(v["linehl"])), "bg", mode)
-      M.copy_highlight(v["texthl"], line_text_hl, mode, line_bg)
+      utils.copy_highlight(v["texthl"], line_text_hl, mode == "gui", line_bg)
       api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
     else
       api.nvim_buf_add_highlight(bufnr, ns, v["linehl"], i - 1, 0, -1)
