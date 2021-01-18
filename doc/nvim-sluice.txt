@@ -12,9 +12,9 @@ CONTENTS                                                    *NvimSluiceContents*
         2.2 :SluiceDisable .............. |:SluiceDisable|
         2.3 :SluiceToggle ............... |:SluiceToggle|
     3. Configuration .............. |NvimSluiceConfig|
-        3.1 :SluiceVisibleArea .......... |:SluiceVisibleArea|
-        3.2 :SluiceCursor ............... |:SluiceCursor|
-        3.3 :SluiceColumn ............... |:SluiceColumn|
+        3.1 SluiceVisibleArea ........... |:hl-SluiceVisibleArea|
+        3.2 SluiceCursor ................ |:hl-SluiceCursor|
+        3.3 SluiceColumn ................ |:hl-SluiceColumn|
     4. License .................... |NvimSluiceLicense|
     5. Credits .................... |NvimSluiceCredits|
 
@@ -67,7 +67,7 @@ Signs window you could set a custom corsor highlight:
 hi link SluiceCursor CursorLine
 
 ------------------------------------------------------------------------------
-3.1 :SluiceVisibleArea                                      *:SluiceVisibleArea*
+3.1 :hl-SluiceVisibleArea                                *:hl-SluiceVisibleArea*
 
 The highlight style of the Sluice window corresponding to the visible area of
 the screen. Default:
@@ -75,7 +75,7 @@ the screen. Default:
 hi link SluiceVisibleArea Normal
 
 ------------------------------------------------------------------------------
-3.2 :SluiceCursor                                                *:SluiceCursor*
+3.2 :hl-SluiceCursor                                          *:hl-SluiceCursor*
 
 The highlight of the location of the cursor within the file as seen in the
 Sluice window. Default:
@@ -83,7 +83,7 @@ Sluice window. Default:
 hi link SluiceCursor Normal
 
 ------------------------------------------------------------------------------
-3.3 :SluiceColumn                                                *:SluiceColumn*
+3.3 :hl-SluiceColumn                                          *:hl-SluiceColumn*
 
 The highlight of the entire Sluice window (height of the window). Default:
 
