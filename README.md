@@ -10,7 +10,9 @@ Plug 'dsummersl/nvim-sluice'
 
 ## Screenshot
 
-[![asciicast](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu)](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu?t=10)
+[![asciicast](./static/screenshot.png)](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu?t=10)
+
+See this [asciinema screencast](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu?t=10) for a demonstration.
 
 ## Commands
 
