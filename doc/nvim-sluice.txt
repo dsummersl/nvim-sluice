@@ -8,23 +8,29 @@ CONTENTS                                                    *NvimSluiceContents*
 
     1. Intro ...................... |NvimSluiceIntro|
     2.1 Commands .................. |NvimSluiceCommands|
-        2.1 :SluiceEnable .............. |:SluiceEnable|
+        2.1 :SluiceEnable ............... |:SluiceEnable|
         2.2 :SluiceDisable .............. |:SluiceDisable|
+        2.3 :SluiceToggle ............... |:SluiceToggle|
     3. Configuration .............. |NvimSluiceConfig|
-        3.1 dash_activate ......... |NvimSluiceConfig_activate|
+        3.1 :SluiceVisibleArea .......... |:SluiceVisibleArea|
+        3.2 :SluiceCursor ............... |:SluiceCursor|
+        3.3 :SluiceColumn ............... |:SluiceColumn|
     4. License .................... |NvimSluiceLicense|
     5. Credits .................... |NvimSluiceCredits|
 
 ==============================================================================
 1. Intro                                                       *NvimSluiceIntro*
 
-TODO
+Sluice provides a minimap of the vim :signs column, on the right side of your
+window.
 
 ==============================================================================
 2. Commands                                                 *NvimSluiceCommands*
 
 ------------------------------------------------------------------------------
 2.1 :SluiceEnable                                                *:SluiceEnable*
+
+Open the Slice signs window.
 
 Usage:
     >
@@ -33,27 +39,55 @@ Usage:
 ------------------------------------------------------------------------------
 2.2 :SluiceDisable                                              *:SluiceDisable*
 
+Close the Sluice signs window.
 
 Usage:
     >
     :SluiceDisable
 
+------------------------------------------------------------------------------
+2.3 :SluiceToggle                                                *:SluiceToggle*
+
+Toggle the Slice window off and on.
+
+Usage:
+    >
+    :SluiceToggle
+
 ==============================================================================
 3. Configuration                                              *NvimSluiceConfig*
 
+The Sluice plugin uses the following default settings for its highlight
+settings. If you define these highlights they will override the default
+values.
+
+For instance, if you want the position of the cursor to be visible in the
+Signs window you could set a custom corsor highlight:
+
+hi link SluiceCursor CursorLine
+
 ------------------------------------------------------------------------------
-3.1 g:dash_activate                                  *NvimSluiceConfig_activate*
+3.1 :SluiceVisibleArea                                      *:SluiceVisibleArea*
 
-This flag configures if the NvimSluice.app (OS X) will be activated to the
-foreground whenever dash.vim sends it a search.
+The highlight style of the Sluice window corresponding to the visible area of
+the screen. Default:
 
-Tip: If you use NvimSluice.app in Standard mode, setting this flag to 0 can save
-you a lot of Command+Tabs back to Vim.
-Tip 2: If you like to use NvimSluice.app in HUD mode, setting this flag to 0 will
-not show the window of the search result.
+hi link SluiceVisibleArea Normal
 
-Default: 1
+------------------------------------------------------------------------------
+3.2 :SluiceCursor                                                *:SluiceCursor*
 
+The highlight of the location of the cursor within the file as seen in the
+Sluice window. Default:
+
+hi link SluiceCursor Normal
+
+------------------------------------------------------------------------------
+3.3 :SluiceColumn                                                *:SluiceColumn*
+
+The highlight of the entire Sluice window (height of the window). Default:
+
+hi link SluiceColumn SignColumn
 
 ==============================================================================
 4. License                                                   *NvimSluiceLicense*
