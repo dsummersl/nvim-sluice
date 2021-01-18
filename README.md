@@ -1,6 +1,6 @@
 # nvim-sluice
 
-A signs 'macro view' gutter for the right side of the window.
+A neovim minimap of the +signs gutter for the right side of the window.
 
 ## Install
 
@@ -10,12 +10,11 @@ Plug 'dsummersl/nvim-sluice'
 
 ## Screenshot
 
-[![asciicast](https://asciinema.org/a/EVPJgGpjO0KEVsLiR2p56u1IJ.svg)](https://asciinema.org/a/EVPJgGpjO0KEVsLiR2p56u1IJ)
-
+[![asciicast](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu?t=10)](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYVu?t=10)
 
 ## Commands
 
-`SluiceEnable` and `SluiceDisable`.
+`SluiceEnable`/`SluiceDisable`/`SluiceToggle`.
 
 ## Development
 
