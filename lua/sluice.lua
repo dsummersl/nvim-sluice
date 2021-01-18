@@ -4,7 +4,7 @@ local api = vim.api
 
 -- Script variables
 
-local throttle_ms = 200
+local throttle_ms = 150
 local winid = nil
 local bufnr = api.nvim_create_buf(false, true)
 local ns = api.nvim_create_namespace('nvim-sluice')
@@ -187,11 +187,20 @@ function M.disable()
   M.close()
 end
 
+function M.toggle()
+  if winid ~= nil and api.nvim_win_is_valid(winid) then
+    M.disable()
+  else
+    M.enable()
+  end
+end
+
 -- Setup
 
 M.enable()
 
 api.nvim_command('command! SluiceEnable  lua require("sluice").enable()')
 api.nvim_command('command! SluiceDisable lua require("sluice").disable()')
+api.nvim_command('command! SluiceToggle lua require("sluice").toggle()')
 
 return M
