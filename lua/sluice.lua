@@ -41,7 +41,7 @@ function M.update_context()
 end
 
 function M.close()
-  if winid ~= nil and api.nvim_win_is_valid(winid) then
+  if winid and api.nvim_win_is_valid(winid) then
     -- Can't close other windows when the command-line window is open
     if api.nvim_call_function('getcmdwintype', {}) ~= '' then
       return
@@ -50,28 +50,6 @@ function M.close()
     api.nvim_win_close(winid, true)
   end
   winid = nil
-end
-
-function M.should_throttle()
-  -- TODO ideally this should be a 'tail' throttle rather than a leading edge
-  -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
-  local var_exists, last_update_str = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
-  local reltime = vim.fn.reltime()
-
-  if not var_exists then
-    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-    return false
-  end
-
-  local last_update = vim.tbl_map(tonumber, vim.split(last_update_str, " "))
-
-  local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < throttle_ms
-
-  if not should_throttle then
-    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-  end
-
-  return should_throttle
 end
 
 function M.signs_changed()
@@ -90,10 +68,6 @@ function M.signs_changed()
 end
 
 function M.open()
-  if M.should_throttle() then
-    return
-  end
-
   local _, get_defined = M.signs_changed()
 
   local gutter_width = get_gutter_width()
@@ -105,7 +79,7 @@ function M.open()
     return M.close()
   end
 
-  if winid == nil or not api.nvim_win_is_valid(winid) then
+  if not winid or not api.nvim_win_is_valid(winid) then
     winid = api.nvim_open_win(bufnr, false, {
       relative = 'win',
       width = gutter_width,
@@ -137,6 +111,7 @@ function M.open()
 end
 
 function M.refresh_visible_area(lines)
+  api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   for i,v in ipairs(lines) do
     if v["texthl"] ~= "" then
       local line_text_hl = v["linehl"] .. v["texthl"]
@@ -173,6 +148,9 @@ function M.enable()
     {'BufEnter',    '*',               'lua require("sluice").update_context()'},
     {'WinEnter',    '*',               'lua require("sluice").update_context()'},
     {'WinLeave',    '*',               'lua require("sluice").close()'},
+    -- {'BufLeave',    '*',               'lua require("sluice").close()'},
+    -- {'TabLeave',    '*',               'lua require("sluice").close()'},
+    -- {'BufWinLeave',    '*',               'lua require("sluice").close()'},
     {'VimResized',  '*',               'lua require("sluice").open()'},
     {'User',        'SessionSavePre',  'lua require("sluice").close()'},
     {'User',        'SessionSavePost', 'lua require("sluice").open()'},
@@ -188,7 +166,7 @@ function M.disable()
 end
 
 function M.toggle()
-  if winid ~= nil and api.nvim_win_is_valid(winid) then
+  if winid and api.nvim_win_is_valid(winid) then
     M.disable()
   else
     M.enable()
