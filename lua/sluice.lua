@@ -52,6 +52,28 @@ function M.close()
   winid = nil
 end
 
+function M.should_throttle()
+  -- TODO ideally this should be a 'tail' throttle rather than a leading edge
+  -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
+  local var_exists, last_update_str = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
+  local reltime = vim.fn.reltime()
+
+  if not var_exists then
+    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    return false
+  end
+
+  local last_update = vim.tbl_map(tonumber, vim.split(last_update_str, " "))
+
+  local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < throttle_ms
+
+  if not should_throttle then
+    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+  end
+
+  return should_throttle
+end
+
 function M.signs_changed()
   local get_defined = vim.fn.sign_getdefined()
   local new_hash = xxh32(vim.inspect(get_defined))
@@ -68,6 +90,14 @@ function M.signs_changed()
 end
 
 function M.open()
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return false
+  end
+
+  if M.should_throttle() then
+    return
+  end
+
   local _, get_defined = M.signs_changed()
 
   local gutter_width = get_gutter_width()
@@ -136,7 +166,7 @@ function M.refresh_buffer(lines)
     table.insert(strings, v["text"])
   end
 
-  vim.fn.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
+  api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
 function M.enable()
