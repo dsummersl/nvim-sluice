@@ -23,6 +23,7 @@ See this [asciinema screencast](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYV
 Install dependencies:
 
     luarocks install busted
+    luarocks install luacheck
 
 Run tests:
 

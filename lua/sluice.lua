@@ -55,11 +55,11 @@ end
 function M.should_throttle()
   -- TODO ideally this should be a 'tail' throttle rather than a leading edge
   -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
-  local var_exists, last_update_str = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
+  local var_exists, last_update_str = pcall(api.nvim_buf_get_var, bufnr, 'sluice_last_update')
   local reltime = vim.fn.reltime()
 
   if not var_exists then
-    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
     return false
   end
 
@@ -68,36 +68,13 @@ function M.should_throttle()
   local should_throttle = vim.fn.reltimefloat(vim.fn.reltime(last_update)) * 1000 < throttle_ms
 
   if not should_throttle then
-    vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
   end
 
   return should_throttle
 end
 
-function M.signs_changed()
-  local get_defined = vim.fn.sign_getdefined()
-  local new_hash = xxh32(vim.inspect(get_defined))
-
-  local _, old_hash = pcall(vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
-
-  if new_hash == old_hash then
-    return false, get_defined
-  end
-
-  vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
-
-  return true, get_defined
-end
-
-function M.open()
-  if not vim.api.nvim_buf_is_valid(bufnr) then
-    return false
-  end
-
-  if M.should_throttle() then
-    return
-  end
-
+function M.get_signs_to_lines()
   local _, get_defined = M.signs_changed()
 
   local gutter_width = get_gutter_width()
@@ -132,8 +109,39 @@ function M.open()
 
   local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
   local window_top = vim.fn.line('w0')
-  local cursor_position = vim.api.nvim_win_get_cursor(0)
-  local lines = utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
+  local cursor_position = api.nvim_win_get_cursor(0)
+
+  return utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
+end
+
+function M.signs_changed()
+  local get_defined = vim.fn.sign_getdefined()
+  local new_hash = xxh32(vim.inspect(get_defined))
+
+  local _, old_hash = pcall(api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
+
+  if new_hash == old_hash then
+    return false, get_defined
+  end
+
+  api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
+
+  return true, get_defined
+end
+
+function M.open()
+  if not api.nvim_buf_is_valid(bufnr) then
+    return false
+  end
+
+  if M.should_throttle() then
+    return
+  end
+
+  local lines = M.get_signs_to_lines()
+  if not lines then
+    return
+  end
   -- TODO need to cache 'lines'
 
   M.refresh_buffer(lines)
@@ -191,6 +199,17 @@ end
 
 function M.disable()
   nvim_augroup('sluice', {})
+
+  -- delete any highlights.
+  local lines = M.get_signs_to_lines()
+  if not lines then
+    for i,v in ipairs(lines) do
+      if v["texthl"] == "" then
+        local line_text_hl = v["linehl"] .. v["texthl"]
+        api.nvim_exec("hi clear " .. new_name, false)
+      end
+    end
+  end
 
   M.close()
 end
