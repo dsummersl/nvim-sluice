@@ -1,4 +1,4 @@
-local utils = require('lua/sluice_utils')
+local utils = require('sluice_utils')
 
 local sign_getdefined = {
   {
@@ -279,7 +279,7 @@ describe("copy_highlight()", function()
           end
         },
         fn = {
-          synIDattr = function(id, attrib)
+          synIDattr = function(_id, attrib)
             if attrib == "bg" then
               return "Orange"
             end
@@ -305,7 +305,7 @@ describe("copy_highlight()", function()
           end
         },
         fn = {
-          synIDattr = function(id, attrib)
+          synIDattr = function(_id, attrib)
             if attrib == "bg" then
               return "Orange"
             end
@@ -330,7 +330,7 @@ describe("copy_highlight()", function()
           end
         },
         fn = {
-          synIDattr = function(id, attrib)
+          synIDattr = function(_id, attrib)
             if attrib == "bold" or attrib == "italic" then
               return "1"
             end

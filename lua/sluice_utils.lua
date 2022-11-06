@@ -128,5 +128,6 @@ end
 return {
   signs_to_lines = signs_to_lines,
   copy_highlight = copy_highlight,
-  set_vim = set_vim
+  set_vim = set_vim,
+  get_vim = get_vim,
 }

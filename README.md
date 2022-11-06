@@ -22,8 +22,8 @@ See this [asciinema screencast](https://asciinema.org/a/QXQfhGBm5Zlx1R2oYQkgQfYV
 
 Install dependencies:
 
-    luarocks install busted
-    luarocks install luacheck
+    luarocks --lua-version 5.1 install busted
+    luarocks --lua-version 5.1 install luacheck
 
 Run tests:
 
