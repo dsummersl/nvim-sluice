@@ -71,6 +71,39 @@ function M.should_throttle()
   return should_throttle
 end
 
+--- Create or update the sluice gutter.
+function M.create_sluice(bufnr)
+  local buf_lines = api.nvim_buf_line_count(0)
+  local gutter_width = signs.get_gutter_width()
+  local win_width = api.nvim_win_get_width(0) - gutter_width + 1
+  local win_height = api.nvim_win_get_height(0)
+
+  if win_height >= buf_lines then
+    return false
+  end
+
+  if not winid or not api.nvim_win_is_valid(winid) then
+    winid = api.nvim_open_win(bufnr, false, {
+      relative = 'win',
+      width = gutter_width,
+      height = win_height,
+      row = 0,
+      col = win_width - gutter_width + 1,
+      focusable = false,
+      style = 'minimal',
+    })
+  else
+    api.nvim_win_set_config(winid, {
+      win = api.nvim_get_current_win(),
+      relative = 'win',
+      width = gutter_width,
+      height = win_height,
+      row = 0,
+      col = win_width - gutter_width + 1,
+    })
+  end
+end
+
 function M.open()
   if not api.nvim_buf_is_valid(bufnr) then
     return false
@@ -79,6 +112,8 @@ function M.open()
   if M.should_throttle() then
     return
   end
+
+  M.create_sluice(bufnr)
 
   local lines = signs.get_signs_to_lines(bufnr)
   if not lines then

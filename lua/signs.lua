@@ -29,34 +29,11 @@ end
 function M.get_signs_to_lines(bufnr)
   local _, get_defined = M.signs_changed(bufnr)
 
-  local gutter_width = M.get_gutter_width()
-  local win_width = api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = api.nvim_win_get_height(0)
   local buf_lines = api.nvim_buf_line_count(0)
 
   if win_height >= buf_lines then
     return false
-  end
-
-  if not winid or not api.nvim_win_is_valid(winid) then
-    winid = api.nvim_open_win(bufnr, false, {
-      relative = 'win',
-      width = gutter_width,
-      height = win_height,
-      row = 0,
-      col = win_width - gutter_width + 1,
-      focusable = false,
-      style = 'minimal',
-    })
-  else
-    api.nvim_win_set_config(winid, {
-      win = api.nvim_get_current_win(),
-      relative = 'win',
-      width = gutter_width,
-      height = win_height,
-      row = 0,
-      col = win_width - gutter_width + 1,
-    })
   end
 
   local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
