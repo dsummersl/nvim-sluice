@@ -1,18 +1,17 @@
 local xxh32 = require("sluice.luaxxhash")
-local utils = require('sluice.sluice_utils')
-local vim = utils.get_vim()
-local api = vim.api
+local sluice_utils = require('sluice.sluice_utils')
 
-local M = {}
+local M = {
+  vim = vim
+}
 
-function M.get_gutter_width ()
+function M.get_gutter_width()
   return 2
 end
 
-
 function M.signs_changed(bufnr)
-  local get_defined = vim.fn.sign_getdefined()
-  local new_hash = xxh32(vim.inspect(get_defined))
+  local get_defined = M.vim.fn.sign_getdefined()
+  local new_hash = xxh32(M.vim.inspect(get_defined))
 
   local _, old_hash = pcall(api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
 
@@ -36,12 +35,11 @@ function M.get_signs_to_lines(bufnr)
     return false
   end
 
-  local get_placed = vim.fn.sign_getplaced('%', { group = '*' })
-  local window_top = vim.fn.line('w0')
+  local get_placed = M.vim.fn.sign_getplaced('%', { group = '*' })
+  local window_top = M.vim.fn.line('w0')
   local cursor_position = api.nvim_win_get_cursor(0)
 
-  return utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
+  return sluice_utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
 end
-
 
 return M

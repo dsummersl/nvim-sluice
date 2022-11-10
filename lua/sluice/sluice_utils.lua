@@ -1,17 +1,9 @@
-local vim = vim
-
-
-
-local function set_vim(new_vim)
-  vim = new_vim
-end
-
-local function get_vim()
-  return vim
-end
+local M = {
+  vim = vim,
+}
 
 local function find_definition(definitions, name)
-  for _,v in ipairs(definitions) do
+  for _, v in ipairs(definitions) do
     if v["name"] == name then
       return v
     end
@@ -47,8 +39,8 @@ local function signs_to_lines(definitions, signs, window_top, cursor, buffer_lin
   local window_bottom_gutter_line = line_to_gutter_line(window_top + height, buffer_lines, height)
   local cursor_gutter_line = line_to_gutter_line(cursor, buffer_lines, height)
 
-  if  all_signs == nil then
-    for line=1,height do
+  if all_signs == nil then
+    for line = 1, height do
       local linehl = get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
       table.insert(lines, { texthl = "", linehl = linehl, text = "  " })
     end
@@ -56,22 +48,22 @@ local function signs_to_lines(definitions, signs, window_top, cursor, buffer_lin
   end
 
   local mappings = {}
-  for _,v in ipairs(all_signs) do
+  for _, v in ipairs(all_signs) do
     local line = line_to_gutter_line(v["lnum"], buffer_lines, height)
     if mappings[line] == nil then
-      mappings[line] = { }
+      mappings[line] = {}
     end
 
     table.insert(mappings[line], v)
   end
 
-  for line=1,height do
+  for line = 1, height do
     local linehl = get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
     if mappings[line] == nil then
       table.insert(lines, { texthl = "", linehl = linehl, text = "  " })
     else
       local max = mappings[line][1]
-      for _,v in ipairs(mappings[line]) do
+      for _, v in ipairs(mappings[line]) do
         if v["priority"] > max["priority"] then
           max = v
         end
@@ -92,22 +84,22 @@ local function copy_highlight(highlight, new_name, is_gui_mode, override_bg)
   end
 
   -- define the new hl
-  get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. "fg=white", false)
+  M.vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "fg=white", false)
 
   local cterms = { "bold", "italic", "reverse", "inverse", "standout", "underline", "undercurl",
     "strikethrough" }
   local attribs = { "bg", "fg", "sp" }
 
-  for _,v in ipairs(attribs) do
-    local attrib = get_vim().fn.synIDattr(get_vim().fn.synIDtrans(get_vim().fn.hlID(highlight)), v, mode)
+  for _, v in ipairs(attribs) do
+    local attrib = M.vim.fn.synIDattr(M.vim.fn.synIDtrans(M.vim.fn.hlID(highlight)), v, mode)
     if attrib ~= "" then
-      get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. v .. "=" .. attrib, false)
+      M.vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. v .. "=" .. attrib, false)
     end
   end
 
   local cterm_attribs = {}
-  for _,v in ipairs(cterms) do
-    local attrib = get_vim().fn.synIDattr(get_vim().fn.synIDtrans(get_vim().fn.hlID(highlight)), v, mode)
+  for _, v in ipairs(cterms) do
+    local attrib = M.vim.fn.synIDattr(M.vim.fn.synIDtrans(M.vim.fn.hlID(highlight)), v, mode)
     if attrib ~= "" then
       table.insert(cterm_attribs, v)
     end
@@ -122,12 +114,10 @@ local function copy_highlight(highlight, new_name, is_gui_mode, override_bg)
   if #cterm_attribs > 0 then
     cterm_vals = mode .. "=" .. table.concat(cterm_attribs, ",")
   end
-  get_vim().api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg .. " " .. cterm_vals, false)
+  M.vim.api.nvim_exec("hi " .. new_name .. " " .. mode .. "bg=" .. override_bg .. " " .. cterm_vals, false)
 end
 
-return {
-  signs_to_lines = signs_to_lines,
-  copy_highlight = copy_highlight,
-  set_vim = set_vim,
-  get_vim = get_vim,
-}
+M.signs_to_lines = signs_to_lines
+M.copy_highlight = copy_highlight
+
+return M
