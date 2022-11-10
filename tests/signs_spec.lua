@@ -1,4 +1,4 @@
-local utils = require('sluice_utils')
+local utils = require('sluice.sluice_utils')
 
 local vim_mock = mock({
   api = {
@@ -16,7 +16,7 @@ local vim_mock = mock({
 })
 utils.set_vim(vim_mock)
 
-local signs = require('lua/signs')
+local signs = require('lua/sluice/signs')
 
 describe('get_gutter_width()', function()
   it('should get gutter width', function()

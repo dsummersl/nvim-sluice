@@ -1,4 +1,4 @@
-local utils = require('sluice_utils')
+local utils = require('sluice.sluice_utils')
 
 local sign_getdefined = {
   {
