@@ -13,13 +13,13 @@ function M.signs_changed(bufnr)
   local get_defined = M.vim.fn.sign_getdefined()
   local new_hash = xxh32(M.vim.inspect(get_defined))
 
-  local _, old_hash = pcall(api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
+  local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
 
   if new_hash == old_hash then
     return false, get_defined
   end
 
-  api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
+  M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
 
   return true, get_defined
 end
@@ -28,8 +28,8 @@ end
 function M.get_signs_to_lines(bufnr)
   local _, get_defined = M.signs_changed(bufnr)
 
-  local win_height = api.nvim_win_get_height(0)
-  local buf_lines = api.nvim_buf_line_count(0)
+  local win_height = M.vim.api.nvim_win_get_height(0)
+  local buf_lines = M.vim.api.nvim_buf_line_count(0)
 
   if win_height >= buf_lines then
     return false
@@ -37,7 +37,7 @@ function M.get_signs_to_lines(bufnr)
 
   local get_placed = M.vim.fn.sign_getplaced('%', { group = '*' })
   local window_top = M.vim.fn.line('w0')
-  local cursor_position = api.nvim_win_get_cursor(0)
+  local cursor_position = M.vim.api.nvim_win_get_cursor(0)
 
   return sluice_utils.signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
 end
