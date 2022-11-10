@@ -1,4 +1,4 @@
-local xxh32 = require("luaxxhash")
+local xxh32 = require("sluice.luaxxhash")
 local vim = vim
 local api = vim.api
 
@@ -8,8 +8,8 @@ local throttle_ms = 150
 local winid = nil
 local bufnr = api.nvim_create_buf(false, true)
 local ns = api.nvim_create_namespace('nvim-sluice')
-local utils = require('sluice_utils')
-local signs = require('signs')
+local utils = require('sluice.sluice_utils')
+local signs = require('sluice.signs')
 
 local nvim_augroup = function(group_name, definitions)
   api.nvim_command('augroup ' .. group_name)
@@ -71,7 +71,7 @@ function M.should_throttle()
   return should_throttle
 end
 
---- Create or update the sluice gutter.
+--- Create the sluice gutter.
 function M.create_sluice(bufnr)
   local buf_lines = api.nvim_buf_line_count(0)
   local gutter_width = signs.get_gutter_width()

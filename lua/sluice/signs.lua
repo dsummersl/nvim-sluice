@@ -1,5 +1,5 @@
-local xxh32 = require("luaxxhash")
-local utils = require('sluice_utils')
+local xxh32 = require("sluice.luaxxhash")
+local utils = require('sluice.sluice_utils')
 local vim = utils.get_vim()
 local api = vim.api
 
