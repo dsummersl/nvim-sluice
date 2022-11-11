@@ -1,5 +1,5 @@
 local config = require('sluice.config')
-local utils = require('sluice.sluice_utils')
+local highlight = require('sluice.highlight')
 local signs = require('sluice.integrations.signs')
 
 M = {
@@ -16,7 +16,7 @@ function M.refresh_visible_area(bufnr, ns, lines)
         mode = "gui"
       end
       local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(v["linehl"])), "bg", mode)
-      utils.copy_highlight(v["texthl"], line_text_hl, mode == "gui", line_bg)
+      highlight.copy_highlight(v["texthl"], line_text_hl, mode == "gui", line_bg)
       M.vim.api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
     else
       M.vim.api.nvim_buf_add_highlight(bufnr, ns, v["linehl"], i - 1, 0, -1)
