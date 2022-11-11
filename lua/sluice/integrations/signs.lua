@@ -5,10 +5,7 @@ local M = {
   vim = vim
 }
 
-function M.get_gutter_width()
-  return 2
-end
-
+--- Returns a table of signs, and whether they have changed since the last call to this method.
 function M.signs_changed(bufnr)
   local get_defined = M.vim.fn.sign_getdefined()
   local new_hash = xxh32(M.vim.inspect(get_defined))
