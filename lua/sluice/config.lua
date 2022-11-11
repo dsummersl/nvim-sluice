@@ -6,9 +6,7 @@ local default_settings = {
   throttle_ms = 150,
   gutter_width = 2,
   gutters = {
-    {
-      signs = {},
-    },
+    { integration = 'signs', }
   },
 }
 

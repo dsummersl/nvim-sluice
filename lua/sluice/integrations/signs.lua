@@ -104,4 +104,21 @@ function M.get_signs_to_lines(bufnr)
   return signs_to_lines(get_defined, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
 end
 
+function M.enable(bufnr, ns, update_fn)
+  -- TODO for now we just call it directly, but eventually we'd do this for
+  update_fn(bufnr, ns, M.get_signs_to_lines(bufnr))
+end
+
+function M.disable(bufnr)
+  local lines = M.get_signs_to_lines(bufnr)
+  if not lines then
+    for _,v in ipairs(lines) do
+      if v["texthl"] == "" then
+        local line_text_hl = v["linehl"] .. v["texthl"]
+        M.vim.api.nvim_exec("hi clear " .. line_text_hl, false)
+      end
+    end
+  end
+end
+
 return M

@@ -1,6 +1,5 @@
 local config = require('sluice.config')
 local highlight = require('sluice.highlight')
-local signs = require('sluice.integrations.signs')
 
 M = {
   vim = vim
@@ -69,16 +68,7 @@ function M.create_window(winid, bufnr)
   end
 end
 
-function M.open(winid, bufnr, ns)
-  if not M.vim.api.nvim_buf_is_valid(bufnr) then
-    return false
-  end
-
-  local winid = M.create_window(winid, bufnr)
-
-  -- TODO look into the configuration and setup the integrations that exist.
-
-  local lines = signs.get_signs_to_lines(bufnr)
+function M.update(bufnr, ns, lines)
   if not lines then
     M.close()
     return
@@ -87,6 +77,19 @@ function M.open(winid, bufnr, ns)
 
   M.refresh_buffer(bufnr, lines)
   M.refresh_visible_area(bufnr, ns, lines)
+end
+
+function M.open(winid, bufnr, ns)
+  if not M.vim.api.nvim_buf_is_valid(bufnr) then
+    return false
+  end
+
+  local winid = M.create_window(winid, bufnr)
+
+  for _,v in ipairs(config.settings.gutters) do
+    local integration = require('sluice.integrations.' .. v.integration)
+    integration.enable(bufnr, ns, M.update)
+  end
 
   return winid
 end
@@ -99,6 +102,13 @@ function M.close(winid)
     end
 
     M.vim.api.nvim_win_close(winid, true)
+  end
+end
+
+function M.disable(bufnr)
+  for _,v in ipairs(config.settings.gutters) do
+    local integration = require('sluice.integrations.' .. v.integration)
+    integration.disable(bufnr)
   end
 end
 

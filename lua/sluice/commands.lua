@@ -89,16 +89,7 @@ end
 function M.disable()
   nvim_augroup('sluice', {})
 
-  -- delete any highlights.
-  local lines = signs.get_signs_to_lines(bufnr)
-  if not lines then
-    for _,v in ipairs(lines) do
-      if v["texthl"] == "" then
-        local line_text_hl = v["linehl"] .. v["texthl"]
-        M.vim.api.nvim_exec("hi clear " .. line_text_hl, false)
-      end
-    end
-  end
+  window.disable(bufnr)
 
   M.close()
 end
