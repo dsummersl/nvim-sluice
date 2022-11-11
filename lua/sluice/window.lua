@@ -1,5 +1,6 @@
 local config = require('sluice.config')
 local highlight = require('sluice.highlight')
+local convert = require('sluice.convert')
 
 M = {
   vim = vim
@@ -69,14 +70,13 @@ function M.create_window(winid, bufnr)
 end
 
 function M.update(bufnr, ns, lines)
-  if not lines then
+  local gutter_lines = convert.lines_to_gutter_lines(lines)
+  if not gutter_lines then
     M.close()
     return
   end
-  -- TODO need to cache 'lines'
-
-  M.refresh_buffer(bufnr, lines)
-  M.refresh_visible_area(bufnr, ns, lines)
+  M.refresh_buffer(bufnr, gutter_lines)
+  M.refresh_visible_area(bufnr, ns, gutter_lines)
 end
 
 function M.open(winid, bufnr, ns)

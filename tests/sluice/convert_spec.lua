@@ -1,5 +1,5 @@
 local utils_mock = require('tests/utils_mock')
-local utils = require('lua/sluice/sluice_utils')
+local convert = require('lua/sluice/convert')
 
 local vim_mock = utils_mock.vim_mock
 
@@ -30,7 +30,7 @@ local sign_getdefined = {
 describe("signs_to_lines()", function()
   it("creates lines without text if there are no signs", function()
     local sign_getplaced = { bufnr = 6 }
-    assert.are.same(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+    assert.are.same(convert.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
       { texthl = "", linehl = "SluiceCursor", text = "  " },
       { texthl = "", linehl = "SluiceColumn", text = "  " },
       { texthl = "", linehl = "SluiceColumn", text = "  " },
@@ -52,7 +52,7 @@ describe("signs_to_lines()", function()
       { lnum = 84, id = 1000009, name = 'ALEWarningSign', priority = 30, group = 'ale' },
     }, bufnr = 6 }
 
-    assert.are.same(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+    assert.are.same(convert.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
       { texthl = "", linehl = "SluiceCursor", text = "  " },
       { texthl = "LineAddedHL", linehl = "SluiceColumn", text = "+ " },
       { texthl = "LineRemovedHL", linehl = "SluiceColumn", text = "- " },
@@ -74,7 +74,7 @@ describe("signs_to_lines()", function()
       { lnum = 24, id = 1, name = 'GitGutterLineAdded', priority = 10, group = 'gitgutter' },
     }, bufnr = 6 }
 
-    assert.are.same(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
+    assert.are.same(convert.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 100, 10), {
       { texthl = "", linehl = "SluiceCursor", text = "  " },
       { texthl = "LineAddedHL", linehl = "SluiceColumn", text = "+ " },
       { texthl = "", linehl = "SluiceColumn", text = "  " },
@@ -190,7 +190,7 @@ describe("signs_to_lines()", function()
       } }
     }
 
-    assert.are.same(utils.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 119, 11), {
+    assert.are.same(convert.signs_to_lines(sign_getdefined, sign_getplaced, 1, 1, 119, 11), {
       { linehl = "SluiceCursor", text = "+ ", texthl = "LineAddedHL" },
       { linehl = "SluiceColumn", text = "  ", texthl = "" },
       { linehl = "SluiceColumn", text = "- ", texthl = "LineRemovedHL" },
@@ -204,68 +204,4 @@ describe("signs_to_lines()", function()
       { linehl = "SluiceColumn", text = "- ", texthl = "LineRemovedHL" }
     })
   end)
-end)
-
-describe("copy_highlight()", function()
-  before_each(function()
-    utils.vim = mock(vim_mock)
-  end)
-
-  it("creates a new cursor without properties", function()
-    utils.copy_highlight("Cursor", "NewCursor", true, "")
-
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guifg=white", false)
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
-  end)
-
-  it("creates a new cursor without properties", function()
-    utils.copy_highlight("Cursor", "NewCursor", true, "")
-
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
-  end)
-
-  it("respects function params background color", function()
-    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
-
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=NONE", false)
-  end)
-
-  it("adds background of source", function()
-    utils.copy_highlight("Cursor", "NewCursor", true, "")
-
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Orange", false)
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=NONE gui=NONE", false)
-  end)
-
-  it("function overrides background of any source", function()
-    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
-
-    assert.stub(vim_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=NONE", false)
-  end)
-
-  it("includes gui settings of source highlight", function()
-    local bold_italic_mock = {
-      api = {
-        nvim_exec = function()
-          return "exec-id"
-        end
-      },
-      fn = {
-        synIDattr = function(_id, attrib)
-          if attrib == "bold" or attrib == "italic" then
-            return "1"
-          end
-          return ""
-        end,
-        synIDtrans = function() end,
-        hlID = function() end
-      }
-    }
-    utils.vim = mock(bold_italic_mock)
-    utils.copy_highlight("Cursor", "NewCursor", true, "Green")
-
-    assert.stub(bold_italic_mock.api.nvim_exec).was.called_with("hi NewCursor guibg=Green gui=bold,italic", false)
-  end)
-
-  -- TODO nocombine
 end)
