@@ -1,7 +1,7 @@
 test:
-	~/.luarocks/bin/busted -m 'lua/?.lua' tests
+	busted tests
 
 lint:
-	~/.luarocks/bin/luacheck lua/*
+	luacheck lua/*
 
 .PHONY: test lint

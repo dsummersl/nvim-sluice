@@ -5,8 +5,8 @@ local M = {
 local window = require('sluice.window')
 local config = require('sluice.config')
 
-local winid = nil
-local bufnr = M.vim.api.nvim_create_buf(false, true)
+local gutter_winid = nil
+local gutter_bufnr = M.vim.api.nvim_create_buf(false, true)
 local ns = M.vim.api.nvim_create_namespace('nvim-sluice')
 
 --- Assign autocmds for a group.
@@ -26,11 +26,11 @@ end
 function M.should_throttle()
   -- TODO ideally this should be a 'tail' throttle rather than a leading edge
   -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
-  local var_exists, last_update_str = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
+  local var_exists, last_update_str = pcall(M.vim.api.nvim_buf_get_var, gutter_bufnr, 'sluice_last_update')
   local reltime = M.vim.fn.reltime()
 
   if not var_exists then
-    M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    M.vim.api.nvim_buf_set_var(gutter_bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
     return false
   end
 
@@ -39,13 +39,14 @@ function M.should_throttle()
   local should_throttle = M.vim.fn.reltimefloat(M.vim.fn.reltime(last_update)) * 1000 < config.settings.throttle_ms
 
   if not should_throttle then
-    M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
+    M.vim.api.nvim_buf_set_var(gutter_bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
   end
 
   return should_throttle
 end
 
 function M.update_context()
+  -- do nothing for preview/diff/non-bufs
   if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return M.close() end
   if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.close() end
   if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return M.close() end
@@ -54,8 +55,8 @@ function M.update_context()
 end
 
 function M.close()
-  window.close(winid)
-  winid = nil
+  window.close(gutter_winid)
+  gutter_winid = nil
 end
 
 function M.open()
@@ -63,7 +64,7 @@ function M.open()
     return
   end
 
-  winid = window.open(winid, bufnr, ns)
+  gutter_winid = window.open(gutter_winid, gutter_bufnr, ns)
 end
 
 function M.enable()
@@ -89,13 +90,13 @@ end
 function M.disable()
   nvim_augroup('sluice', {})
 
-  window.disable(bufnr)
+  window.disable(gutter_bufnr)
 
   M.close()
 end
 
 function M.toggle()
-  if winid and M.vim.api.nvim_win_is_valid(winid) then
+  if gutter_winid and M.vim.api.nvim_win_is_valid(gutter_winid) then
     M.disable()
   else
     M.enable()

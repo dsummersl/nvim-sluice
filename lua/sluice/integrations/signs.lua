@@ -4,30 +4,46 @@ local M = {
   vim = vim
 }
 
---- Returns a table of signs, and whether they have changed since the last call to this method.
-function M.signs_changed(bufnr)
+--- Get a table with keys set to the `name` of each sign that is defined.
+local function sign_getdefined()
   local get_defined = M.vim.fn.sign_getdefined()
-  local new_hash = xxh32(M.vim.inspect(get_defined))
-
-  local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
-
-  if new_hash == old_hash then
-    return get_defined
+  local signs_defined = {}
+  for _, v in ipairs(get_defined) do
+    signs_defined[v["name"]] = v
   end
 
-  M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
-
-  return get_defined
+  return signs_defined
 end
 
-function M.enable(bufnr, ns, update_fn)
+--- Returns a table of signs, and whether they have changed since the last call to this method.
+function M.signs_changed(bufnr)
+  local get_defined = sign_getdefined()
+  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
+
+  -- local new_hash = xxh32(M.vim.inspect(get_placed))
+  -- local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
+  --
+  -- if new_hash == old_hash then
+  --   return get_defined
+  -- end
+  -- M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
+
+  local result = {}
+  for _, v in ipairs(get_placed[1]["signs"]) do
+    table.insert(result, M.vim.tbl_extend('force', get_defined[v["name"]], v))
+  end
+
+  return result
+end
+
+function M.enable(bufnr, update_fn)
   -- TODO for now we just call it directly, but eventually we'd do this when we know of some events?
-  update_fn(bufnr, ns, M.signs_changed(bufnr))
+  update_fn(M.signs_changed(bufnr))
 end
 
 function M.disable(bufnr)
-  local lines = M.signs_changed(bufnr)
   -- TODO this cleanup should happen elsewhere.
+  local lines = M.signs_changed(bufnr)
   if not lines then
     for _, v in ipairs(lines) do
       if v["texthl"] == "" then

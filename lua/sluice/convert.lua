@@ -25,53 +25,33 @@ function M.find_definition(definitions, name)
   return nil
 end
 
-function M.signs_to_lines(definitions, signs, window_top, cursor, buffer_lines, height)
-  local lines = {}
-  local all_signs = signs["signs"]
+--- Convert a list of lines/styles to a list of gutter lines.
+-- @param lines A list of dicts with any keys from :highlight, plus text/line/priority.
+function M.lines_to_gutters(lines, window_top, cursor, buffer_lines, height)
   local window_top_gutter_line = M.line_to_gutter_line(window_top, buffer_lines, height)
   local window_bottom_gutter_line = M.line_to_gutter_line(window_top + height, buffer_lines, height)
   local cursor_gutter_line = M.line_to_gutter_line(cursor, buffer_lines, height)
 
-  if all_signs == nil then
-    for line = 1, height do
-      local linehl = highlight.get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
-      table.insert(lines, { texthl = "", linehl = linehl, text = "  " })
-    end
-    return lines
-  end
-
-  local mappings = {}
-  for _, v in ipairs(all_signs) do
-    local line = M.line_to_gutter_line(v["lnum"], buffer_lines, height)
-    if mappings[line] == nil then
-      mappings[line] = {}
-    end
-
-    table.insert(mappings[line], v)
-  end
-
+  -- ensure that each line of the gutter has a definition.
+  local gutter_lines = {}
   for line = 1, height do
     local linehl = highlight.get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
-    if mappings[line] == nil then
-      table.insert(lines, { texthl = "", linehl = linehl, text = "  " })
-    else
-      local max = mappings[line][1]
-      for _, v in ipairs(mappings[line]) do
-        if v["priority"] > max["priority"] then
-          max = v
-        end
-      end
-      local name = max["name"]
-      local definition = M.find_definition(definitions, name)
-      if definition ~= nil then
-        table.insert(lines, { texthl = definition["texthl"], linehl = linehl, text = definition["text"] })
-      end
+    gutter_lines[line] = { texthl = "", linehl = linehl, text = "  ", priority = 0 }
+  end
+
+  -- drop in all the lines provided by an integration.
+  for _, line in ipairs(lines) do
+    local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
+    local gutter_line = gutter_lines[gutter_line_number]
+    if gutter_line["priority"] < line["priority"] then
+      gutter_lines[gutter_line_number] = M.vim.tbl_extend('force', gutter_line, line)
     end
   end
-  return lines
+
+  return gutter_lines
 end
 
---- Reach the signs, and return a list of lines.
+---
 function M.lines_to_gutter_lines(lines)
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
@@ -80,11 +60,10 @@ function M.lines_to_gutter_lines(lines)
     return false
   end
 
-  local get_placed = M.vim.fn.sign_getplaced('%', { group = '*' })
   local window_top = M.vim.fn.line('w0')
   local cursor_position = M.vim.api.nvim_win_get_cursor(0)
 
-  return M.signs_to_lines(lines, get_placed[1], window_top, cursor_position[1], buf_lines, win_height)
+  return M.lines_to_gutters(lines, window_top, cursor_position[1], buf_lines, win_height)
 end
 
 return M

@@ -6,9 +6,10 @@ M = {
   vim = vim
 }
 
+--- Add styling to the gutter.
 function M.refresh_visible_area(bufnr, ns, lines)
   M.vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-  for i,v in ipairs(lines) do
+  for i, v in ipairs(lines) do
     if v["texthl"] ~= "" then
       local line_text_hl = v["linehl"] .. v["texthl"]
       local mode = "cterm"
@@ -24,12 +25,12 @@ function M.refresh_visible_area(bufnr, ns, lines)
   end
 end
 
---- Refresh the gutter buffer.
+--- Refresh the content of the gutter.
 function M.refresh_buffer(bufnr, lines)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
-  for _,v in ipairs(lines) do
+  for _, v in ipairs(lines) do
     table.insert(strings, v["text"])
   end
 
@@ -39,7 +40,7 @@ end
 --- Create a gutter.
 function M.create_window(winid, bufnr)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
-  local gutter_width = config.settings.gutter_width
+  local gutter_width = 2
   local win_width = M.vim.api.nvim_win_get_width(0) - gutter_width + 1
   local win_height = M.vim.api.nvim_win_get_height(0)
 
@@ -67,48 +68,53 @@ function M.create_window(winid, bufnr)
       col = win_width - gutter_width + 1,
     })
   end
+
+  return winid
 end
 
-function M.update(bufnr, ns, lines)
+function M.update(gutter_bufnr, ns, lines)
   local gutter_lines = convert.lines_to_gutter_lines(lines)
   if not gutter_lines then
     M.close()
     return
   end
-  M.refresh_buffer(bufnr, gutter_lines)
-  M.refresh_visible_area(bufnr, ns, gutter_lines)
+  M.refresh_buffer(gutter_bufnr, gutter_lines)
+  M.refresh_visible_area(gutter_bufnr, ns, gutter_lines)
 end
 
-function M.open(winid, bufnr, ns)
-  if not M.vim.api.nvim_buf_is_valid(bufnr) then
+function M.open(gutter_winid, gutter_bufnr, ns)
+  if not M.vim.api.nvim_buf_is_valid(gutter_bufnr) then
     return false
   end
 
-  local winid = M.create_window(winid, bufnr)
+  local new_gutter_winid = M.create_window(gutter_winid, gutter_bufnr)
 
-  for _,v in ipairs(config.settings.gutters) do
+  for _, v in ipairs(config.settings.gutters) do
     local integration = require('sluice.integrations.' .. v.integration)
-    integration.enable(bufnr, ns, M.update)
+    local update_in_ns = function(lines)
+      return M.update(gutter_bufnr, ns, lines)
+    end
+    integration.enable(M.vim.fn.bufnr(), update_in_ns)
   end
 
-  return winid
+  return new_gutter_winid
 end
 
-function M.close(winid)
-  if winid and M.vim.api.nvim_win_is_valid(winid) then
+function M.close(gutter_winid)
+  if gutter_winid and M.vim.api.nvim_win_is_valid(gutter_winid) then
     -- Can't close other windows when the command-line window is open
     if M.vim.api.nvim_call_function('getcmdwintype', {}) ~= '' then
       return
     end
 
-    M.vim.api.nvim_win_close(winid, true)
+    M.vim.api.nvim_win_close(gutter_winid, true)
   end
 end
 
-function M.disable(bufnr)
-  for _,v in ipairs(config.settings.gutters) do
+function M.disable(gutter_bufnr)
+  for _, v in ipairs(config.settings.gutters) do
     local integration = require('sluice.integrations.' .. v.integration)
-    integration.disable(bufnr)
+    integration.disable(gutter_bufnr)
   end
 end
 
