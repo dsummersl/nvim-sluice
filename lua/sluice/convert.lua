@@ -24,29 +24,19 @@ function M.find_definition(definitions, name)
 end
 
 --- Convert a list of lines/styles to a list of gutter lines.
--- @param lines A list of dicts with any keys from :highlight, plus text/line/priority.
+-- @param lines A list of dicts with any keys from :highlight, plus text/line.
 function M.lines_to_gutters(lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = { texthl = "", linehl = "SluiceColumn", text = "  ", priority = 0 }
+    gutter_lines[line] = { texthl = "", linehl = "SluiceColumn", text = "  " }
   end
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
     local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
     local gutter_line = gutter_lines[gutter_line_number]
-    local gl_priority = 0
-    local l_priority = 1
-    if gutter_line["priority"] then
-      gl_priority = gutter_line["priority"]
-    end
-    if line["priority"] then
-      l_priority = line["priority"]
-    end
-    if gl_priority < l_priority then
-      gutter_lines[gutter_line_number] = M.vim.tbl_extend('force', gutter_line, line)
-    end
+    gutter_lines[gutter_line_number] = M.vim.tbl_extend('force', gutter_line, line)
   end
 
   return gutter_lines

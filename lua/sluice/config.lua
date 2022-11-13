@@ -7,11 +7,12 @@ local default_settings = {
   gutters = {
     { integration = 'viewport', },
     { integration = 'signs', },
+    { integration = 'search', },
     -- example of a custom gutter:
     -- {
     --   update = function(bufnr)
     --     return {
-    --       { lnum = 1, text = 'XX', texthl = 'Normal', priority = 100 }
+    --       { lnum = 1, text = 'XX', texthl = 'Normal' }
     --     }
     --   end,
     -- },

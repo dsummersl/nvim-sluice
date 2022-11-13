@@ -14,7 +14,6 @@ function M.update(bufnr)
     table.insert(lines, {
       text = "  ",
       linehl = linehl,
-      priority = 1,
       lnum = lnum,
     })
   end
