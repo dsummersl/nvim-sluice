@@ -94,9 +94,33 @@ function M.open(gutter_winid, gutter_bufnr, ns)
 
   local lines = {}
   for _, v in ipairs(config.settings.gutters) do
-    local integration = require('sluice.integrations.' .. v.integration)
-    local update_fn = integration.enable(M.vim.fn.bufnr())
-    local integration_lines = update_fn(M.vim.fn.bufnr())
+    local enable_fn = nil
+    local update_fn = nil
+    if v.integration ~= nil then
+      -- when there is an integration, load it, and enable it.
+      local integration = require('sluice.integrations.' .. v.integration)
+      enable_fn = integration.enable
+      update_fn = integration.update
+    end
+    if v.enable ~= nil then
+      enable_fn = v.enable
+    end
+    if v.update ~= nil then
+      update_fn = v.update
+    end
+
+    local bufnr = M.vim.fn.bufnr()
+    if enable_fn ~= nil then
+      enable_fn(bufnr)
+    end
+
+    if update_fn == nil then
+      print("No update function for gutter")
+      -- TODO close the gutter
+      return
+    end
+
+    local integration_lines = update_fn(bufnr)
     for _, v in ipairs(integration_lines) do
       table.insert(lines, v)
     end

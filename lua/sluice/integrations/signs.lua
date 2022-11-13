@@ -16,7 +16,7 @@ local function sign_getdefined()
 end
 
 --- Returns a table of signs, and whether they have changed since the last call to this method.
-function M.signs_changed(bufnr)
+function M.update(bufnr)
   local get_defined = sign_getdefined()
   local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
 
@@ -37,12 +37,11 @@ function M.signs_changed(bufnr)
 end
 
 function M.enable(bufnr)
-  return M.signs_changed
 end
 
 function M.disable(bufnr)
   -- TODO this cleanup should happen elsewhere.
-  local lines = M.signs_changed(bufnr)
+  local lines = M.update(bufnr)
   if not lines then
     for _, v in ipairs(lines) do
       if v["texthl"] == "" then

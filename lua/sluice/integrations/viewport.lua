@@ -23,7 +23,6 @@ function M.update(bufnr)
 end
 
 function M.enable(bufnr)
-  return M.update
 end
 
 function M.disable(bufnr)

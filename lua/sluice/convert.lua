@@ -36,7 +36,15 @@ function M.lines_to_gutters(lines, buffer_lines, height)
   for _, line in ipairs(lines) do
     local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
     local gutter_line = gutter_lines[gutter_line_number]
-    if gutter_line["priority"] < line["priority"] then
+    local gl_priority = 0
+    local l_priority = 1
+    if gutter_line["priority"] then
+      gl_priority = gutter_line["priority"]
+    end
+    if line["priority"] then
+      l_priority = line["priority"]
+    end
+    if gl_priority < l_priority then
       gutter_lines[gutter_line_number] = M.vim.tbl_extend('force', gutter_line, line)
     end
   end
