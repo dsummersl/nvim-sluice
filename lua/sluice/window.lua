@@ -72,7 +72,10 @@ function M.create_window(winid, bufnr)
   return winid
 end
 
+--- Update the gutter with new lines.
 function M.update(gutter_bufnr, ns, lines)
+  -- TODO store this plugin and its updated value
+  -- TODO then replay all the plugins in order.
   local gutter_lines = convert.lines_to_gutter_lines(lines)
   if not gutter_lines then
     M.close()
@@ -89,13 +92,16 @@ function M.open(gutter_winid, gutter_bufnr, ns)
 
   local new_gutter_winid = M.create_window(gutter_winid, gutter_bufnr)
 
+  local lines = {}
   for _, v in ipairs(config.settings.gutters) do
     local integration = require('sluice.integrations.' .. v.integration)
-    local update_in_ns = function(lines)
-      return M.update(gutter_bufnr, ns, lines)
+    local update_fn = integration.enable(M.vim.fn.bufnr())
+    local integration_lines = update_fn(M.vim.fn.bufnr())
+    for _, v in ipairs(integration_lines) do
+      table.insert(lines, v)
     end
-    integration.enable(M.vim.fn.bufnr(), update_in_ns)
   end
+  M.update(gutter_bufnr, ns, lines)
 
   return new_gutter_winid
 end

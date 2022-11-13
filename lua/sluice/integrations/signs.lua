@@ -36,9 +36,8 @@ function M.signs_changed(bufnr)
   return result
 end
 
-function M.enable(bufnr, update_fn)
-  -- TODO for now we just call it directly, but eventually we'd do this when we know of some events?
-  update_fn(M.signs_changed(bufnr))
+function M.enable(bufnr)
+  return M.signs_changed
 end
 
 function M.disable(bufnr)

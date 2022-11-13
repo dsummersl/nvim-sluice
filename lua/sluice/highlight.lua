@@ -2,17 +2,6 @@ local M = {
   vim = vim,
 }
 
-local function get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
-  local linehl = "SluiceColumn"
-  if line == cursor_gutter_line then
-    linehl = "SluiceCursor"
-  elseif line >= window_top_gutter_line and line <= window_bottom_gutter_line then
-    linehl = "SluiceVisibleArea"
-  end
-
-  return linehl
-end
-
 -- mode == gui or cterm boolean
 local function copy_highlight(highlight, new_name, is_gui_mode, override_bg)
   local mode = "cterm"

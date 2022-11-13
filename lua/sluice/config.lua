@@ -4,9 +4,9 @@ local M = {
 local default_settings = {
   enable = true,
   throttle_ms = 150,
-  gutter_width = 2,
   gutters = {
-    { integration = 'signs', }
+    { integration = 'viewport', },
+    { integration = 'signs', },
   },
 }
 

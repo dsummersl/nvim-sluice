@@ -1,5 +1,3 @@
-local highlight = require('sluice.highlight')
-
 local M = {
   vim = vim
 }
@@ -27,16 +25,11 @@ end
 
 --- Convert a list of lines/styles to a list of gutter lines.
 -- @param lines A list of dicts with any keys from :highlight, plus text/line/priority.
-function M.lines_to_gutters(lines, window_top, cursor, buffer_lines, height)
-  local window_top_gutter_line = M.line_to_gutter_line(window_top, buffer_lines, height)
-  local window_bottom_gutter_line = M.line_to_gutter_line(window_top + height, buffer_lines, height)
-  local cursor_gutter_line = M.line_to_gutter_line(cursor, buffer_lines, height)
-
+function M.lines_to_gutters(lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    local linehl = highlight.get_linehl(line, window_top_gutter_line, window_bottom_gutter_line, cursor_gutter_line)
-    gutter_lines[line] = { texthl = "", linehl = linehl, text = "  ", priority = 0 }
+    gutter_lines[line] = { texthl = "", linehl = "SluiceColumn", text = "  ", priority = 0 }
   end
 
   -- drop in all the lines provided by an integration.
@@ -60,10 +53,7 @@ function M.lines_to_gutter_lines(lines)
     return false
   end
 
-  local window_top = M.vim.fn.line('w0')
-  local cursor_position = M.vim.api.nvim_win_get_cursor(0)
-
-  return M.lines_to_gutters(lines, window_top, cursor_position[1], buf_lines, win_height)
+  return M.lines_to_gutters(lines, buf_lines, win_height)
 end
 
 return M
