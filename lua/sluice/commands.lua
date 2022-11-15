@@ -2,7 +2,7 @@ local M = {
   vim = vim
 }
 
-local window = require('sluice.window')
+local gutter = require('sluice.gutter')
 local config = require('sluice.config')
 
 local gutter_winid = nil
@@ -55,7 +55,7 @@ function M.update_context()
 end
 
 function M.close()
-  window.close(gutter_winid)
+  gutter.close(gutter_winid)
   gutter_winid = nil
 end
 
@@ -64,10 +64,11 @@ function M.open()
     return
   end
 
-  gutter_winid = window.open(gutter_winid, gutter_bufnr, ns)
+  gutter_winid = gutter.open(gutter_winid, gutter_bufnr, ns)
 end
 
 function M.enable()
+  -- TODO move these to the various plugins
   nvim_augroup('sluice', {
     {'WinScrolled', '*',               'lua require("sluice.commands").update_context()'},
     {'CursorMoved', '*',               'lua require("sluice.commands").update_context()'},
@@ -90,7 +91,7 @@ end
 function M.disable()
   nvim_augroup('sluice', {})
 
-  window.disable(gutter_bufnr)
+  gutter.disable(gutter_bufnr)
 
   M.close()
 end

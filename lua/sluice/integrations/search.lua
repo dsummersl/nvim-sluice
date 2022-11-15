@@ -21,7 +21,7 @@ function M.update(bufnr)
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
-        text = "/ ",
+        text = " ∘",
         texthl = "Comment",
         priority = 10,
       })
