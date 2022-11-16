@@ -4,23 +4,35 @@ local M = {
 local default_settings = {
   enable = true,
   throttle_ms = 150,
-  gutters = { {
-    plugins = { 'viewport', 'signs' },
-    window = {
-      width = 1
-      -- TODO background highlights, etc
+  gutters = {
+    {
+      plugins = { 'viewport', 'signs' },
+      window = {
+        width = 1
+        -- TODO background highlights, etc
+      },
     },
-    -- example of a custom gutter:
+    {
+      plugins = { 'viewport', 'search' },
+    },
     -- {
-    --   update = function(bufnr)
-    --     return {
-    --       { lnum = 1, text = 'XX', texthl = 'Normal' }
-    --     }
-    --   end,
+    --   plugins = {
+    --     'viewport',
+    --     {
+    --       update = function(bufnr)
+    --         return {
+    --           { lnum = 1, text = 'X', texthl = 'Normal' },
+    --           { lnum = 11, text = 'X', texthl = 'Normal' },
+    --           { lnum = 21, text = 'X', texthl = 'Normal' },
+    --           { lnum = 31, text = 'X', texthl = 'Normal' },
+    --           { lnum = 41, text = 'X', texthl = 'Normal' },
+    --           { lnum = 51, text = 'X', texthl = 'Normal' },
+    --         }
+    --       end,
+    --     } 
+    --   },
     -- },
-  }, {
-    plugins = { 'viewport', 'search' },
-  } },
+  }
 }
 
 local apply_user_settings = function(user_settings)

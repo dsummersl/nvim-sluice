@@ -48,10 +48,10 @@ function M.create_window(gutter)
 
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
   -- TODO this width actually needs to be smart enough to know the widths of all the gutters to do this dynamically.
-  local win_width = M.vim.api.nvim_win_get_width(0) - gutter_width - (gutter.gutter_count - gutter.gutter_index) * gutter_width
-  local win_height = M.vim.api.nvim_win_get_height(0)
+  local col = M.vim.api.nvim_win_get_width(0) - gutter_width - (gutter.gutter_count - gutter.gutter_index) * gutter_width
+  local height = M.vim.api.nvim_win_get_height(0)
 
-  if win_height >= buf_lines then
+  if height >= buf_lines then
     return false
   end
 
@@ -61,9 +61,9 @@ function M.create_window(gutter)
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,
-      height = win_height,
+      height = height,
       row = 0,
-      col = win_width,
+      col = col,
       focusable = false,
       style = 'minimal',
     })
@@ -72,9 +72,9 @@ function M.create_window(gutter)
       win = gutter.parent_winid,
       relative = 'win',
       width = gutter_width,
-      height = win_height,
+      height = height,
       row = 0,
-      col = win_width,
+      col = col,
     })
   end
 end
