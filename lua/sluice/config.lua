@@ -4,10 +4,12 @@ local M = {
 local default_settings = {
   enable = true,
   throttle_ms = 150,
-  gutters = {
-    { integration = 'viewport', },
-    { integration = 'signs', },
-    { integration = 'search', },
+  gutters = { {
+    plugins = { 'viewport', 'signs' },
+    window = {
+      width = 1
+      -- TODO background highlights, etc
+    },
     -- example of a custom gutter:
     -- {
     --   update = function(bufnr)
@@ -16,7 +18,9 @@ local default_settings = {
     --     }
     --   end,
     -- },
-  },
+  }, {
+    plugins = { 'viewport', 'search' },
+  } },
 }
 
 local apply_user_settings = function(user_settings)

@@ -39,38 +39,44 @@ function M.refresh_buffer(bufnr, lines)
 end
 
 --- Create a gutter.
-function M.create_window(winid, bufnr)
+function M.create_window(gutter)
+  local gutter_width = 1
+  -- local window_settings = gutter.settings.window
+  -- if window_settings ~= nil and window_settings.width ~= nil then
+  --   gutter_width = gutter.settings.window.width
+  -- end
+
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
-  local gutter_width = 2
-  local win_width = M.vim.api.nvim_win_get_width(0) - gutter_width + 1
+  -- TODO this width actually needs to be smart enough to know the widths of all the gutters to do this dynamically.
+  local win_width = M.vim.api.nvim_win_get_width(0) - gutter_width - (gutter.gutter_count - gutter.gutter_index) * gutter_width
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   if win_height >= buf_lines then
     return false
   end
 
-  if not winid or not M.vim.api.nvim_win_is_valid(winid) then
-    winid = M.vim.api.nvim_open_win(bufnr, false, {
+  if not gutter.winid or not M.vim.api.nvim_win_is_valid(gutter.winid) then
+    gutter.parent_winid = M.vim.api.nvim_get_current_win()
+    gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
+    gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,
       height = win_height,
       row = 0,
-      col = win_width - gutter_width + 1,
+      col = win_width,
       focusable = false,
       style = 'minimal',
     })
   else
-    M.vim.api.nvim_win_set_config(winid, {
-      win = M.vim.api.nvim_get_current_win(),
+    M.vim.api.nvim_win_set_config(gutter.winid, {
+      win = gutter.parent_winid,
       relative = 'win',
       width = gutter_width,
       height = win_height,
       row = 0,
-      col = win_width - gutter_width + 1,
+      col = win_width,
     })
   end
-
-  return winid
 end
 
 return M

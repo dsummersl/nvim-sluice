@@ -1,9 +1,9 @@
 local M = {
-  vim = vim
+  vim = vim,
+  gutters = {},
+  lines = {},
 }
 
-local gutter_winid = nil
-local gutter_bufnr = M.vim.api.nvim_create_buf(false, true)
 local ns = M.vim.api.nvim_create_namespace('nvim-sluice')
 
 local config = require('sluice.config')
@@ -46,25 +46,39 @@ function M.update(gutter_bufnr, ns, lines)
   window.refresh_visible_area(gutter_bufnr, ns, gutter_lines)
 end
 
+--- Open all gutters configured for this plugin.
 function M.open()
-  if M.should_throttle() then
-    return
-  end
+  -- if M.should_throttle() then
+  --   return
+  -- end
 
-  if not M.vim.api.nvim_buf_is_valid(gutter_bufnr) then
-    return false
+  local gutter_count = M.vim.tbl_count(config.settings.gutters)
+  for i, v in ipairs(config.settings.gutters) do
+    if M.gutters[i] == nil then
+      M.gutters[i] = {}
+      M.gutters[i].settings = v
+      M.gutters[i].gutter_index = i
+      M.gutters[i].gutter_count = gutter_count
+    end
+    M.open_gutter(M.gutters[i])
   end
+end
 
-  local new_gutter_winid = window.create_window(gutter_winid, gutter_bufnr)
+--- Open one gutter
+function M.open_gutter(gutter)
+  local bufnr = M.vim.fn.bufnr()
+
+  local new_gutter_winid = window.create_window(gutter)
+  local gutter_winid = gutter.winid
+  local gutter_bufnr = gutter.bufnr
 
   local lines = {}
-  -- TODO pick the right gutter for this gutter id.
-  for _, v in ipairs(config.settings.gutters) do
+  for _, v in ipairs(gutter.settings.plugins) do
     local enable_fn = nil
     local update_fn = nil
-    if v.integration ~= nil then
+    if type(v) == "string" then
       -- when there is an integration, load it, and enable it.
-      local integration = require('sluice.integrations.' .. v.integration)
+      local integration = require('sluice.integrations.' .. v)
       enable_fn = integration.enable
       update_fn = integration.update
     end
@@ -75,7 +89,6 @@ function M.open()
       update_fn = v.update
     end
 
-    local bufnr = M.vim.fn.bufnr()
     if enable_fn ~= nil then
       enable_fn(bufnr)
     end
@@ -91,6 +104,7 @@ function M.open()
       table.insert(lines, v)
     end
   end
+  M.lines = lines
   M.update(gutter_bufnr, ns, lines)
 
   return new_gutter_winid
@@ -104,7 +118,6 @@ function M.close()
     end
 
     M.vim.api.nvim_win_close(gutter_winid, true)
-    gutter_winid = nil
   end
 end
 

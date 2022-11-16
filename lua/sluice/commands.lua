@@ -20,18 +20,10 @@ end
 
 function M.update_context()
   -- do nothing for preview/diff/non-bufs
-  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return M.close() end
-  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.close() end
-  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return M.close() end
+  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return M.disable() end
+  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.disable() end
+  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return M.disable() end
 
-  M.open()
-end
-
-function M.close()
-  gutter.close()
-end
-
-function M.open()
   gutter.open()
 end
 
@@ -46,13 +38,10 @@ function M.enable()
     {'CursorHoldI', '*',               'lua require("sluice.commands").update_context()'},
     {'BufEnter',    '*',               'lua require("sluice.commands").update_context()'},
     {'WinEnter',    '*',               'lua require("sluice.commands").update_context()'},
-    {'WinLeave',    '*',               'lua require("sluice.commands").close()'},
-    -- {'BufLeave',    '*',               'lua require("sluice").close()'},
-    -- {'TabLeave',    '*',               'lua require("sluice").close()'},
-    -- {'BufWinLeave',    '*',               'lua require("sluice").close()'},
-    {'VimResized',  '*',               'lua require("sluice.commands").open()'},
-    {'User',        'SessionSavePre',  'lua require("sluice.commands").close()'},
-    {'User',        'SessionSavePost', 'lua require("sluice.commands").open()'},
+    {'WinLeave',    '*',               'lua require("sluice.commands").disable()'},
+    {'VimResized',  '*',               'lua require("sluice.commands").enable()'},
+    {'User',        'SessionSavePre',  'lua require("sluice.commands").disable()'},
+    {'User',        'SessionSavePost', 'lua require("sluice.commands").enable()'},
   })
 
   M.update_context()
@@ -64,8 +53,7 @@ function M.disable()
   nvim_augroup('sluice', {})
 
   gutter.disable()
-
-  M.close()
+  gutter.close()
 end
 
 function M.toggle()

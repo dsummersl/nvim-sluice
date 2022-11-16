@@ -36,7 +36,14 @@ function M.update(bufnr)
   return result
 end
 
+
+-- TODO
+--- counts in multiple modes:
+--- roman numerals: https://www.compart.com/en/unicode/U+24D8
+--- circles: https://www.compart.com/en/unicode/U+24EA
+--- braile: https://www.compart.com/en/unicode/U+2800
 function M.enable(bufnr)
+  -- TODO setup the listeners for this.
 end
 
 function M.disable(bufnr)

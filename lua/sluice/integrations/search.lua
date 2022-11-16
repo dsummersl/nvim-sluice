@@ -21,7 +21,7 @@ function M.update(bufnr)
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
-        text = " ∘",
+        text = "∘",
         texthl = "Comment",
         priority = 10,
       })
@@ -33,6 +33,7 @@ end
 
 
 function M.enable(bufnr)
+  -- TODO shouldn't there be a way to make these go away on cursor move
 end
 
 
