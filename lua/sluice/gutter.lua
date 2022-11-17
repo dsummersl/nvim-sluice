@@ -2,6 +2,7 @@ local M = {
   vim = vim,
   gutters = {},
   lines = {},
+  gutter_lines = {},
 }
 
 local ns = M.vim.api.nvim_create_namespace('nvim-sluice')
@@ -34,10 +35,10 @@ function M.should_throttle()
 end
 
 --- Update the gutter with new lines.
-function M.update(gutter_bufnr, ns, lines)
+function M.update(settings, gutter_bufnr, ns, lines)
   -- TODO store this plugin and its updated value
   -- TODO then replay all the plugins in order.
-  local gutter_lines = convert.lines_to_gutter_lines(lines)
+  local gutter_lines = convert.lines_to_gutter_lines(settings, lines)
   window.refresh_buffer(gutter_bufnr, gutter_lines)
   window.refresh_visible_area(gutter_bufnr, ns, gutter_lines)
 end
@@ -73,7 +74,6 @@ function M.open_gutter(gutter)
   local bufnr = M.vim.fn.bufnr()
 
   window.create_window(gutter)
-  local gutter_winid = gutter.winid
   local gutter_bufnr = gutter.bufnr
 
   local lines = {}
@@ -104,13 +104,13 @@ function M.open_gutter(gutter)
     end
 
     local integration_lines = update_fn(bufnr)
-    for _, v in ipairs(integration_lines) do
-      table.insert(lines, v)
+    for _, il in ipairs(integration_lines) do
+      table.insert(lines, il)
     end
   end
   M.lines = lines
 
-  M.update(gutter_bufnr, ns, lines)
+  M.update(gutter.settings, gutter_bufnr, ns, lines)
 end
 
 function M.close()

@@ -2,30 +2,42 @@ local M = {
   vim = vim
 }
 
+local default_gutter_settings = {
+  plugins = { 'viewport' },
+  window = {
+    --- Width of the gutter.
+    width = 1,
+    --- Default highlight to use in the gutter. 
+    -- This serves as the base linehl highlight for a column in each gutter. Plugins can
+    -- overide parts of this highlight (typically this is the background color of
+    -- areas represented in the gutter of offscreen content)
+    default_gutter_hl = 'SluiceColumn',
+  },
+}
+
+local apply_gutter_settings = function(gutters)
+  local result = {}
+  for _, gutter in ipairs(gutters) do
+    table.insert(result, M.vim.tbl_deep_extend('keep', gutter or {}, default_gutter_settings))
+  end
+  return result
+end
+
 local default_settings = {
   enable = true,
   throttle_ms = 150,
 
-  --- If the buffer is smaller than the window height, don't show the gutter.
+  --- If the buffer is smaller than the window height, don't show gutters.
   hide_on_small_buffers = true,
 
-  --- Default highlight to use in the gutter. 
-  -- This serves as the base linehl highlight for a column in each gutter. Plugins can
-  -- overide parts of this highlight (typically this is the background color of
-  -- areas represented in the gutter of offscreen content)
-  default_gutter_hl = 'SluiceColumn',
-
-  gutters = {
+  gutters = apply_gutter_settings{
     {
       plugins = { 'viewport', 'signs' },
-      window = {
-        width = 1
-        -- TODO background highlights, etc
-      },
     },
     {
       plugins = { 'viewport', 'search' },
     },
+    --- Example custom getter function:
     -- {
     --   plugins = {
     --     'viewport',
@@ -46,11 +58,11 @@ local default_settings = {
   }
 }
 
-local apply_user_settings = function(user_settings)
-  M.settings = M.vim.tbl_extend('force', user_settings or {}, default_settings)
+function M.apply_user_settings(user_settings)
+  M.settings = M.vim.tbl_deep_extend('keep', user_settings or {}, default_settings)
+  apply_gutter_settings(M.settings)
 end
 
-M.apply_user_settings = apply_user_settings
 M.settings = default_settings
 
 return M

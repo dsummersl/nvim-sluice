@@ -27,11 +27,11 @@ end
 
 --- Convert a list of lines/styles to a list of gutter lines.
 -- @param lines A list of dicts with any keys from :highlight, plus text/line.
-function M.lines_to_gutters(lines, buffer_lines, height)
+function M.lines_to_gutters(settings, lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = { texthl = "", linehl = config.settings.default_gutter_hl, text = " " }
+    gutter_lines[line] = { texthl = "", linehl = settings.window.default_gutter_hl, text = " " }
   end
 
   -- drop in all the lines provided by an integration.
@@ -45,7 +45,7 @@ function M.lines_to_gutters(lines, buffer_lines, height)
 end
 
 ---
-function M.lines_to_gutter_lines(lines)
+function M.lines_to_gutter_lines(settings, lines)
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
 
@@ -53,7 +53,7 @@ function M.lines_to_gutter_lines(lines)
     return {}
   end
 
-  return M.lines_to_gutters(lines, buf_lines, win_height)
+  return M.lines_to_gutters(settings, lines, buf_lines, win_height)
 end
 
 return M
