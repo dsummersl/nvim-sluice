@@ -55,7 +55,6 @@ function M.create_window(gutter)
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
   end
   if gutter.winid == nil then
-    gutter.parent_winid = M.vim.api.nvim_get_current_win()
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,
@@ -67,7 +66,7 @@ function M.create_window(gutter)
     })
   else
     M.vim.api.nvim_win_set_config(gutter.winid, {
-      win = gutter.parent_winid,
+      win = M.vim.api.nvim_get_current_win(),
       relative = 'win',
       width = gutter_width,
       height = height,
