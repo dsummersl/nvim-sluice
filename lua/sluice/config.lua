@@ -1,11 +1,20 @@
 local M = {
   vim = vim
 }
+
 local default_settings = {
   enable = true,
   throttle_ms = 150,
+
   --- If the buffer is smaller than the window height, don't show the gutter.
   hide_on_small_buffers = true,
+
+  --- Default highlight to use in the gutter. 
+  -- This serves as the base linehl highlight for a column in each gutter. Plugins can
+  -- overide parts of this highlight (typically this is the background color of
+  -- areas represented in the gutter of offscreen content)
+  default_gutter_hl = 'SluiceColumn',
+
   gutters = {
     {
       plugins = { 'viewport', 'signs' },

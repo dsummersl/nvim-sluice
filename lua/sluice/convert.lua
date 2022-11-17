@@ -2,6 +2,8 @@ local M = {
   vim = vim
 }
 
+local config = require("sluice.config")
+
 --- Convert a line in the file, to the corresponding line in the gutter.
 function M.line_to_gutter_line(line, buffer_lines, height)
   local gutter_line = math.floor(line / buffer_lines * height)
@@ -29,7 +31,7 @@ function M.lines_to_gutters(lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = { texthl = "", linehl = "SluiceColumn", text = "  " }
+    gutter_lines[line] = { texthl = "", linehl = config.settings.default_gutter_hl, text = " " }
   end
 
   -- drop in all the lines provided by an integration.
