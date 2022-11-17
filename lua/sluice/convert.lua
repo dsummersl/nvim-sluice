@@ -48,7 +48,7 @@ function M.lines_to_gutter_lines(lines)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
 
   if win_height >= buf_lines then
-    return false
+    return {}
   end
 
   return M.lines_to_gutters(lines, buf_lines, win_height)

@@ -4,6 +4,8 @@ local M = {
 local default_settings = {
   enable = true,
   throttle_ms = 150,
+  --- If the buffer is smaller than the window height, don't show the gutter.
+  hide_on_small_buffers = true,
   gutters = {
     {
       plugins = { 'viewport', 'signs' },

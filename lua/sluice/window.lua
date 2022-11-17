@@ -51,13 +51,11 @@ function M.create_window(gutter)
   local col = M.vim.api.nvim_win_get_width(0) - gutter_width - (gutter.gutter_count - gutter.gutter_index) * gutter_width
   local height = M.vim.api.nvim_win_get_height(0)
 
-  if height >= buf_lines then
-    return false
-  end
-
-  if not gutter.winid or not M.vim.api.nvim_win_is_valid(gutter.winid) then
-    gutter.parent_winid = M.vim.api.nvim_get_current_win()
+  if gutter.bufnr == nil then
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
+  end
+  if gutter.winid == nil then
+    gutter.parent_winid = M.vim.api.nvim_get_current_win()
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,

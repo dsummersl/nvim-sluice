@@ -19,15 +19,17 @@ local nvim_augroup = function(group_name, definitions)
 end
 
 function M.update_context()
-  -- do nothing for preview/diff/non-bufs
-  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return M.disable() end
-  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.disable() end
-  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return M.disable() end
+  if not M.enabled then return end
+  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return end
+  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return end
+  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return end
 
   gutter.open()
 end
 
 function M.enable()
+  if M.enabled then return end
+
   M.enabled = true
 
   -- TODO move these to the various plugins
@@ -38,21 +40,19 @@ function M.enable()
     {'CursorHoldI', '*',               'lua require("sluice.commands").update_context()'},
     {'BufEnter',    '*',               'lua require("sluice.commands").update_context()'},
     {'WinEnter',    '*',               'lua require("sluice.commands").update_context()'},
-    {'WinLeave',    '*',               'lua require("sluice.commands").disable()'},
-    {'VimResized',  '*',               'lua require("sluice.commands").enable()'},
-    {'User',        'SessionSavePre',  'lua require("sluice.commands").disable()'},
-    {'User',        'SessionSavePost', 'lua require("sluice.commands").enable()'},
+    {'VimResized',  '*',               'lua require("sluice.commands").update_context()'},
   })
 
   M.update_context()
 end
 
 function M.disable()
+  if not M.enabled then return end
+
   M.enabled = false
 
   nvim_augroup('sluice', {})
 
-  gutter.disable()
   gutter.close()
 end
 

@@ -38,10 +38,6 @@ function M.update(gutter_bufnr, ns, lines)
   -- TODO store this plugin and its updated value
   -- TODO then replay all the plugins in order.
   local gutter_lines = convert.lines_to_gutter_lines(lines)
-  if not gutter_lines then
-    M.close()
-    return
-  end
   window.refresh_buffer(gutter_bufnr, gutter_lines)
   window.refresh_visible_area(gutter_bufnr, ns, gutter_lines)
 end
@@ -53,6 +49,14 @@ function M.open()
   -- end
 
   local gutter_count = M.vim.tbl_count(config.settings.gutters)
+
+  local win_height = M.vim.api.nvim_win_get_height(0)
+  local buf_lines = M.vim.api.nvim_buf_line_count(0)
+  if config.settings.hide_on_small_buffers and win_height >= buf_lines then
+    M.close()
+    return
+  end
+
   for i, v in ipairs(config.settings.gutters) do
     if M.gutters[i] == nil then
       M.gutters[i] = {}
@@ -68,7 +72,7 @@ end
 function M.open_gutter(gutter)
   local bufnr = M.vim.fn.bufnr()
 
-  local new_gutter_winid = window.create_window(gutter)
+  window.create_window(gutter)
   local gutter_winid = gutter.winid
   local gutter_bufnr = gutter.bufnr
 
@@ -105,26 +109,37 @@ function M.open_gutter(gutter)
     end
   end
   M.lines = lines
-  M.update(gutter_bufnr, ns, lines)
 
-  return new_gutter_winid
+  M.update(gutter_bufnr, ns, lines)
 end
 
 function M.close()
-  if gutter_winid and M.vim.api.nvim_win_is_valid(gutter_winid) then
+  for _, gutter in ipairs(M.gutters) do
     -- Can't close other windows when the command-line window is open
     if M.vim.api.nvim_call_function('getcmdwintype', {}) ~= '' then
       return
     end
 
-    M.vim.api.nvim_win_close(gutter_winid, true)
-  end
-end
+    for _, plugin in ipairs(gutter.settings.plugins) do
+      local disable_fn = nil
+      if type(plugin) == "string" then
+        -- when there is an integration, load it, and enable it.
+        local integration = require('sluice.integrations.' .. plugin)
+        disable_fn = integration.disable
+      end
+      if plugin.disable ~= nil then
+        disable_fn = plugin.disable
+      end
 
-function M.disable()
-  for _, v in ipairs(config.settings.gutters) do
-    local integration = require('sluice.integrations.' .. v.integration)
-    integration.disable(gutter_bufnr)
+      if gutter.bufnr ~= nil then
+        disable_fn(gutter.bufnr)
+      end
+    end
+
+    if gutter.winid ~= nil then
+      M.vim.api.nvim_win_close(gutter.winid, true)
+      gutter.winid = nil
+    end
   end
 end
 
