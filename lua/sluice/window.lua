@@ -3,7 +3,6 @@ local convert = require('sluice.convert')
 
 M = {
   vim = vim,
-  logger = {},
 }
 
 --- Find the best match, ordered by priority.
@@ -15,22 +14,8 @@ function M.find_best_match(matches, key)
     if best_match == nil then
       best_match = match
     else
-      local compare_by_priority = match.priority ~= nil and best_match.priority ~= nil
-      local has_same_priority = compare_by_priority and match.priority == best_match.priority
-      local compare_by_key = (
-        match[key] ~= nil and
-        best_match[key] ~= nil and
-        (
-          not compare_by_priority or
-          has_same_priority
-        ))
-
-      if not compare_by_priority and match[key] ~= nil and best_match[key] == nil then
-        best_match = match
-      elseif compare_by_key then
-        if match[key] > best_match[key] then
-          best_match = match
-        end
+      if key ~= nil and match[key] == nil then
+        -- skip
       else
         if best_match == nil then
           best_match = match
@@ -50,9 +35,7 @@ end
 function M.refresh_highlights(bufnr, ns, lines)
   M.vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   for i, matches in ipairs(lines) do
-    table.insert(M.logger, "<")
     local best_texthl_match = M.find_best_match(matches, "texthl")
-    table.insert(M.logger, ">")
     local best_linehl_match = M.find_best_match(matches, "linehl")
     local best_linehl = nil
     local best_texthl = nil
@@ -71,6 +54,7 @@ function M.refresh_highlights(bufnr, ns, lines)
       end
       if best_linehl ~= nil then
         local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(best_linehl)), "bg", mode)
+        -- TODO...
         highlight.copy_highlight(best_texthl, line_text_hl, mode == "gui", line_bg)
         M.vim.api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
       else
@@ -97,6 +81,7 @@ function M.refresh_buffer(bufnr, lines)
 end
 
 --- Create a gutter.
+-- side effect: creates bufnr and ns
 function M.create_window(gutter)
   local gutter_width = 1
   -- local window_settings = gutter.settings.window
@@ -111,8 +96,9 @@ function M.create_window(gutter)
 
   if gutter.bufnr == nil then
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
+    gutter.ns = M.vim.api.nvim_create_namespace('sluice'.. gutter.bufnr)
   end
-  if gutter.winid == nil then
+  if gutter.winid == nil or vim.fn.win_id2win(gutter.winid) == 0 then
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,

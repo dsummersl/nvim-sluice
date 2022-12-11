@@ -37,6 +37,13 @@ local default_settings = {
     {
       plugins = { 'viewport', 'search' },
     },
+    -- {
+    --   plugins = { 'viewport', 
+    -- },
+    --   viewport = {
+    --     cursor_hl = 'IncSearch',
+    --   }
+    -- },
     --- Example custom getter function:
     -- {
     --   plugins = {

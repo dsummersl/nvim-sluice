@@ -2,7 +2,7 @@ local M = {
   vim = vim
 }
 
-function M.update(bufnr)
+function M.update(settings, bufnr)
   local pattern = M.vim.fn.getreg('/')
   if pattern == '' or M.vim.v.hlsearch == 0 then
     return {}
@@ -21,7 +21,7 @@ function M.update(bufnr)
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
-        text = "∘",
+        text = "-",
         texthl = "Comment",
         priority = 10,
       })
@@ -32,12 +32,12 @@ function M.update(bufnr)
 end
 
 
-function M.enable(bufnr)
+function M.enable(settings, bufnr)
   -- TODO shouldn't there be a way to make these go away on cursor move
 end
 
 
-function M.disable(bufnr)
+function M.disable(settings, bufnr)
 end
 
 

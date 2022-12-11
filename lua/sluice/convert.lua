@@ -27,18 +27,19 @@ end
 
 --- Convert a list of lines/styles to a list of gutter lines.
 -- @param lines A list of dicts with any keys from :highlight, plus text/line.
+-- @returns A list of dicts (of all plugin entries) for each gutter line.
 function M.lines_to_gutters(settings, lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
+  -- TODO maybe move this to viewport?
   for line = 1, height do
-    gutter_lines[line] = { texthl = "", linehl = settings.window.default_gutter_hl, text = " " }
+    gutter_lines[line] = {{ texthl = "", linehl = settings.window.default_gutter_hl, text = " " }}
   end
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
     local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
-    local gutter_line = gutter_lines[gutter_line_number]
-    gutter_lines[gutter_line_number] = M.vim.tbl_extend('force', gutter_line, line)
+    table.insert(gutter_lines[gutter_line_number], line)
   end
 
   return gutter_lines

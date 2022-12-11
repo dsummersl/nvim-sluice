@@ -85,24 +85,31 @@ describe('find_best_match()', function()
         }
       )
     end)
-    it('among the same priority it picks the highest lnum', function()
-      assert.are.same(window.find_best_match({unpack(lines, 3, 5)}, 'lnum'),
-        {
-          linehl = "SluiceVisibleArea",
-          lnum = 5,
-          priority = 5,
-          text = " "
-        }
-      )
-    end)
     it('excludes entries without the key', function()
       assert.are.same(window.find_best_match({unpack(lines, 7, 9)}, 'lnum'),
         {
           linehl = "SluiceColumn",
-          lnum = 8,
+          lnum = 7,
           priority = 0,
           text = " "
         }
+      )
+    end)
+
+    it('does not compare non-int key values', function()
+      local lines = {
+        { linehl = "SluiceColumn"   , text = " ", texthl = "" },
+        { linehl = "IncSearch"        , lnum = 7  , priority = 1 , text = " " },
+        { linehl = "SluiceVisibleArea", lnum = 8  , priority = 0 , text = " " },
+        { linehl = "SluiceVisibleArea", lnum = 9  , priority = 0 , text = " " },
+      }
+      assert.are.same({
+          linehl = "IncSearch",
+          lnum = 7,
+          priority = 1,
+          text = " "
+        },
+        window.find_best_match(lines, 'linehl')
       )
     end)
   end)
