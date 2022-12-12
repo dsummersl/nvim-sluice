@@ -47,7 +47,7 @@ function M.refresh_highlights(bufnr, ns, lines)
     end
 
     if best_texthl ~= nil then
-      local line_text_hl = "Sluice" .. best_texthl .. string.format("%02d", i)
+      local line_text_hl = "Sluice" .. best_texthl .. string.format("%02d", bufnr) .. string.format("%02d", i)
       local mode = "cterm"
       if vim.o.termguicolors then
         mode = "gui"
