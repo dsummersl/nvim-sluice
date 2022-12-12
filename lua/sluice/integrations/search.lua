@@ -4,6 +4,8 @@ local M = {
 
 function M.update(settings, bufnr)
   local pattern = M.vim.fn.getreg('/')
+  local current_line = M.vim.fn.getpos('.')[2]
+
   if pattern == '' or M.vim.v.hlsearch == 0 then
     return {}
   end
@@ -18,11 +20,15 @@ function M.update(settings, bufnr)
 
   for lnum, line in ipairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
+      local texthl = "Comment"
+      if lnum == current_line then
+        texthl = "Error"
+      end
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "-",
-        texthl = "Comment",
+        texthl = texthl,
         priority = 10,
       })
     end
