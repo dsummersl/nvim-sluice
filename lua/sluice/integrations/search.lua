@@ -2,9 +2,15 @@ local M = {
   vim = vim
 }
 
+local default_settings = {
+  match_hl = "SluiceSearchMatch",
+  match_line_hl = "SluiceSearchMatchLine",
+}
+
 function M.update(settings, bufnr)
   local pattern = M.vim.fn.getreg('/')
   local current_line = M.vim.fn.getpos('.')[2]
+  local update_settings = M.vim.tbl_deep_extend('keep', settings.search or {}, default_settings)
 
   if pattern == '' or M.vim.v.hlsearch == 0 then
     return {}
@@ -20,9 +26,9 @@ function M.update(settings, bufnr)
 
   for lnum, line in ipairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
-      local texthl = "Comment"
+      local texthl = update_settings.match_hl
       if lnum == current_line then
-        texthl = "Error"
+        texthl = update_settings.match_line_hl
       end
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
@@ -40,6 +46,12 @@ end
 
 function M.enable(settings, bufnr)
   -- TODO shouldn't there be a way to make these go away on cursor move
+  if M.vim.fn.hlexists('SluiceSearchMatch') == 0 then
+    M.vim.cmd('hi link SluiceSearchMatch Comment')
+  end
+  if M.vim.fn.hlexists('SluiceSearchMatchLine') == 0 then
+    M.vim.cmd('hi link SluiceSearchMatchLine Error')
+  end
 end
 
 

@@ -1,7 +1,7 @@
 local window = require('sluice.window')
 
 local lines = { {
-    linehl = "SluiceVisibleArea",
+    linehl = "SluiceViewportVisibleArea",
     lnum = 1,
     priority = 5,
     text = " "
@@ -11,22 +11,22 @@ local lines = { {
     priority = 10,
     text = "-"
   }, {
-    linehl = "SluiceVisibleArea",
+    linehl = "SluiceViewportVisibleArea",
     lnum = 3,
     priority = 5,
     text = " "
   }, {
-    linehl = "SluiceVisibleArea",
+    linehl = "SluiceViewportVisibleArea",
     lnum = 4,
     priority = 5,
     text = " "
   }, {
-    linehl = "SluiceVisibleArea",
+    linehl = "SluiceViewportVisibleArea",
     lnum = 5,
     priority = 5,
     text = " "
   }, {
-    linehl = "SluiceVisibleArea",
+    linehl = "SluiceViewportVisibleArea",
     priority = 5,
     text = " "
   }, {
@@ -66,7 +66,7 @@ describe('find_best_match()', function()
   it('prioritizes the last highest priority', function()
     assert.are.same(window.find_best_match({unpack(lines, 3, 5)}),
       {
-        linehl = "SluiceVisibleArea",
+        linehl = "SluiceViewportVisibleArea",
         lnum = 3,
         priority = 5,
         text = " "
@@ -100,8 +100,8 @@ describe('find_best_match()', function()
       local lines = {
         { linehl = "SluiceColumn"   , text = " ", texthl = "" },
         { linehl = "IncSearch"        , lnum = 7  , priority = 1 , text = " " },
-        { linehl = "SluiceVisibleArea", lnum = 8  , priority = 0 , text = " " },
-        { linehl = "SluiceVisibleArea", lnum = 9  , priority = 0 , text = " " },
+        { linehl = "SluiceViewportVisibleArea", lnum = 8  , priority = 0 , text = " " },
+        { linehl = "SluiceViewportVisibleArea", lnum = 9  , priority = 0 , text = " " },
       }
       assert.are.same({
           linehl = "IncSearch",

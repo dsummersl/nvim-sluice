@@ -2,26 +2,22 @@ local M = {
   vim = vim,
 }
 
+local default_settings = {
+  visible_area_hl = "SluiceViewportVisibleArea",
+  cursor_hl = "SluiceCursor",
+}
+
 function M.update(settings, bufnr)
   local cursor_position = M.vim.api.nvim_win_get_cursor(0)[1]
-  local visible_area_hl = 'SluiceVisibleArea'
-  local cursor_hl = 'SluiceCursor'
-  if settings.viewport ~= nil then
-    if settings.viewport.visible_area_hl ~= nil then
-      visible_area_hl = settings.viewport.visible_area_hl
-    end
-    if settings.viewport.cursor_hl ~= nil then
-      cursor_hl = settings.viewport.cursor_hl
-    end
-  end
+  local update_settings = M.vim.tbl_deep_extend('keep', settings.viewport or {}, default_settings)
 
   local lines = {}
   for lnum = M.vim.fn.line('w0'), M.vim.fn.line('w$') do
-    local linehl = visible_area_hl
+    local linehl = update_settings.visible_area_hl
     local text = " "
     local priority = 0
     if lnum == cursor_position then
-      linehl = cursor_hl
+      linehl = update_settings.cursor_hl
       text = " "
       priority = 1
     end
@@ -37,6 +33,12 @@ function M.update(settings, bufnr)
 end
 
 function M.enable(settings, bufnr)
+  if M.vim.fn.hlexists('SluiceViewportVisibleArea') == 0 then
+    M.vim.cmd('hi link SluiceViewportVisibleArea Normal')
+  end
+  if M.vim.fn.hlexists('SluiceCursor') == 0 then
+    M.vim.cmd('hi link SluiceCursor Normal')
+  end
 end
 
 function M.disable(settings, bufnr)
