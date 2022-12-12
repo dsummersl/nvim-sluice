@@ -4,7 +4,7 @@ local M = {
 
 local default_settings = {
   visible_area_hl = "SluiceViewportVisibleArea",
-  cursor_hl = "SluiceCursor",
+  cursor_hl = "SluiceViewportCursor",
 }
 
 function M.update(settings, bufnr)
@@ -36,8 +36,8 @@ function M.enable(settings, bufnr)
   if M.vim.fn.hlexists('SluiceViewportVisibleArea') == 0 then
     M.vim.cmd('hi link SluiceViewportVisibleArea Normal')
   end
-  if M.vim.fn.hlexists('SluiceCursor') == 0 then
-    M.vim.cmd('hi link SluiceCursor Normal')
+  if M.vim.fn.hlexists('SluiceViewportCursor') == 0 then
+    M.vim.cmd('hi link SluiceViewportCursor Normal')
   end
 end
 

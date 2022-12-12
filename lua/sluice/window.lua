@@ -54,11 +54,9 @@ function M.refresh_highlights(bufnr, ns, lines)
       end
       if best_linehl ~= nil then
         local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(best_linehl)), "bg", mode)
-        -- TODO...
         highlight.copy_highlight(best_texthl, line_text_hl, mode == "gui", line_bg)
         M.vim.api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
       else
-        -- TODO something f-ed up here
         M.vim.api.nvim_buf_add_highlight(bufnr, ns, best_texthl, i - 1, 0, -1)
       end
     else

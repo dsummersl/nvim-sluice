@@ -32,7 +32,7 @@ describe('lines_to_gutters()', function()
         texthl = '',
       },
       {
-        linehl = 'SluiceCursor',
+        linehl = 'SluiceViewportCursor',
         text = ' ',
         lnum = 1,
         priority = 1,
@@ -41,7 +41,7 @@ describe('lines_to_gutters()', function()
     assert.are.same(
       convert.lines_to_gutters(gutter_settings, {
         {
-          linehl = "SluiceCursor",
+          linehl = "SluiceViewportCursor",
           lnum = 1,
           priority = 1,
           text = " "

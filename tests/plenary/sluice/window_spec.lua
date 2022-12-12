@@ -6,7 +6,7 @@ local lines = { {
     priority = 5,
     text = " "
   }, {
-    linehl = "SluiceCursor",
+    linehl = "SluiceViewportCursor",
     lnum = 2,
     priority = 10,
     text = "-"
@@ -55,7 +55,7 @@ describe('find_best_match()', function()
   it('picks the highest priority', function()
     assert.are.same(window.find_best_match(lines),
       {
-        linehl = "SluiceCursor",
+        linehl = "SluiceViewportCursor",
         lnum = 2,
         priority = 10,
         text = "-"
@@ -78,7 +78,7 @@ describe('find_best_match()', function()
     it('still prioritizes by priority', function()
       assert.are.same(window.find_best_match(lines, 'lnum'),
         {
-          linehl = "SluiceCursor",
+          linehl = "SluiceViewportCursor",
           lnum = 2,
           priority = 10,
           text = "-"
