@@ -20,9 +20,6 @@ end
 
 function M.update_context()
   if not M.enabled then return end
-  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return end
-  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return end
-  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return end
 
   gutter.open()
 end

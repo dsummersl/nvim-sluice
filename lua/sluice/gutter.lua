@@ -50,13 +50,6 @@ function M.open()
 
   local gutter_count = M.vim.tbl_count(config.settings.gutters)
 
-  local win_height = M.vim.api.nvim_win_get_height(0)
-  local buf_lines = M.vim.api.nvim_buf_line_count(0)
-  if config.settings.hide_on_small_buffers and win_height >= buf_lines then
-    M.close()
-    return
-  end
-
   for i, v in ipairs(config.settings.gutters) do
     if M.gutters[i] == nil then
       M.gutters[i] = {}
@@ -64,7 +57,14 @@ function M.open()
       M.gutters[i].gutter_index = i
       M.gutters[i].gutter_count = gutter_count
     end
-    M.open_gutter(M.gutters[i])
+
+    M.gutters[i].enabled = v.window.enabled_fn()
+    if M.gutters[i].enabled then
+      M.open_gutter(M.gutters[i])
+    else
+      -- TODO support having some gutters enabled and others not enabled
+      M.close()
+    end
   end
 end
 

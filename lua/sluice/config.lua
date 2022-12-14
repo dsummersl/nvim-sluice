@@ -2,6 +2,35 @@ local M = {
   vim = vim
 }
 
+--- Whether to display the gutter or not.
+--
+-- Returns boolean indicating whether the gutter is shown on screen or not.
+--
+-- Show the gutter if:
+-- - the buffer is not smaller than the window
+-- - the buffer is not a special &buftype
+-- - the buffer is not a &previewwindow
+-- - the buffer is not a &diff
+function M.default_enabled_fn()
+  local win_height = M.vim.api.nvim_win_get_height(0)
+  local buf_lines = M.vim.api.nvim_buf_line_count(0)
+  if win_height >= buf_lines then
+    return false
+  end
+  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then
+    return false
+  end
+  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
+    return false
+  end
+  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then
+    return false
+  end
+
+  return true
+end
+
+
 local default_gutter_settings = {
   plugins = { 'viewport' },
   window = {
@@ -12,6 +41,9 @@ local default_gutter_settings = {
     -- overide parts of this highlight (typically this is the background color of
     -- areas represented in the gutter of offscreen content)
     default_gutter_hl = 'SluiceColumn',
+
+    --- Whether to display the gutter or not.
+    enabled_fn = M.default_enabled_fn,
   },
 }
 
@@ -26,9 +58,6 @@ end
 local default_settings = {
   enable = true,
   throttle_ms = 150,
-
-  --- If the buffer is smaller than the window height, don't show gutters.
-  hide_on_small_buffers = true,
 
   gutters = apply_gutter_settings{
     {
