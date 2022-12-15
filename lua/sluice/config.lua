@@ -36,7 +36,7 @@ local default_gutter_settings = {
   window = {
     --- Width of the gutter.
     width = 1,
-    --- Default highlight to use in the gutter. 
+    --- Default highlight to use in the gutter.
     -- This serves as the base linehl highlight for a column in each gutter. Plugins can
     -- overide parts of this highlight (typically this is the background color of
     -- areas represented in the gutter of offscreen content)
@@ -67,7 +67,7 @@ local default_settings = {
       plugins = { 'viewport', 'search' },
     },
     -- {
-    --   plugins = { 'viewport', 
+    --   plugins = { 'viewport',
     -- },
     --   viewport = {
     --     cursor_hl = 'IncSearch',
@@ -88,7 +88,7 @@ local default_settings = {
     --           { lnum = 51, text = 'X', texthl = 'Normal' },
     --         }
     --       end,
-    --     } 
+    --     }
     --   },
     -- },
   }

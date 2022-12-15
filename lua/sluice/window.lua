@@ -1,7 +1,6 @@
 local highlight = require('sluice.highlight')
-local convert = require('sluice.convert')
 
-M = {
+local M = {
   vim = vim,
 }
 
@@ -14,9 +13,7 @@ function M.find_best_match(matches, key)
     if best_match == nil then
       best_match = match
     else
-      if key ~= nil and match[key] == nil then
-        -- skip
-      else
+      if not (key ~= nil and match[key] == nil) then
         if best_match == nil then
           best_match = match
         elseif best_match.priority == nil then
@@ -87,9 +84,10 @@ function M.create_window(gutter)
   --   gutter_width = gutter.settings.window.width
   -- end
 
-  local buf_lines = M.vim.api.nvim_buf_line_count(0)
   -- TODO this width actually needs to be smart enough to know the widths of all the gutters to do this dynamically.
-  local col = M.vim.api.nvim_win_get_width(0) - gutter_width - (gutter.gutter_count - gutter.gutter_index) * gutter_width
+  local col = M.vim.api.nvim_win_get_width(0) -
+    gutter_width -
+    (gutter.gutter_count - gutter.gutter_index) * gutter_width
   local height = M.vim.api.nvim_win_get_height(0)
 
   if gutter.bufnr == nil then

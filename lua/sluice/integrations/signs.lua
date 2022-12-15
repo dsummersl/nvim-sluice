@@ -1,5 +1,3 @@
-local xxh32 = require("sluice.luaxxhash")
-
 local M = {
   vim = vim
 }
@@ -16,7 +14,7 @@ local function sign_getdefined()
 end
 
 --- Returns a table of signs, and whether they have changed since the last call to this method.
-function M.update(settings, bufnr)
+function M.update(_settings, bufnr)
   local get_defined = sign_getdefined()
   local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
 
@@ -42,7 +40,7 @@ end
 --- roman numerals: https://www.compart.com/en/unicode/U+24D8
 --- circles: https://www.compart.com/en/unicode/U+24EA
 --- braile: https://www.compart.com/en/unicode/U+2800
-function M.enable(settings, bufnr)
+function M.enable(_settings, _bufnr)
   -- TODO setup the listeners for this.
 end
 

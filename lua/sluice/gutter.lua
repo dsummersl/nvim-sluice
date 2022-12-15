@@ -9,29 +9,6 @@ local config = require('sluice.config')
 local window = require('sluice.window')
 local convert = require('sluice.convert')
 
---- Determine whether to throttle some command based on the throttle_ms config.
-function M.should_throttle()
-  -- TODO ideally this should be a 'tail' throttle rather than a leading edge
-  -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
-  local var_exists, last_update_str = pcall(M.vim.api.nvim_buf_get_var, gutter_bufnr, 'sluice_last_update')
-  local reltime = M.vim.fn.reltime()
-
-  if not var_exists then
-    M.vim.api.nvim_buf_set_var(gutter_bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-    return false
-  end
-
-  local last_update = M.vim.tbl_map(tonumber, M.vim.split(last_update_str, " "))
-
-  local should_throttle = M.vim.fn.reltimefloat(M.vim.fn.reltime(last_update)) * 1000 < config.settings.throttle_ms
-
-  if not should_throttle then
-    M.vim.api.nvim_buf_set_var(gutter_bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-  end
-
-  return should_throttle
-end
-
 --- Update the gutter with new lines.
 function M.update(gutter, lines)
   -- TODO store this plugin and its updated value

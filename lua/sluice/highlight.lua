@@ -44,6 +44,5 @@ local function copy_highlight(highlight, new_name, is_gui_mode, override_bg)
 end
 
 M.copy_highlight = copy_highlight
-M.get_linehl = get_linehl
 
 return M

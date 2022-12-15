@@ -44,7 +44,7 @@ function M.update(settings, bufnr)
 end
 
 
-function M.enable(settings, bufnr)
+function M.enable(_settings, _bufnr)
   -- TODO shouldn't there be a way to make these go away on cursor move
   if M.vim.fn.hlexists('SluiceSearchMatch') == 0 then
     M.vim.cmd('hi link SluiceSearchMatch Comment')
@@ -55,7 +55,7 @@ function M.enable(settings, bufnr)
 end
 
 
-function M.disable(settings, bufnr)
+function M.disable(_settings, _bufnr)
 end
 
 

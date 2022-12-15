@@ -2,8 +2,6 @@ local M = {
   vim = vim
 }
 
-local config = require("sluice.config")
-
 --- Convert a line in the file, to the corresponding line in the gutter.
 function M.line_to_gutter_line(line, buffer_lines, height)
   local gutter_line = math.floor(line / buffer_lines * height)
