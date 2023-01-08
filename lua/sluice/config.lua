@@ -31,6 +31,20 @@ function M.default_enabled_fn()
 end
 
 
+--- Enable a gutter if the default would be enabled, and there are search results.
+function M.has_results_enabled_fn()
+  if not M.default_enabled_fn() then
+    return false
+  end
+
+  local results = M.vim.fn.getmatches()
+  if #results == 0 then
+    return false
+  end
+
+  return true
+end
+
 local default_gutter_settings = {
   plugins = { 'viewport' },
   window = {
@@ -66,6 +80,9 @@ local default_settings = {
     },
     {
       plugins = { 'viewport', 'search' },
+      window = {
+        enabled_fn = M.has_results_enabled_fn,
+      },
     },
     -- {
     --   plugins = { 'viewport',
