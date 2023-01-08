@@ -28,7 +28,9 @@ function M.update(_settings, bufnr)
 
   local result = {}
   for _, v in ipairs(get_placed[1]["signs"]) do
-    table.insert(result, M.vim.tbl_extend('force', get_defined[v["name"]], v))
+    local line = M.vim.tbl_extend('force', get_defined[v["name"]], v)
+    line.plugin = 'signs'
+    table.insert(result, line)
   end
 
   return result

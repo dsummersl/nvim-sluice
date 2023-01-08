@@ -19,50 +19,9 @@ function M.update(gutter, lines)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end
 
-function M.init_gutters(config)
-  local gutter_count = M.vim.tbl_count(config.settings.gutters)
-  local gutters = {}
-  for i, v in ipairs(config.settings.gutters) do
-    if gutters[i] == nil then
-      gutters[i] = {}
-      gutters[i].settings = v
-      gutters[i].enabled = true
-    end
-  end
-
-  return gutters
-end
-
---- Open all gutters configured for this plugin.
-function M.open()
-  -- if M.should_throttle() then
-  --   return
-  -- end
-
-  if M.gutters == nil then
-    M.gutters = M.init_gutters(config)
-  end
-
-  for i, v in ipairs(config.settings.gutters) do
-    M.gutters[i].enabled = v.window.enabled_fn()
-  end
-
-  for i, v in ipairs(config.settings.gutters) do
-    if M.gutters[i].enabled then
-      M.open_gutter(i)
-    else
-      M.close_gutter(M.gutters[i])
-    end
-  end
-end
-
---- Open one gutter
-function M.open_gutter(gutter_index)
-  local gutter = M.gutters[gutter_index]
+--- Get plugin lines for each gutter
+function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
-
-  window.create_window(M.gutters, gutter_index)
-
   local lines = {}
   for _, plugin in ipairs(gutter.settings.plugins) do
     local enable_fn = nil
@@ -95,9 +54,57 @@ function M.open_gutter(gutter_index)
       table.insert(lines, il)
     end
   end
-  M.lines[gutter.bufnr] = lines
 
-  M.update(gutter, lines)
+  return lines
+end
+
+--- Create initial gutter settings
+function M.init_gutters(config)
+  local gutter_count = M.vim.tbl_count(config.settings.gutters)
+  local gutters = {}
+  for i, v in ipairs(config.settings.gutters) do
+    if gutters[i] == nil then
+      gutters[i] = {}
+      gutters[i].settings = v
+      gutters[i].enabled = true
+    end
+  end
+
+  return gutters
+end
+
+--- Open all gutters configured for this plugin.
+function M.open()
+  -- if M.should_throttle() then
+  --   return
+  -- end
+
+  if M.gutters == nil then
+    M.gutters = M.init_gutters(config)
+  end
+
+  for i, gutter_settings in ipairs(config.settings.gutters) do
+    local gutter = M.gutters[i]
+    gutter.lines = M.get_lines(gutter)
+    gutter.enabled = gutter_settings.window.enabled_fn(gutter)
+  end
+
+  for i, v in ipairs(config.settings.gutters) do
+    if M.gutters[i].enabled then
+      M.open_gutter(i)
+    else
+      M.close_gutter(M.gutters[i])
+    end
+  end
+end
+
+--- Open one gutter
+function M.open_gutter(gutter_index)
+  local gutter = M.gutters[gutter_index]
+
+  window.create_window(M.gutters, gutter_index)
+
+  M.update(gutter, gutter.lines)
 end
 
 --- Close one gutter

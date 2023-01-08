@@ -26,6 +26,7 @@ function M.update(settings, _bufnr)
       linehl = linehl,
       lnum = lnum,
       priority = priority,
+      plugin = 'viewport',
     })
   end
 

@@ -36,6 +36,7 @@ function M.update(settings, bufnr)
         text = "-",
         texthl = texthl,
         priority = 10,
+        plugin = 'search',
       })
     end
   end
