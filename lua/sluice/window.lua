@@ -74,19 +74,26 @@ function M.refresh_buffer(bufnr, lines)
   M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
+function M.get_gutter_column(gutters, gutter_index)
+  local column = M.vim.api.nvim_win_get_width(0)
+  local gutter_count = #gutters
+  for i=gutter_count, gutter_index, -1 do
+    local gutter = gutters[i]
+    local gutter_width = gutter.settings.window.width
+    if gutter.enabled then
+      column = column - gutter_width
+    end
+  end
+  return column
+end
+
 --- Create a gutter.
 -- side effect: creates bufnr and ns
-function M.create_window(gutter)
-  local gutter_width = 1
-  -- local window_settings = gutter.settings.window
-  -- if window_settings ~= nil and window_settings.width ~= nil then
-  --   gutter_width = gutter.settings.window.width
-  -- end
+function M.create_window(gutters, gutter_index)
+  local gutter = gutters[gutter_index]
+  local gutter_width = gutter.settings.window.width
 
-  -- TODO this width actually needs to be smart enough to know the widths of all the gutters to do this dynamically.
-  local col = M.vim.api.nvim_win_get_width(0) -
-    gutter_width -
-    (gutter.gutter_count - gutter.gutter_index) * gutter_width
+  local col = M.get_gutter_column(gutters, gutter_index)
   local height = M.vim.api.nvim_win_get_height(0)
 
   if gutter.bufnr == nil then

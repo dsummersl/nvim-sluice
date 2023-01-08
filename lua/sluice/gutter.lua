@@ -19,25 +19,32 @@ function M.update(gutter, lines)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end
 
+function M.init_gutters(config)
+  local gutter_count = M.vim.tbl_count(config.settings.gutters)
+  local gutters = {}
+  for i, v in ipairs(config.settings.gutters) do
+    if gutters[i] == nil then
+      gutters[i] = {}
+      gutters[i].settings = v
+      gutters[i].enabled = true
+    end
+  end
+
+  return gutters
+end
+
 --- Open all gutters configured for this plugin.
 function M.open()
   -- if M.should_throttle() then
   --   return
   -- end
 
-  local gutter_count = M.vim.tbl_count(config.settings.gutters)
+  M.gutters = M.init_gutters(config)
 
   for i, v in ipairs(config.settings.gutters) do
-    if M.gutters[i] == nil then
-      M.gutters[i] = {}
-      M.gutters[i].settings = v
-      M.gutters[i].gutter_index = i
-      M.gutters[i].gutter_count = gutter_count
-    end
-
     M.gutters[i].enabled = v.window.enabled_fn()
     if M.gutters[i].enabled then
-      M.open_gutter(M.gutters[i])
+      M.open_gutter(i)
     else
       -- TODO support having some gutters enabled and others not enabled
       M.close()
@@ -46,10 +53,11 @@ function M.open()
 end
 
 --- Open one gutter
-function M.open_gutter(gutter)
+function M.open_gutter(gutter_index)
+  local gutter = M.gutters[gutter_index]
   local bufnr = M.vim.fn.bufnr()
 
-  window.create_window(gutter)
+  window.create_window(M.gutters, gutter_index)
 
   local lines = {}
   for _, plugin in ipairs(gutter.settings.plugins) do
