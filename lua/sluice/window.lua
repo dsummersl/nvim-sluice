@@ -44,15 +44,14 @@ function M.refresh_highlights(bufnr, ns, lines)
     end
 
     if best_texthl ~= nil then
-      local line_text_hl = "Sluice" .. best_texthl .. string.format("%02d", bufnr) .. string.format("%02d", i)
       local mode = "cterm"
       if vim.o.termguicolors then
         mode = "gui"
       end
       if best_linehl ~= nil then
         local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(best_linehl)), "bg", mode)
-        highlight.copy_highlight(best_texthl, line_text_hl, mode == "gui", line_bg)
-        M.vim.api.nvim_buf_add_highlight(bufnr, ns, line_text_hl, i - 1, 0, -1)
+        local highlight_name = highlight.copy_highlight(best_texthl, mode == "gui", line_bg)
+        M.vim.api.nvim_buf_add_highlight(bufnr, ns, highlight_name, i - 1, 0, -1)
       else
         M.vim.api.nvim_buf_add_highlight(bufnr, ns, best_texthl, i - 1, 0, -1)
       end

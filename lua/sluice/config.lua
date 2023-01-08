@@ -36,9 +36,10 @@ local default_gutter_settings = {
   window = {
     --- Width of the gutter.
     width = 1,
+
     --- Default highlight to use in the gutter.
     -- This serves as the base linehl highlight for a column in each gutter. Plugins can
-    -- overide parts of this highlight (typically this is the background color of
+    -- override parts of this highlight (typically this is the background color of
     -- areas represented in the gutter of offscreen content)
     default_gutter_hl = 'SluiceColumn',
 
