@@ -1,3 +1,5 @@
+local counters = require('sluice.integrations.counters')
+
 local M = {
   vim = vim
 }
@@ -63,6 +65,9 @@ local default_gutter_settings = {
 
     --- Whether to display the gutter or not.
     enabled_fn = M.default_enabled_fn,
+
+    --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
+    count_method = counters.methods.circle_2,
   },
 }
 
@@ -81,6 +86,9 @@ local default_settings = {
   gutters = apply_gutter_settings{
     {
       plugins = { 'viewport', 'signs' },
+      window = {
+        count_method = nil,
+      },
     },
     {
       plugins = { 'viewport', 'search' },

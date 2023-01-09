@@ -1,4 +1,5 @@
 local highlight = require('sluice.highlight')
+local counters = require('sluice.integrations.counters')
 
 local M = {
   vim = vim,
@@ -62,13 +63,25 @@ function M.refresh_highlights(bufnr, ns, lines)
 end
 
 --- Refresh the content of the gutter.
-function M.refresh_buffer(bufnr, lines)
+function M.refresh_buffer(bufnr, lines, count_method)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
   for _, matches in ipairs(lines) do
-    local best_match = M.find_best_match(matches, "text")
-    table.insert(strings, best_match["text"])
+    local text = ' '
+    local non_empty_matches = 0
+    for _, match in ipairs(matches) do
+      if match.text ~= " " then
+        non_empty_matches = non_empty_matches + 1
+      end
+    end
+    if count_method ~= nil and non_empty_matches > 1 then
+      text = counters.count(non_empty_matches, count_method)
+    else
+      text = M.find_best_match(matches, "text")['text']
+    end
+
+    table.insert(strings, text)
   end
 
   M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)

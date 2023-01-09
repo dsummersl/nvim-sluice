@@ -14,7 +14,7 @@ function M.update(gutter, lines)
   -- TODO store this plugin and its updated value
   -- TODO then replay all the plugins in order.
   local gutter_lines = convert.lines_to_gutter_lines(gutter.settings, lines)
-  window.refresh_buffer(gutter.bufnr, gutter_lines)
+  window.refresh_buffer(gutter.bufnr, gutter_lines, gutter.settings.window.count_method)
   window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end

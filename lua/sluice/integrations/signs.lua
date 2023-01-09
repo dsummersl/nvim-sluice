@@ -37,11 +37,6 @@ function M.update(_settings, bufnr)
 end
 
 
--- TODO
---- counts in multiple modes:
---- roman numerals: https://www.compart.com/en/unicode/U+24D8
---- circles: https://www.compart.com/en/unicode/U+24EA
---- braile: https://www.compart.com/en/unicode/U+2800
 function M.enable(_settings, _bufnr)
   -- TODO setup the listeners for this.
 end
