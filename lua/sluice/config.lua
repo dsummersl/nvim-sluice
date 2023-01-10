@@ -67,7 +67,7 @@ local default_gutter_settings = {
     enabled_fn = M.default_enabled_fn,
 
     --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
-    count_method = counters.methods.circle_2,
+    count_method = counters.methods.horizontal_block,
   },
 }
 
