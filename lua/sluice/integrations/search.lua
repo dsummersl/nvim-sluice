@@ -33,7 +33,7 @@ function M.update(settings, bufnr)
       -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
-        text = "-",
+        text = "—",
         texthl = texthl,
         priority = 10,
         plugin = 'search',

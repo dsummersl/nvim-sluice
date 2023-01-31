@@ -87,7 +87,7 @@ local default_settings = {
     {
       plugins = { 'viewport', 'signs' },
       window = {
-        count_method = nil,
+        count_method = '',
       },
     },
     {
