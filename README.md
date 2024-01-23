@@ -4,8 +4,52 @@ A neovim minimap of the +signs gutter for the right side of the window.
 
 ## Install
 
-```vim
+You can install this plugin using a variety of plugin managers.
+
+Plug:
+
+```
 Plug 'dsummersl/nvim-sluice'
+```
+
+Lazy:
+
+```
+{
+  "dsummersl/nvim-sluice",
+  config = function()
+    require("sluice").setup({
+      ... override any defaults ...
+    })
+  end
+},
+
+```
+
+
+Default configuration:
+
+```vim
+{
+  enable = true,
+  gutters = { {
+      plugins = { "viewport", "search" },
+      window = {
+        default_gutter_hl = "SluiceColumn",
+        enabled_fn = <function 1>,
+        width = 1
+      }
+    }, {
+      plugins = { "viewport", "signs" },
+      window = {
+        count_method = "",
+        default_gutter_hl = "SluiceColumn",
+        enabled_fn = <function 2>,
+        width = 1
+      }
+    } },
+  throttle_ms = 150
+}
 ```
 
 ## Screenshot
