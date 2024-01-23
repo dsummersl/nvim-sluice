@@ -125,12 +125,12 @@ function M.close_gutter(gutter)
       disable_fn = plugin.disable
     end
 
-    if gutter.bufnr ~= nil then
+    if M.vim.fn.bufexists(gutter.bufnr) ~= 0 then
       disable_fn(gutter.settings, gutter.bufnr)
     end
   end
 
-  if gutter.winid ~= nil then
+  if vim.fn.win_id2win(gutter.winid) ~= 0 then
     M.vim.api.nvim_win_close(gutter.winid, true)
     gutter.winid = nil
   end

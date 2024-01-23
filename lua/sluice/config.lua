@@ -85,15 +85,15 @@ local default_settings = {
 
   gutters = apply_gutter_settings{
     {
-      plugins = { 'viewport', 'signs' },
-      window = {
-        count_method = '',
-      },
-    },
-    {
       plugins = { 'viewport', 'search' },
       window = {
         enabled_fn = M.make_plugin_has_results_enabled_fn('search'),
+      },
+    },
+    {
+      plugins = { 'viewport', 'signs' },
+      window = {
+        count_method = '',
       },
     },
     -- {

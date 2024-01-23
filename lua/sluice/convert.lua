@@ -36,8 +36,11 @@ function M.lines_to_gutters(settings, lines, buffer_lines, height)
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
+    -- TODO how would the buffer_lines 
     local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
-    table.insert(gutter_lines[gutter_line_number], line)
+    if not (gutter_line_number < 1 or gutter_line_number > height) then
+      table.insert(gutter_lines[gutter_line_number], line)
+    end
   end
 
   return gutter_lines
