@@ -39,3 +39,7 @@ The idea behind this project is based on [vim-sluice](https://github.com/dsummer
 ## TODO
 
 - Show specific highlights visible in the screen (matchup in particular)
+- Show the current visual select.
+- Add options to the signs plugin to whitelist or blacklist specific patterns
+
+- https://github.com/lewis6991/satellite.nvim -- a good inspiration for a reboot from 

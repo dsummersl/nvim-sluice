@@ -1,7 +1,7 @@
 test:
-	~/.luarocks/bin/busted -m 'lua/?.lua' tests
+	nvim --headless -c "PlenaryBustedDirectory tests/plenary/ {minimal_init = 'tests/minimal_init.vim'}"
 
 lint:
-	~/.luarocks/bin/luacheck lua/*
+	luacheck lua/*
 
 .PHONY: test lint

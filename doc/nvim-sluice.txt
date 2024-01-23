@@ -12,8 +12,8 @@ CONTENTS                                                    *NvimSluiceContents*
         2.2 :SluiceDisable .............. |:SluiceDisable|
         2.3 :SluiceToggle ............... |:SluiceToggle|
     3. Configuration .............. |NvimSluiceConfig|
-        3.1 SluiceVisibleArea ........... |hl-SluiceVisibleArea|
-        3.2 SluiceCursor ................ |hl-SluiceCursor|
+        3.1 SluiceViewportVisibleArea ........... |hl-SluiceViewportVisibleArea|
+        3.2 SluiceViewportCursor ................ |hl-SluiceViewportCursor|
         3.3 SluiceColumn ................ |hl-SluiceColumn|
     4. License .................... |NvimSluiceLicense|
     5. Credits .................... |NvimSluiceCredits|
@@ -64,23 +64,23 @@ values.
 For instance, if you want the position of the cursor to be visible in the
 Signs window you could set a custom corsor highlight:
 
-hi link SluiceCursor CursorLine
+hi link SluiceViewportCursor CursorLine
 
 ------------------------------------------------------------------------------
-3.1 hl-SluiceVisibleArea                                  *hl-SluiceVisibleArea*
+3.1 hl-SluiceViewportVisibleArea                                  *hl-SluiceViewportVisibleArea*
 
 The highlight style of the Sluice window corresponding to the visible area of
 the screen. Default:
 
-hi link SluiceVisibleArea Normal
+hi link SluiceViewportVisibleArea Normal
 
 ------------------------------------------------------------------------------
-3.2 hl-SluiceCursor                                            *hl-SluiceCursor*
+3.2 hl-SluiceViewportCursor                                            *hl-SluiceViewportCursor*
 
 The highlight of the location of the cursor within the file as seen in the
 Sluice window. Default:
 
-hi link SluiceCursor Normal
+hi link SluiceViewportCursor Normal
 
 ------------------------------------------------------------------------------
 3.3 hl-SluiceColumn                                            *hl-SluiceColumn*

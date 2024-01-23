@@ -1,13 +1,9 @@
 local M = {
-  vim = vim
+  vim = vim,
+  enabled = false
 }
 
-local window = require('sluice.window')
-local config = require('sluice.config')
-
-local winid = nil
-local bufnr = M.vim.api.nvim_create_buf(false, true)
-local ns = M.vim.api.nvim_create_namespace('nvim-sluice')
+local gutter = require('sluice.gutter')
 
 --- Assign autocmds for a group.
 local nvim_augroup = function(group_name, definitions)
@@ -22,51 +18,18 @@ local nvim_augroup = function(group_name, definitions)
   M.vim.api.nvim_command('augroup END')
 end
 
---- Determine whether to throttle some command based on the throttle_ms config.
-function M.should_throttle()
-  -- TODO ideally this should be a 'tail' throttle rather than a leading edge
-  -- type throttle...where an async call is made at the end of the 'throttle_ms' time period.
-  local var_exists, last_update_str = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_update')
-  local reltime = M.vim.fn.reltime()
-
-  if not var_exists then
-    M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-    return false
-  end
-
-  local last_update = M.vim.tbl_map(tonumber, M.vim.split(last_update_str, " "))
-
-  local should_throttle = M.vim.fn.reltimefloat(M.vim.fn.reltime(last_update)) * 1000 < config.settings.throttle_ms
-
-  if not should_throttle then
-    M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_update', tostring(reltime[1]) .. " " .. tostring(reltime[2]))
-  end
-
-  return should_throttle
-end
-
 function M.update_context()
-  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then return M.close() end
-  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then return M.close() end
-  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then return M.close() end
+  if not M.enabled then return end
 
-  M.open()
-end
-
-function M.close()
-  window.close(winid)
-  winid = nil
-end
-
-function M.open()
-  if M.should_throttle() then
-    return
-  end
-
-  winid = window.open(winid, bufnr, ns)
+  gutter.open()
 end
 
 function M.enable()
+  if M.enabled then return end
+
+  M.enabled = true
+
+  -- TODO move these to the various plugins
   nvim_augroup('sluice', {
     {'WinScrolled', '*',               'lua require("sluice.commands").update_context()'},
     {'CursorMoved', '*',               'lua require("sluice.commands").update_context()'},
@@ -74,37 +37,24 @@ function M.enable()
     {'CursorHoldI', '*',               'lua require("sluice.commands").update_context()'},
     {'BufEnter',    '*',               'lua require("sluice.commands").update_context()'},
     {'WinEnter',    '*',               'lua require("sluice.commands").update_context()'},
-    {'WinLeave',    '*',               'lua require("sluice.commands").close()'},
-    -- {'BufLeave',    '*',               'lua require("sluice").close()'},
-    -- {'TabLeave',    '*',               'lua require("sluice").close()'},
-    -- {'BufWinLeave',    '*',               'lua require("sluice").close()'},
-    {'VimResized',  '*',               'lua require("sluice.commands").open()'},
-    {'User',        'SessionSavePre',  'lua require("sluice.commands").close()'},
-    {'User',        'SessionSavePost', 'lua require("sluice.commands").open()'},
+    {'VimResized',  '*',               'lua require("sluice.commands").update_context()'},
   })
 
   M.update_context()
 end
 
 function M.disable()
+  if not M.enabled then return end
+
+  M.enabled = false
+
   nvim_augroup('sluice', {})
 
-  -- delete any highlights.
-  local lines = signs.get_signs_to_lines(bufnr)
-  if not lines then
-    for _,v in ipairs(lines) do
-      if v["texthl"] == "" then
-        local line_text_hl = v["linehl"] .. v["texthl"]
-        M.vim.api.nvim_exec("hi clear " .. line_text_hl, false)
-      end
-    end
-  end
-
-  M.close()
+  gutter.close()
 end
 
 function M.toggle()
-  if winid and M.vim.api.nvim_win_is_valid(winid) then
+  if M.enabled then
     M.disable()
   else
     M.enable()
