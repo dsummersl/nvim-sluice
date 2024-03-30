@@ -31,6 +31,7 @@ function M.enable()
 
   -- TODO move these to the various plugins
   nvim_augroup('sluice', {
+    {'DiagnosticChanged', '*',               'lua require("sluice.commands").update_context()'},
     {'WinScrolled', '*',               'lua require("sluice.commands").update_context()'},
     {'CursorMoved', '*',               'lua require("sluice.commands").update_context()'},
     {'CursorHold',  '*',               'lua require("sluice.commands").update_context()'},

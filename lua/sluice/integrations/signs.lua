@@ -27,6 +27,7 @@ function M.update(_settings, bufnr)
   -- M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
 
   local result = {}
+
   for _, v in ipairs(get_placed[1]["signs"]) do
     if v["name"] ~= "" then
       local line = M.vim.tbl_extend('force', get_defined[v["name"]], v)
@@ -38,9 +39,9 @@ function M.update(_settings, bufnr)
   return result
 end
 
-
 function M.enable(_settings, _bufnr)
   -- TODO setup the listeners for this.
+  -- Specific events to update on - DiagnosticChanged would be one
 end
 
 function M.disable(settings, bufnr)
