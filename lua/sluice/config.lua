@@ -95,6 +95,8 @@ local default_settings = {
       window = {
         count_method = '',
       },
+      extmarks = {
+      }
     },
     -- {
     --   plugins = { 'viewport',
