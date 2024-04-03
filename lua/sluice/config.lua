@@ -91,7 +91,7 @@ local default_settings = {
       },
     },
     {
-      plugins = { 'viewport', 'signs', 'extmarks' },
+      plugins = { 'viewport', 'signs', 'extmark_signs' },
       window = {
         count_method = '',
       },
