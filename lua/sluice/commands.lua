@@ -4,6 +4,7 @@ local M = {
 }
 
 local gutter = require('sluice.gutter')
+local debounce = require('sluice.debounce')
 
 --- Assign autocmds for a group.
 local nvim_augroup = function(group_name, definitions)
@@ -18,11 +19,13 @@ local nvim_augroup = function(group_name, definitions)
   M.vim.api.nvim_command('augroup END')
 end
 
-function M.update_context()
+local function update_context()
   if not M.enabled then return end
 
   gutter.open()
 end
+
+M.update_context = debounce(update_context, 100)
 
 function M.enable()
   if M.enabled then return end
@@ -30,6 +33,7 @@ function M.enable()
   M.enabled = true
 
   -- TODO move these to the various plugins
+  -- TODO what else to make this faster?
   nvim_augroup('sluice', {
     {'DiagnosticChanged', '*',               'lua require("sluice.commands").update_context()'},
     {'WinScrolled', '*',               'lua require("sluice.commands").update_context()'},
