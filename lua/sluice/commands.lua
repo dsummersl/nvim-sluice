@@ -32,8 +32,6 @@ function M.enable()
 
   M.enabled = true
 
-  -- TODO move these to the various plugins
-  -- TODO what else to make this faster?
   nvim_augroup('sluice', {
     {'DiagnosticChanged', '*',               'lua require("sluice.commands").update_context()'},
     {'WinScrolled', '*',               'lua require("sluice.commands").update_context()'},

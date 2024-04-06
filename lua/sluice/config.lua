@@ -87,6 +87,7 @@ local default_settings = {
     {
       plugins = { 'viewport', 'search' },
       window = {
+        -- TODO this should be a method that maps to a function ("has results")
         enabled_fn = M.make_plugin_has_results_enabled_fn('search'),
       },
     },
@@ -127,7 +128,11 @@ local default_settings = {
 }
 
 function M.apply_user_settings(user_settings)
-  M.settings = M.vim.tbl_deep_extend('keep', user_settings or {}, default_settings)
+  M.vim.validate({ config = { user_settings, 'table'} })
+  -- TODO apply more validate actions here, see here for examples:
+  -- /Users/danesummers/.local/share/nvim/lazy/mini.nvim/lua/mini/diff.lua#851
+
+  M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
   apply_gutter_settings(M.settings)
 end
 

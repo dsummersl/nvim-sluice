@@ -11,8 +11,6 @@ function M.update(_settings, bufnr)
   for _, mark in ipairs(extmarks) do
     local row = mark[2]
     local details = mark[4]
-    -- TODO currently only supports signs, but could be extended to support
-    -- other extmarks
     if details['sign_hl_group'] ~= "" then
       table.insert(result, {
         lnum = row + 1,
