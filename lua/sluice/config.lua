@@ -99,45 +99,20 @@ local default_settings = {
       extmarks = {
       }
     },
-    -- {
-    --   plugins = { 'viewport',
-    -- },
-    --   viewport = {
-    --     cursor_hl = 'IncSearch',
-    --   }
-    -- },
-    --- Example custom getter function:
-    -- {
-    --   plugins = {
-    --     'viewport',
-    --     {
-    --       update = function(bufnr)
-    --         return {
-    --           { lnum = 1, text = 'X', texthl = 'Normal' },
-    --           { lnum = 11, text = 'X', texthl = 'Normal' },
-    --           { lnum = 21, text = 'X', texthl = 'Normal' },
-    --           { lnum = 31, text = 'X', texthl = 'Normal' },
-    --           { lnum = 41, text = 'X', texthl = 'Normal' },
-    --           { lnum = 51, text = 'X', texthl = 'Normal' },
-    --         }
-    --       end,
-    --     }
-    --   },
-    -- },
   }
 }
 
 function M.apply_user_settings(user_settings)
   if user_settings ~= nil then
-    vim.validate({ user_settings = { user_settings, 'table', true} })
+    M.vim.validate({ user_settings = { user_settings, 'table', true} })
   end
   -- TODO apply more validate actions here, see here for examples:
   -- /Users/danesummers/.local/share/nvim/lazy/mini.nvim/lua/mini/diff.lua#851
 
-  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
+  M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
   apply_gutter_settings(M.settings)
-  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
-  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
+  M.settings = M.vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
+  M.settings = M.vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
   M.settings.gutters = apply_gutter_settings(M.settings.gutters)
 end
 

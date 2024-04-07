@@ -1,21 +1,18 @@
 local config = require('sluice.config')
 
 describe('sluice.config', function()
-
   describe('default_enabled_fn', function()
     before_each(function()
-      config.vim = {
-        api = {
-          nvim_win_get_height = function() return 50 end,
-          nvim_buf_line_count = function() return 100 end
-        },
-        fn = {
-          getwinvar = function(_, var)
-            if var == '&buftype' then return '' end
-            if var == '&previewwindow' then return 0 end
-            if var == '&diff' then return 0 end
-          end
-        }
+      config.vim.api = {
+        nvim_win_get_height = function() return 50 end,
+        nvim_buf_line_count = function() return 100 end
+      }
+      config.vim.fn  = {
+        getwinvar = function(_, var)
+          if var == '&buftype' then return '' end
+          if var == '&previewwindow' then return 0 end
+          if var == '&diff' then return 0 end
+        end
       }
     end)
 
@@ -96,5 +93,4 @@ describe('sluice.config', function()
       assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
     end)
   end)
-
 end)
