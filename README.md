@@ -1,6 +1,12 @@
 # nvim-sluice
 
-A neovim minimap of the +signs gutter for the right side of the window.
+Sluice:
+
+> A trough to channel water from a distance.
+
+A neovim plugin that provides vertical channels along the sides of your window:
+- minimap of the +signs and extmarks for the side of the window.
+- replacement for the signcolumn: customize the width and contents of the column to your liking!
 
 ## Install
 
@@ -36,7 +42,7 @@ Default configuration:
       plugins = { "viewport", "search" },
       window = {
         default_gutter_hl = "SluiceColumn",
-        enabled_fn = <function 1>,
+        enabled_fn = 'sluice.config.default_enabled_fn',
         width = 1
       }
     }, {
@@ -44,7 +50,7 @@ Default configuration:
       window = {
         count_method = "",
         default_gutter_hl = "SluiceColumn",
-        enabled_fn = <function 2>,
+        enabled_fn = 'sluice.config.default_enabled_fn',
         width = 1
       }
     } },
