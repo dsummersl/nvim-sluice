@@ -2,23 +2,23 @@ local config = require('sluice.config')
 
 describe('sluice.config', function()
 
-  before_each(function()
-    config.vim = {
-      api = {
-        nvim_win_get_height = function() return 50 end,
-        nvim_buf_line_count = function() return 100 end
-      },
-      fn = {
-        getwinvar = function(_, var)
-          if var == '&buftype' then return '' end
-          if var == '&previewwindow' then return 0 end
-          if var == '&diff' then return 0 end
-        end
-      }
-    }
-  end)
-
   describe('default_enabled_fn', function()
+    before_each(function()
+      config.vim = {
+        api = {
+          nvim_win_get_height = function() return 50 end,
+          nvim_buf_line_count = function() return 100 end
+        },
+        fn = {
+          getwinvar = function(_, var)
+            if var == '&buftype' then return '' end
+            if var == '&previewwindow' then return 0 end
+            if var == '&diff' then return 0 end
+          end
+        }
+      }
+    end)
+
     it('should return true when conditions are met', function()
       assert.is_true(config.default_enabled_fn({}))
     end)
@@ -81,10 +81,7 @@ describe('sluice.config', function()
     end)
 
     it('should not override unspecified settings', function()
-      local user_settings = {
-        enable = true,
-      }
-      config.apply_user_settings(user_settings)
+      config.apply_user_settings({})
       assert.is_true(config.settings.enable)
       -- Check that other settings are still at their default values
       assert.are.equal(150, config.settings.throttle_ms)
