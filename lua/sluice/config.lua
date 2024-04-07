@@ -134,8 +134,9 @@ function M.apply_user_settings(user_settings)
   -- TODO apply more validate actions here, see here for examples:
   -- /Users/danesummers/.local/share/nvim/lazy/mini.nvim/lua/mini/diff.lua#851
 
-  M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
+  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
   apply_gutter_settings(M.settings)
+  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
   M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
   M.settings.gutters = apply_gutter_settings(M.settings.gutters)
 end
