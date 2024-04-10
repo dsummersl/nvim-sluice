@@ -3,6 +3,11 @@ local config = require('sluice.config')
 describe('sluice.config', function()
   describe('default_enabled_fn', function()
     before_each(function()
+      config.vim = {
+        validate = vim.validate,
+        deepcopy = vim.deepcopy,
+        tbl_deep_extend = vim.tbl_deep_extend
+      }
       config.vim.api = {
         nvim_win_get_height = function() return 50 end,
         nvim_buf_line_count = function() return 100 end
