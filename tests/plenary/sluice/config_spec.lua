@@ -130,5 +130,38 @@ describe('sluice.config', function()
       config.apply_user_settings(user_settings)
       assert.are.equal('custom_group', config.settings.gutters[1].signs.group)
     end)
+
+    it('should throw an error for invalid types', function()
+      assert.has_error(function()
+        config.apply_user_settings({ enable = 'true' })
+      end, "enable: expected boolean, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ throttle_ms = '200' })
+      end, "throttle_ms: expected number, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ gutters = 'not a table' })
+      end, "gutters: expected table, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
+      end, "gutters[1].window.width: expected number, got string")
+    end)
+
+    it('should handle signs group setting', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'signs' },
+            signs = {
+              group = 'custom_group'
+            }
+          }
+        }
+      }
+      config.apply_user_settings(user_settings)
+      assert.are.equal('custom_group', config.settings.gutters[1].signs.group)
+    end)
   end)
 end)
