@@ -105,14 +105,37 @@ local default_settings = {
 function M.apply_user_settings(user_settings)
   if user_settings ~= nil then
     M.vim.validate({ user_settings = { user_settings, 'table', true} })
+
+    -- Validate global options
+    if user_settings.enable ~= nil then
+      M.vim.validate({ enable = { user_settings.enable, 'boolean' } })
+    end
+    if user_settings.throttle_ms ~= nil then
+      M.vim.validate({ throttle_ms = { user_settings.throttle_ms, 'number' } })
+    end
+
+    -- Validate gutters
+    if user_settings.gutters ~= nil then
+      M.vim.validate({ gutters = { user_settings.gutters, 'table' } })
+      for i, gutter in ipairs(user_settings.gutters) do
+        M.vim.validate({
+          ['gutters[' .. i .. ']'] = { gutter, 'table' },
+          ['gutters[' .. i .. '].plugins'] = { gutter.plugins, 'table', true },
+        })
+        if gutter.window ~= nil then
+          M.vim.validate({
+            ['gutters[' .. i .. '].window'] = { gutter.window, 'table' },
+            ['gutters[' .. i .. '].window.width'] = { gutter.window.width, 'number', true },
+            ['gutters[' .. i .. '].window.default_gutter_hl'] = { gutter.window.default_gutter_hl, 'string', true },
+            ['gutters[' .. i .. '].window.enabled_fn'] = { gutter.window.enabled_fn, 'function', true },
+            ['gutters[' .. i .. '].window.count_method'] = { gutter.window.count_method, {'string', 'function'}, true },
+          })
+        end
+      end
+    end
   end
-  -- TODO apply more validate actions here, see here for examples:
-  -- /Users/danesummers/.local/share/nvim/lazy/mini.nvim/lua/mini/diff.lua#851
 
   M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
-  apply_gutter_settings(M.settings)
-  M.settings = M.vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
-  M.settings = M.vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
   M.settings.gutters = apply_gutter_settings(M.settings.gutters)
 end
 

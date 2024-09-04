@@ -97,5 +97,23 @@ describe('sluice.config', function()
       assert.are.equal(150, config.settings.throttle_ms)
       assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
     end)
+
+    it('should throw an error for invalid types', function()
+      assert.has_error(function()
+        config.apply_user_settings({ enable = 'true' })
+      end, "enable: expected boolean, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ throttle_ms = '200' })
+      end, "throttle_ms: expected number, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ gutters = 'not a table' })
+      end, "gutters: expected table, got string")
+
+      assert.has_error(function()
+        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
+      end, "gutters%[1%].window.width: expected number, got string")
+    end)
   end)
 end)
