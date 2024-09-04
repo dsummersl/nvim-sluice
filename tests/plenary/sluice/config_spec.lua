@@ -113,7 +113,7 @@ describe('sluice.config', function()
 
       assert.has_error(function()
         config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
-      end, "gutters%[1%].window.width: expected number, got string")
+      end, "gutters[1].window.width: expected number, got string")
     end)
   end)
 end)
