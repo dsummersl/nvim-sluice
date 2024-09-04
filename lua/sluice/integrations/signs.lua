@@ -16,6 +16,7 @@ end
 --- Returns a table of signs, and whether they have changed since the last call to this method.
 function M.update(settings, bufnr)
   local get_defined = sign_getdefined()
+  -- TODO this should be settings.signs.group - but only if settings.signs exists!
   local group = settings.group or '*'
   local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = group })
 
