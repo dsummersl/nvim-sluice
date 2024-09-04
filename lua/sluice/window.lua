@@ -91,10 +91,12 @@ function M.get_gutter_column(gutters, gutter_index)
   local column = M.vim.api.nvim_win_get_width(0)
   local gutter_count = #gutters
   for i=gutter_count, gutter_index, -1 do
-    local gutter = gutters[i]
-    local gutter_width = gutter.settings.window.width
-    if gutter.enabled then
-      column = column - gutter_width
+    local gutter_settings = M.vim.tbl_get(require('sluice.config').settings.gutters, i)
+    if gutter_settings then
+      local gutter_width = gutter_settings.window.width
+      if gutters[i] and gutters[i].enabled then
+        column = column - gutter_width
+      end
     end
   end
   return column
@@ -104,7 +106,8 @@ end
 -- side effect: creates bufnr and ns
 function M.create_window(gutters, gutter_index)
   local gutter = gutters[gutter_index]
-  local gutter_width = gutter.settings.window.width
+  local gutter_settings = require('sluice.config').settings.gutters[gutter_index]
+  local gutter_width = gutter_settings.window.width
 
   local col = M.get_gutter_column(gutters, gutter_index)
   local height = M.vim.api.nvim_win_get_height(0)
