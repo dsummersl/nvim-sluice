@@ -57,37 +57,125 @@ Usage:
 ==============================================================================
 3. Configuration                                              *NvimSluiceConfig*
 
-The Sluice plugin uses the following default settings for its highlight
-settings. If you define these highlights they will override the default
-values.
+Sluice can be configured by calling the setup function with a table of options.
+Here's an example of how to configure Sluice with its default settings:
 
-For instance, if you want the position of the cursor to be visible in the
-Signs window you could set a custom corsor highlight:
-
-hi link SluiceViewportCursor CursorLine
+>
+    require('sluice').setup({
+      enable = true,
+      throttle_ms = 150,
+      gutters = {
+        {
+          plugins = { 'viewport', 'search' },
+          window = {
+            width = 1,
+            default_gutter_hl = 'SluiceColumn',
+            enabled_fn = function that checks if search has results,
+            count_method = 'horizontal_block',
+          },
+        },
+        {
+          plugins = { 'viewport', 'signs', 'extmark_signs' },
+          window = {
+            width = 1,
+            default_gutter_hl = 'SluiceColumn',
+            enabled_fn = default_enabled_fn,
+            count_method = '',
+          },
+        },
+      },
+    })
+<
 
 ------------------------------------------------------------------------------
-3.1 hl-SluiceViewportVisibleArea                                  *hl-SluiceViewportVisibleArea*
+3.1 Global Options                                     *NvimSluiceGlobalOptions*
+
+`enable`                                                     *NvimSluiceEnable*
+    Type: boolean
+    Default: `true`
+    Enable or disable Sluice globally.
+
+`throttle_ms`                                           *NvimSluiceThrottleMs*
+    Type: number
+    Default: `150`
+    The number of milliseconds to wait before updating the Sluice window.
+
+------------------------------------------------------------------------------
+3.2 Gutter Options                                     *NvimSluiceGutterOptions*
+
+Sluice supports multiple gutters, each with its own configuration.
+
+`plugins`                                               *NvimSluiceGutterPlugins*
+    Type: table of strings
+    Default: `{ 'viewport', 'search' }` for the first gutter,
+             `{ 'viewport', 'signs', 'extmark_signs' }` for the second gutter
+    The plugins to use for this gutter.
+
+`window`                                                *NvimSluiceGutterWindow*
+    Type: table
+    Configuration for the gutter window.
+
+    `width`                                        *NvimSluiceGutterWindowWidth*
+        Type: number
+        Default: `1`
+        The width of the gutter window.
+
+    `default_gutter_hl`              *NvimSluiceGutterWindowDefaultGutterHl*
+        Type: string
+        Default: `'SluiceColumn'`
+        The default highlight group for the gutter.
+
+    `enabled_fn`                          *NvimSluiceGutterWindowEnabledFn*
+        Type: function
+        Default: `default_enabled_fn` or a function that checks if search has results
+        A function that determines whether the gutter should be displayed.
+
+    `count_method`                      *NvimSluiceGutterWindowCountMethod*
+        Type: string or function
+        Default: `'horizontal_block'` for the first gutter, `''` for the second
+        The method to use for displaying counts in the gutter.
+
+------------------------------------------------------------------------------
+3.3 Highlight Groups                                 *NvimSluiceHighlightGroups*
+
+The Sluice plugin uses the following highlight groups. If you define these
+highlights they will override the default values.
+
+------------------------------------------------------------------------------
+3.3.1 hl-SluiceViewportVisibleArea                    *hl-SluiceViewportVisibleArea*
 
 The highlight style of the Sluice window corresponding to the visible area of
 the screen. Default:
 
-hi link SluiceViewportVisibleArea Normal
+>
+    hi link SluiceViewportVisibleArea Normal
+<
 
 ------------------------------------------------------------------------------
-3.2 hl-SluiceViewportCursor                                            *hl-SluiceViewportCursor*
+3.3.2 hl-SluiceViewportCursor                                *hl-SluiceViewportCursor*
 
 The highlight of the location of the cursor within the file as seen in the
 Sluice window. Default:
 
-hi link SluiceViewportCursor Normal
+>
+    hi link SluiceViewportCursor Normal
+<
+
+For instance, if you want the position of the cursor to be visible in the
+Signs window you could set a custom cursor highlight:
+
+>
+    hi link SluiceViewportCursor CursorLine
+<
 
 ------------------------------------------------------------------------------
-3.3 hl-SluiceColumn                                            *hl-SluiceColumn*
+3.3.3 hl-SluiceColumn                                            *hl-SluiceColumn*
 
 The highlight of the entire Sluice window (height of the window). Default:
 
-hi link SluiceColumn SignColumn
+>
+    hi link SluiceColumn SignColumn
+<
 
 ==============================================================================
 4. License                                                   *NvimSluiceLicense*
