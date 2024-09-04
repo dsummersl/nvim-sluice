@@ -82,7 +82,6 @@ end
 local default_settings = {
   enable = true,
   throttle_ms = 150,
-
   gutters = apply_gutter_settings{
     {
       plugins = { 'viewport', 'search' },
