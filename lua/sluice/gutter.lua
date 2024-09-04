@@ -25,7 +25,8 @@ end
 function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
-  for _, plugin in ipairs(gutter.settings.plugins) do
+  local gutter_settings = config.settings.gutters[gutter.index]
+  for _, plugin in ipairs(gutter_settings.plugins) do
     local enable_fn = nil
     local update_fn = nil
 
@@ -42,7 +43,7 @@ function M.get_lines(gutter)
     end
 
     if enable_fn ~= nil then
-      enable_fn(gutter.settings, bufnr)
+      enable_fn(gutter_settings, bufnr)
     end
 
     if update_fn == nil then
@@ -51,7 +52,7 @@ function M.get_lines(gutter)
       return
     end
 
-    local integration_lines = update_fn(gutter.settings, bufnr)
+    local integration_lines = update_fn(gutter_settings, bufnr)
     for _, il in ipairs(integration_lines) do
       table.insert(lines, il)
     end
@@ -64,13 +65,11 @@ end
 function M.init_gutters(config)
   local gutters = {}
   print("|config.settings.gutters = " .. M.vim.inspect(config.settings.gutters))
-  for i, v in ipairs(config.settings.gutters) do
-    if gutters[i] == nil then
-      gutters[i] = {}
-      -- TODO these settings are stale - not the latest
-      gutters[i].settings = v
-      gutters[i].enabled = true
-    end
+  for i, _ in ipairs(config.settings.gutters) do
+    gutters[i] = {
+      index = i,
+      enabled = true
+    }
   end
 
   return gutters
@@ -93,7 +92,7 @@ function M.open()
   end
 
   M.vim.schedule(function()
-    for i, v in ipairs(config.settings.gutters) do
+    for i, _ in ipairs(config.settings.gutters) do
       if M.gutters[i].enabled then
         M.open_gutter(i)
       else
@@ -119,7 +118,8 @@ function M.close_gutter(gutter)
     return
   end
 
-  for _, plugin in ipairs(gutter.settings.plugins) do
+  local gutter_settings = config.settings.gutters[gutter.index]
+  for _, plugin in ipairs(gutter_settings.plugins) do
     local disable_fn = nil
     if type(plugin) == "string" then
       -- when there is an integration, load it, and enable it.
@@ -131,7 +131,7 @@ function M.close_gutter(gutter)
     end
 
     if M.vim.fn.bufexists(gutter.bufnr) ~= 0 then
-      disable_fn(gutter.settings, gutter.bufnr)
+      disable_fn(gutter_settings, gutter.bufnr)
     end
   end
 
