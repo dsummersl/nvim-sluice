@@ -14,9 +14,10 @@ local function sign_getdefined()
 end
 
 --- Returns a table of signs, and whether they have changed since the last call to this method.
-function M.update(_settings, bufnr)
+function M.update(settings, bufnr)
   local get_defined = sign_getdefined()
-  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
+  local group = settings.group or '*'
+  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = group })
 
   -- local new_hash = xxh32(M.vim.inspect(get_placed))
   -- local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')

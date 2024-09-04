@@ -95,6 +95,9 @@ local default_settings = {
         count_method = '',
       },
       extmarks = {
+      },
+      signs = {
+        group = '*'
       }
     },
   }
