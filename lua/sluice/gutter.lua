@@ -62,11 +62,12 @@ end
 
 --- Create initial gutter settings
 function M.init_gutters(config)
-  local gutter_count = M.vim.tbl_count(config.settings.gutters)
   local gutters = {}
+  print("|config.settings.gutters = " .. M.vim.inspect(config.settings.gutters))
   for i, v in ipairs(config.settings.gutters) do
     if gutters[i] == nil then
       gutters[i] = {}
+      -- TODO these settings are stale - not the latest
       gutters[i].settings = v
       gutters[i].enabled = true
     end
