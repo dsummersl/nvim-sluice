@@ -13,7 +13,7 @@ local M = {
 -- - the buffer is not a special &buftype
 -- - the buffer is not a &previewwindow
 -- - the buffer is not a &diff
-function M.default_enabled_fn(gutter)
+function M.default_enabled_fn(_gutter)
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
   if win_height >= buf_lines then
@@ -33,8 +33,8 @@ function M.default_enabled_fn(gutter)
 end
 
 --- Create an enable_fn function that returns true if a specific plugin has contributed lines to the gutter.
-function M.make_plugin_has_results_enabled_fn(plugin)
-  local function enabled_fn(gutter)
+function M.make_has_results_fn(plugin)
+  local function has_results_fn(gutter)
     if not M.default_enabled_fn() then
       return false
     end
@@ -48,7 +48,7 @@ function M.make_plugin_has_results_enabled_fn(plugin)
     return false
   end
 
-  return enabled_fn
+  return has_results_fn
 end
 
 local default_gutter_settings = {
@@ -87,8 +87,7 @@ local default_settings = {
     {
       plugins = { 'viewport', 'search' },
       window = {
-        -- TODO this should be a method that maps to a function ("has results")
-        enabled_fn = M.make_plugin_has_results_enabled_fn('search'),
+        enabled_fn = M.make_has_results_fn('search'),
       },
     },
     {
