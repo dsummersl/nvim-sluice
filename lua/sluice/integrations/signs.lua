@@ -18,8 +18,8 @@ end
 --- Returns a table of signs, and whether they have changed since the last call to this method.
 function M.update(settings, bufnr)
   local get_defined = sign_getdefined()
-  local group = (settings.signs and settings.signs.group) or '*'
-  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = function(g) return config.str_table_fn(group, g) end })
+  local group = (settings.signs and settings.signs.group) or '.*'
+  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
 
   -- local new_hash = xxh32(M.vim.inspect(get_placed))
   -- local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
@@ -30,9 +30,8 @@ function M.update(settings, bufnr)
   -- M.vim.api.nvim_buf_set_var(bufnr, 'sluice_last_defined', new_hash)
 
   local result = {}
-
   for _, v in ipairs(get_placed[1]["signs"]) do
-    if v["name"] ~= "" then
+    if config.str_table_fn(group, v["name"]) and v["name"] ~= "" then
       local line = M.vim.tbl_extend('force', get_defined[v["name"]], v)
       line.plugin = 'signs'
       table.insert(result, line)

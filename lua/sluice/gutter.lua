@@ -13,9 +13,10 @@ local convert = require('sluice.convert')
 function M.update(gutter, lines)
   -- TODO store this plugin and its updated value
   -- TODO then replay all the plugins in order.
-  local gutter_lines = convert.lines_to_gutter_lines(gutter.settings, lines)
+  local gutter_settings = config.settings.gutters[gutter.index]
+  local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    window.refresh_buffer(gutter.bufnr, gutter_lines, gutter.settings.window.count_method)
+    window.refresh_buffer(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
     window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
@@ -64,11 +65,10 @@ end
 --- Create initial gutter settings
 function M.init_gutters(config)
   local gutters = {}
-  print("|config.settings.gutters = " .. M.vim.inspect(config.settings.gutters))
-  for i, _ in ipairs(config.settings.gutters) do
+  for i, v in ipairs(config.settings.gutters) do
     gutters[i] = {
       index = i,
-      enabled = true
+      enabled = v.enabled
     }
   end
 

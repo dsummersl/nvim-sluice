@@ -119,28 +119,24 @@ end)
 
 describe('get_gutter_column()', function()
   local vim_width = vim.api.nvim_win_get_width(0)
-  local one_gutter = gutter.init_gutters({
-      settings = {
+  local one_gutter = {
+      gutters = {{
+        window = {
+          width = 3
+        }
+      }},
+    }
+    local two_gutters = {
         gutters = {{
           window = {
             width = 3
           }
+        }, {
+          window = {
+            width = 2
+          }
         }},
       }
-    })
-    local two_gutters = gutter.init_gutters({
-        settings = {
-          gutters = {{
-            window = {
-              width = 3
-            }
-          }, {
-            window = {
-              width = 2
-            }
-          }},
-        }
-      })
 
   it('returns the right most column by its order', function()
     local gutters = gutter.init_gutters(config)
@@ -149,16 +145,22 @@ describe('get_gutter_column()', function()
   end)
 
   it('would account for a plugin with a custom width', function()
-    assert.are.same(vim_width - 3, window.get_gutter_column(one_gutter, 1))
+    config.apply_user_settings(one_gutter)
+    local gutters = gutter.init_gutters(config)
+    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1))
   end)
 
   it('would count multiple gutters', function()
-    assert.are.same(vim_width - 5, window.get_gutter_column(two_gutters, 1))
-    assert.are.same(vim_width - 2, window.get_gutter_column(two_gutters, 2))
+    config.apply_user_settings(two_gutters)
+    local gutters = gutter.init_gutters(config)
+    assert.are.same(vim_width - 5, window.get_gutter_column(gutters, 1))
+    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 2))
   end)
 
   it('ignores gutters that are not enabled', function()
-    two_gutters[2].enabled = false
-    assert.are.same(vim_width - 3, window.get_gutter_column(two_gutters, 1))
+    two_gutters.gutters[2].enabled = false
+    config.apply_user_settings(two_gutters)
+    local gutters = gutter.init_gutters(config)
+    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1))
   end)
 end)

@@ -90,7 +90,7 @@ end
 function M.get_gutter_column(gutters, gutter_index)
   local column = M.vim.api.nvim_win_get_width(0)
   local gutter_count = #gutters
-  for i = gutter_count, gutter_index + 1, -1 do
+  for i = gutter_count, gutter_index, -1 do
     local gutter_settings = M.vim.tbl_get(require('sluice.config').settings.gutters, i)
     if gutter_settings then
       local gutter_width = gutter_settings.window.width

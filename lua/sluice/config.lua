@@ -180,7 +180,9 @@ function M.apply_user_settings(user_settings)
   end
 
   M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
-  M.settings.gutters = apply_gutter_settings(M.settings.gutters)
+  if user_settings ~= nil and user_settings.gutters ~= nil then
+    M.settings.gutters = apply_gutter_settings(user_settings.gutters)
+  end
 end
 
 M.settings = default_settings
