@@ -10,10 +10,12 @@ local M = {
 -- @return boolean True if the value matches, is in the table, or passes the function test
 function M.str_table_fn(obj, value)
   if type(obj) == "string" then
-    return obj == value
+    return string.match(value, obj) ~= nil
   elseif type(obj) == "table" then
     for _, v in ipairs(obj) do
-      if v == value then
+      if type(v) == "string" and string.match(value, v) then
+        return true
+      elseif v == value then
         return true
       end
     end
@@ -28,9 +30,13 @@ end
 local function test_str_table_fn()
   assert(M.str_table_fn("test", "test"), "String equality test failed")
   assert(not M.str_table_fn("test", "other"), "String inequality test failed")
+  assert(M.str_table_fn("t.*t", "test"), "Regex match test failed")
+  assert(not M.str_table_fn("a.*b", "test"), "Regex non-match test failed")
   
   assert(M.str_table_fn({"a", "b", "c"}, "b"), "Table inclusion test failed")
   assert(not M.str_table_fn({"a", "b", "c"}, "d"), "Table exclusion test failed")
+  assert(M.str_table_fn({"a.*c", "b.*d"}, "abcd"), "Table regex match test failed")
+  assert(not M.str_table_fn({"x.*z", "p.*q"}, "abcd"), "Table regex non-match test failed")
   
   assert(M.str_table_fn(function(x) return x > 5 end, 10), "Function true test failed")
   assert(not M.str_table_fn(function(x) return x > 5 end, 3), "Function false test failed")
