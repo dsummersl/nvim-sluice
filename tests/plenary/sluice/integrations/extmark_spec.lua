@@ -1,6 +1,6 @@
 local assert = require("luassert")
 local mock = require("luassert.mock")
-local extmark = require("sluice.integrations.extmark")
+local extmark = require("sluice.integrations.extmark_signs")
 
 describe("extmark integration", function()
   local bufnr = 1
@@ -33,6 +33,7 @@ describe("extmark integration", function()
 
       local result = extmark.update(settings, bufnr)
 
+      assert.is_table(result)
       assert.equals(3, #result)
       assert.same({
         lnum = 1,
@@ -60,6 +61,7 @@ describe("extmark integration", function()
     it("should return empty table when no hl_groups", function()
       local settings_without_hl = {extmarks = {}}
       local result = extmark.update(settings_without_hl, bufnr)
+      assert.is_table(result)
       assert.same({}, result)
     end)
   end)

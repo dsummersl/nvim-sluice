@@ -4,7 +4,7 @@ local M = {
 
 --- Returns all 'signs' in the extmark buffer
 function M.update(settings, bufnr)
-  local hl_groups = settings.extmarks.hl_groups
+  local hl_groups = settings.extmarks and settings.extmarks.hl_groups
   if not hl_groups then
     return {}
   end
@@ -21,7 +21,6 @@ function M.update(settings, bufnr)
         lnum = row + 1,
         text = details["sign_text"],
         texthl = details["sign_hl_group"],
-        -- linehl = details["hl_group"],
         priority = details["priority"],
         plugin = 'extmarks',
       })
@@ -37,14 +36,10 @@ function M.enable(_settings, _bufnr)
 end
 
 function M.disable(settings, bufnr)
-  -- TODO this cleanup should happen elsewhere.
-  local lines = M.update(settings, bufnr)
-  if not lines then
-    for _, v in ipairs(lines) do
-      if v["texthl"] == "" then
-        local line_text_hl = v["linehl"] .. v["texthl"]
-        M.vim.api.nvim_exec("hi clear " .. line_text_hl, false)
-      end
+  local hl_groups = settings.extmarks and settings.extmarks.hl_groups
+  if hl_groups then
+    for _, hl_group in ipairs(hl_groups) do
+      M.vim.api.nvim_exec("hi clear " .. hl_group, false)
     end
   end
 end
