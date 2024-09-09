@@ -1,3 +1,5 @@
+local config = require('sluice.config')
+
 local M = {
   vim = vim
 }
@@ -17,7 +19,7 @@ end
 function M.update(settings, bufnr)
   local get_defined = sign_getdefined()
   local group = (settings.signs and settings.signs.group) or '*'
-  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = group })
+  local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = function(g) return config.str_table_fn(group, g) end })
 
   -- local new_hash = xxh32(M.vim.inspect(get_placed))
   -- local _, old_hash = pcall(M.vim.api.nvim_buf_get_var, bufnr, 'sluice_last_defined')
