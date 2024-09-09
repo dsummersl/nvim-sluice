@@ -1,3 +1,5 @@
+local config = require('sluice.config')
+
 local M = {
   vim = vim
 }
@@ -16,7 +18,7 @@ function M.update(settings, bufnr)
   for _, mark in ipairs(extmarks) do
     local row = mark[2]
     local details = mark[4]
-    if details['sign_hl_group'] ~= "" then
+    if details['sign_hl_group'] ~= "" and config.str_table_fn(hl_groups, details['sign_hl_group']) then
       table.insert(result, {
         lnum = row + 1,
         text = details["sign_text"],
