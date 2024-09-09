@@ -196,4 +196,36 @@ describe('sluice.config', function()
       assert.is_false(config.str_table_fn(nil, "test"))
     end)
   end)
+
+  describe('str_table_fn', function()
+    it('should return true for matching strings', function()
+      assert.is_true(config.str_table_fn("test", "test"))
+    end)
+
+    it('should return false for non-matching strings', function()
+      assert.is_false(config.str_table_fn("test", "other"))
+    end)
+
+    it('should return true for value in table', function()
+      assert.is_true(config.str_table_fn({"a", "b", "c"}, "b"))
+    end)
+
+    it('should return false for value not in table', function()
+      assert.is_false(config.str_table_fn({"a", "b", "c"}, "d"))
+    end)
+
+    it('should return true when function returns true', function()
+      assert.is_true(config.str_table_fn(function(x) return x > 5 end, 10))
+    end)
+
+    it('should return false when function returns false', function()
+      assert.is_false(config.str_table_fn(function(x) return x > 5 end, 3))
+    end)
+
+    it('should return false for unsupported types', function()
+      assert.is_false(config.str_table_fn(123, "test"))
+      assert.is_false(config.str_table_fn(true, "test"))
+      assert.is_false(config.str_table_fn(nil, "test"))
+    end)
+  end)
 end)
