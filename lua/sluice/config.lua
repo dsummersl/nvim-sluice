@@ -4,6 +4,43 @@ local M = {
   vim = vim
 }
 
+--- Utility function to check if a value matches a string, is in a table, or passes a function test
+-- @param obj string|table|function The object to check against
+-- @param value any The value to check
+-- @return boolean True if the value matches, is in the table, or passes the function test
+function M.str_table_fn(obj, value)
+  if type(obj) == "string" then
+    return obj == value
+  elseif type(obj) == "table" then
+    for _, v in ipairs(obj) do
+      if v == value then
+        return true
+      end
+    end
+    return false
+  elseif type(obj) == "function" then
+    return obj(value)
+  end
+  return false
+end
+
+-- Test cases for str_table_fn
+local function test_str_table_fn()
+  assert(M.str_table_fn("test", "test"), "String equality test failed")
+  assert(not M.str_table_fn("test", "other"), "String inequality test failed")
+  
+  assert(M.str_table_fn({"a", "b", "c"}, "b"), "Table inclusion test failed")
+  assert(not M.str_table_fn({"a", "b", "c"}, "d"), "Table exclusion test failed")
+  
+  assert(M.str_table_fn(function(x) return x > 5 end, 10), "Function true test failed")
+  assert(not M.str_table_fn(function(x) return x > 5 end, 3), "Function false test failed")
+  
+  print("All str_table_fn tests passed!")
+end
+
+-- Uncomment the line below to run the tests
+-- test_str_table_fn()
+
 --- Whether to display the gutter or not.
 --
 -- Returns boolean indicating whether the gutter is shown on screen or not.
