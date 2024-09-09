@@ -138,9 +138,10 @@ local default_settings = {
         count_method = '',
       },
       extmarks = {
+        hl_groups = { 'Illuminated.*', 'MiniDiff.*' }
       },
       signs = {
-        group = '*'
+        group = '.*'
       }
     },
   }
