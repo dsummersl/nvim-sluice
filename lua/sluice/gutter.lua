@@ -1,7 +1,6 @@
 local M = {
   vim = vim,
   gutters = nil,
-  lines = {},
   gutter_lines = {},
 }
 
@@ -11,38 +10,16 @@ local convert = require('sluice.convert')
 
 --- Update the gutter with new lines.
 function M.update(gutter, lines)
-  -- TODO store this plugin and its updated value
-  -- TODO then replay all the plugins in order.
   local gutter_settings = config.settings.gutters[gutter.index]
   local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    if gutter_settings.window.render_method == 'line' then
-      M.refresh_buffer_line(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
-    else
-      window.refresh_buffer_macro(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
-    end
+    window.refresh_buffer_macro(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
     window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end
 
---- Refresh the content of the gutter line by line.
-function M.refresh_buffer_line(bufnr, lines, count_method)
-  local win_height = M.vim.api.nvim_win_get_height(0)
-  local top_line = M.vim.fn.line('w0')
-  local bottom_line = M.vim.fn.line('w$')
-
-  local strings = {}
-  for i = top_line, bottom_line do
-    local matches = lines[i] or {}
-    local text = window.get_gutter_text(matches, count_method)
-    table.insert(strings, text)
-  end
-
-  M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
-end
-
---- Get plugin lines for each gutter
+--- Get all integration lines for a gutter
 function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
@@ -73,6 +50,15 @@ function M.get_lines(gutter)
       return
     end
 
+    -- TODO the update_fn of an integration (ie, viewport) is called multiple times when there are multiple
+    -- gutters using it - this doesn't need to happen. We should be able to:
+    --  - obtain a list of all integrations configured for all the gutters
+    --  - call each integration once
+    --  - pass these results to this function and use the values rather than recompute them
+    --
+    -- honestly though, rather than computing the lines for each gutter and
+    -- storing that value, it would be wiser to store them by integration. And
+    -- then coalesce them into the gutter lines at the time of rendering.
     local integration_lines = update_fn(gutter_settings, bufnr)
     for _, il in ipairs(integration_lines) do
       table.insert(lines, il)

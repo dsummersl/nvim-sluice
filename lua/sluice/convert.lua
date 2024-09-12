@@ -2,8 +2,16 @@ local M = {
   vim = vim
 }
 
---- Convert a line in the file, to the corresponding line in the gutter.
+--- Convert a line in the file, to the corresponding line in the gutter's
+--- window.
 function M.line_to_gutter_line(line, buffer_lines, height)
+  return line
+end
+
+--- Convert a line in the file, to the corresponding line in the gutter's
+--- window. This only converts the number relative to the total number of lines
+--- in the file (macro mode)
+function M.line_to_gutter_line_macro(line, buffer_lines, height)
   local gutter_line = math.floor(line / buffer_lines * height)
   if gutter_line == 0 then
     return 1
@@ -29,15 +37,18 @@ end
 function M.lines_to_gutters(settings, lines, buffer_lines, height)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
-  -- TODO maybe move this to viewport?
   for line = 1, height do
     gutter_lines[line] = {{ texthl = "", linehl = settings.window.default_gutter_hl, text = " " }}
   end
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
-    -- TODO how would the buffer_lines 
-    local gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
+    local gutter_line_number = 0
+    if settings.window.render_method == "macro" then
+      gutter_line_number = M.line_to_gutter_line_macro(line['lnum'], buffer_lines, height)
+    else
+      gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height)
+    end
     if not (gutter_line_number < 1 or gutter_line_number > height) then
       table.insert(gutter_lines[gutter_line_number], line)
     end

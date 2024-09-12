@@ -62,30 +62,25 @@ function M.refresh_highlights(bufnr, ns, lines)
   end
 end
 
---- Get the text for a single gutter line.
-function M.get_gutter_text(matches, count_method)
-  local text = ' '
-  local non_empty_matches = 0
-  for _, match in ipairs(matches) do
-    if match.text ~= " " then
-      non_empty_matches = non_empty_matches + 1
-    end
-  end
-  if count_method ~= nil and non_empty_matches > 1 then
-    text = counters.count(non_empty_matches, count_method)
-  else
-    text = M.find_best_match(matches, "text")['text']
-  end
-  return text
-end
-
 --- Refresh the content of the gutter.
 function M.refresh_buffer_macro(bufnr, lines, count_method)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
   for _, matches in ipairs(lines) do
-    local text = M.get_gutter_text(matches, count_method)
+    local text = ' '
+    local non_empty_matches = 0
+    for _, match in ipairs(matches) do
+      if match.text ~= " " then
+        non_empty_matches = non_empty_matches + 1
+      end
+    end
+    if count_method ~= nil and non_empty_matches > 1 then
+      text = counters.count(non_empty_matches, count_method)
+    else
+      text = M.find_best_match(matches, "text")['text']
+    end
+
     table.insert(strings, text)
   end
 
@@ -93,7 +88,8 @@ function M.refresh_buffer_macro(bufnr, lines, count_method)
 end
 
 function M.get_gutter_column(gutters, gutter_index, layout)
-  local window_width = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or 80  -- Default to 80 if function not available
+  local window_width = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or
+  80                                                                                          -- Default to 80 if function not available
   local column = 0
   local gutter_count = #gutters
   local config = require('sluice.config')
@@ -106,7 +102,7 @@ function M.get_gutter_column(gutters, gutter_index, layout)
       end
     end
     return window_width - column
-  else  -- 'left' layout
+  else -- 'left' layout
     for i = 1, gutter_index - 1 do
       local gutter_settings = config.settings.gutters[i]
       if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'left' then
@@ -130,7 +126,7 @@ function M.create_window(gutters, gutter_index)
 
   if gutter.bufnr == nil then
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
-    gutter.ns = M.vim.api.nvim_create_namespace('sluice'.. gutter.bufnr)
+    gutter.ns = M.vim.api.nvim_create_namespace('sluice' .. gutter.bufnr)
   end
   if gutter.winid == nil or M.vim.fn.win_id2win(gutter.winid) == 0 then
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
