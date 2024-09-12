@@ -117,6 +117,82 @@ describe('find_best_match()', function()
   end)
 end)
 
+describe('create_window()', function()
+  local mock_vim = {
+    api = {
+      nvim_create_buf = function() return 1 end,
+      nvim_create_namespace = function() return 1 end,
+      nvim_open_win = function() return 1 end,
+      nvim_win_set_config = function() end,
+      nvim_win_get_height = function() return 10 end,
+      nvim_get_current_win = function() return 0 end,
+    },
+    fn = {
+      win_id2win = function() return 0 end,
+    },
+  }
+
+  before_each(function()
+    window.vim = mock_vim
+    config.settings = {
+      gutters = {
+        {
+          window = {
+            width = 2,
+            layout = 'right',
+          },
+        },
+      },
+    }
+  end)
+
+  it('creates a window with right layout', function()
+    local gutters = {{}}
+    local spy = vim.spy.on(mock_vim.api, 'nvim_open_win')
+    window.create_window(gutters, 1)
+    assert.spy(spy).was_called_with(1, false, {
+      relative = 'win',
+      width = 2,
+      height = 10,
+      row = 0,
+      col = vim.api.nvim_win_get_width(0) - 2,
+      focusable = false,
+      style = 'minimal',
+    })
+  end)
+
+  it('creates a window with left layout', function()
+    config.settings.gutters[1].window.layout = 'left'
+    local gutters = {{}}
+    local spy = vim.spy.on(mock_vim.api, 'nvim_open_win')
+    window.create_window(gutters, 1)
+    assert.spy(spy).was_called_with(1, false, {
+      relative = 'win',
+      width = 2,
+      height = 10,
+      row = 0,
+      col = 0,
+      focusable = false,
+      style = 'minimal',
+    })
+  end)
+
+  it('updates an existing window', function()
+    local gutters = {{winid = 1}}
+    mock_vim.fn.win_id2win = function() return 1 end
+    local spy = vim.spy.on(mock_vim.api, 'nvim_win_set_config')
+    window.create_window(gutters, 1)
+    assert.spy(spy).was_called_with(1, {
+      win = 0,
+      relative = 'win',
+      width = 2,
+      height = 10,
+      row = 0,
+      col = vim.api.nvim_win_get_width(0) - 2,
+    })
+  end)
+end)
+
 describe('get_gutter_column()', function()
   local vim_width = vim.api.nvim_win_get_width(0)
   local one_gutter = {

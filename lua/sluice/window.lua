@@ -108,8 +108,14 @@ function M.create_window(gutters, gutter_index)
   local gutter = gutters[gutter_index]
   local gutter_settings = require('sluice.config').settings.gutters[gutter_index]
   local gutter_width = gutter_settings.window.width
+  local layout = gutter_settings.window.layout or 'right'
 
-  local col = M.get_gutter_column(gutters, gutter_index)
+  local col
+  if layout == 'right' then
+    col = M.get_gutter_column(gutters, gutter_index)
+  else
+    col = 0
+  end
   local height = M.vim.api.nvim_win_get_height(0)
 
   if gutter.bufnr == nil then
