@@ -216,45 +216,74 @@ describe('get_gutter_column()', function()
   local one_gutter = {
       gutters = {{
         window = {
-          width = 3
+          width = 3,
+          layout = 'right'
         }
       }},
     }
     local two_gutters = {
         gutters = {{
           window = {
-            width = 3
+            width = 3,
+            layout = 'right'
           }
         }, {
           window = {
-            width = 2
+            width = 2,
+            layout = 'right'
+          }
+        }},
+      }
+    local mixed_gutters = {
+        gutters = {{
+          window = {
+            width = 3,
+            layout = 'right'
+          }
+        }, {
+          window = {
+            width = 2,
+            layout = 'left'
+          }
+        }, {
+          window = {
+            width = 1,
+            layout = 'right'
           }
         }},
       }
 
   it('returns the right most column by its order', function()
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 1))
-    assert.are.same(vim_width - 1, window.get_gutter_column(gutters, 2))
+    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(vim_width - 1, window.get_gutter_column(gutters, 2, 'right'))
   end)
 
   it('would account for a plugin with a custom width', function()
     config.apply_user_settings(one_gutter)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1))
+    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1, 'right'))
   end)
 
-  it('would count multiple gutters', function()
+  it('would count multiple gutters with the same layout', function()
     config.apply_user_settings(two_gutters)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 5, window.get_gutter_column(gutters, 1))
-    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 2))
+    assert.are.same(vim_width - 5, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 2, 'right'))
   end)
 
   it('ignores gutters that are not enabled', function()
     two_gutters.gutters[2].enabled = false
     config.apply_user_settings(two_gutters)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1))
+    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1, 'right'))
+  end)
+
+  it('handles mixed layouts correctly', function()
+    config.apply_user_settings(mixed_gutters)
+    local gutters = gutter.init_gutters(config)
+    assert.are.same(vim_width - 4, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(0, window.get_gutter_column(gutters, 2, 'left'))
+    assert.are.same(vim_width - 1, window.get_gutter_column(gutters, 3, 'right'))
   end)
 end)

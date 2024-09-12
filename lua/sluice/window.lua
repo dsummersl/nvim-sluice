@@ -96,7 +96,7 @@ function M.get_gutter_column(gutters, gutter_index, layout)
   if layout == 'right' then
     for i = gutter_count, gutter_index, -1 do
       local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false then
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'right' then
         column = column + gutter_settings.window.width
       end
     end
@@ -104,7 +104,7 @@ function M.get_gutter_column(gutters, gutter_index, layout)
   else  -- 'left' layout
     for i = 1, gutter_index - 1 do
       local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false then
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'left' then
         column = column + gutter_settings.window.width
       end
     end
