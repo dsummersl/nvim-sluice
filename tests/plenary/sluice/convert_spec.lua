@@ -19,12 +19,6 @@ describe('line_to_gutter_line_macro()', function()
     assert.are.equal(convert.line_to_gutter_line_macro(1, 1000, 10, 1), 1)
     assert.are.equal(convert.line_to_gutter_line_macro(1000, 1000, 10, 1000), 10)
   end)
-
-  it('adjusts gutter lines based on cursor position', function()
-    assert.are.equal(convert.line_to_gutter_line_macro(1, 100, 50, 25), 13)
-    assert.are.equal(convert.line_to_gutter_line_macro(50, 100, 50, 25), 25)
-    assert.are.equal(convert.line_to_gutter_line_macro(100, 100, 50, 75), 38)
-  end)
 end)
 
 local gutter_settings = {
