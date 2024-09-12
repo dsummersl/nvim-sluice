@@ -93,6 +93,9 @@ local default_gutter_settings = {
 
     --- Layout of the gutter. Can be 'left' or 'right'.
     layout = 'right',
+
+    --- Render method for the gutter. Can be 'macro' or 'line'.
+    render_method = 'macro',
   },
 }
 
@@ -159,9 +162,13 @@ function M.apply_user_settings(user_settings)
             ['gutters[' .. i .. '].window.enabled_fn'] = { gutter.window.enabled_fn, 'function', true },
             ['gutters[' .. i .. '].window.count_method'] = { gutter.window.count_method, {'string', 'function'}, true },
             ['gutters[' .. i .. '].window.layout'] = { gutter.window.layout, 'string', true },
+            ['gutters[' .. i .. '].window.render_method'] = { gutter.window.render_method, 'string', true },
           })
           if gutter.window.layout ~= nil and gutter.window.layout ~= 'left' and gutter.window.layout ~= 'right' then
             error("gutters[" .. i .. "].window.layout must be 'left' or 'right'")
+          end
+          if gutter.window.render_method ~= nil and gutter.window.render_method ~= 'macro' and gutter.window.render_method ~= 'line' then
+            error("gutters[" .. i .. "].window.render_method must be 'macro' or 'line'")
           end
         end
       end

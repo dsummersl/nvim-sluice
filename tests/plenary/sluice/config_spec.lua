@@ -175,6 +175,37 @@ describe('sluice.config', function()
       end, "gutters[1].window.layout must be 'left' or 'right'")
     end)
 
+    it('should throw an error for invalid render_method', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'viewport' },
+            window = {
+              render_method = 'invalid'
+            }
+          }
+        }
+      }
+      assert.has_error(function()
+        config.apply_user_settings(user_settings)
+      end, "gutters[1].window.render_method must be 'macro' or 'line'")
+    end)
+
+    it('should accept valid render_method', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'viewport' },
+            window = {
+              render_method = 'line'
+            }
+          }
+        }
+      }
+      config.apply_user_settings(user_settings)
+      assert.are.equal('line', config.settings.gutters[1].window.render_method)
+    end)
+
     it('should throw an error for invalid types', function()
       assert.has_error(function()
         config.apply_user_settings({ enable = 'true' })
