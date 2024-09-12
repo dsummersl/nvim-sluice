@@ -87,19 +87,29 @@ function M.refresh_buffer(bufnr, lines, count_method)
   M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
-function M.get_gutter_column(gutters, gutter_index)
-  local column = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or 80  -- Default to 80 if function not available
+function M.get_gutter_column(gutters, gutter_index, layout)
+  local window_width = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or 80  -- Default to 80 if function not available
+  local column = 0
   local gutter_count = #gutters
-  for i = gutter_count, gutter_index, -1 do
-    local gutter_settings = M.vim.tbl_get(require('sluice.config').settings.gutters, i)
-    if gutter_settings then
-      local gutter_width = gutter_settings.window.width
-      if gutters[i] and gutters[i].enabled ~= false then
-        column = column - gutter_width
+  local config = require('sluice.config')
+
+  if layout == 'right' then
+    for i = gutter_count, gutter_index, -1 do
+      local gutter_settings = config.settings.gutters[i]
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false then
+        column = column + gutter_settings.window.width
       end
     end
+    return window_width - column
+  else  -- 'left' layout
+    for i = 1, gutter_index - 1 do
+      local gutter_settings = config.settings.gutters[i]
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false then
+        column = column + gutter_settings.window.width
+      end
+    end
+    return column
   end
-  return column
 end
 
 --- Create a gutter.
@@ -110,20 +120,14 @@ function M.create_window(gutters, gutter_index)
   local gutter_width = gutter_settings.window.width
   local layout = gutter_settings.window.layout
 
-  local col
-  if layout == 'right' then
-    col = M.get_gutter_column(gutters, gutter_index)
-  else
-    -- TODO we need a get_gutter_column to accomodate the layout parameter
-    col = 0
-  end
+  local col = M.get_gutter_column(gutters, gutter_index, layout)
   local height = M.vim.api.nvim_win_get_height(0)
 
   if gutter.bufnr == nil then
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
     gutter.ns = M.vim.api.nvim_create_namespace('sluice'.. gutter.bufnr)
   end
-  if gutter.winid == nil or vim.fn.win_id2win(gutter.winid) == 0 then
+  if gutter.winid == nil or M.vim.fn.win_id2win(gutter.winid) == 0 then
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
       width = gutter_width,
