@@ -1,10 +1,20 @@
 local convert = require('sluice.convert')
 
 describe('line_to_gutter_line()', function()
-  it('returns the same line number for line mode', function()
+  it('returns the correct line number for visible lines', function()
+    assert.are.equal(convert.line_to_gutter_line(1, 100, 50, 25), 1)
+    assert.are.equal(convert.line_to_gutter_line(25, 100, 50, 25), 25)
+    assert.are.equal(convert.line_to_gutter_line(50, 100, 50, 25), 50)
+  end)
+
+  it('returns 0 for lines outside the visible range', function()
+    assert.are.equal(convert.line_to_gutter_line(1, 100, 50, 50), 0)
+    assert.are.equal(convert.line_to_gutter_line(100, 100, 50, 50), 0)
+  end)
+
+  it('handles edge cases', function()
     assert.are.equal(convert.line_to_gutter_line(1, 100, 50, 1), 1)
-    assert.are.equal(convert.line_to_gutter_line(50, 100, 50, 50), 50)
-    assert.are.equal(convert.line_to_gutter_line(100, 100, 50, 100), 100)
+    assert.are.equal(convert.line_to_gutter_line(100, 100, 50, 100), 50)
   end)
 end)
 

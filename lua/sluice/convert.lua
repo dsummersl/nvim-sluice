@@ -5,7 +5,14 @@ local M = {
 --- Convert a line in the file, to the corresponding line in the gutter's
 --- window.
 function M.line_to_gutter_line(line, buffer_lines, height, cursor_position)
-  return line
+  local start_line = math.max(1, cursor_position - math.floor(height / 2))
+  local end_line = start_line + height - 1
+
+  if line < start_line or line > end_line then
+    return 0
+  end
+
+  return line - start_line + 1
 end
 
 --- Convert a line in the file, to the corresponding line in the gutter's
