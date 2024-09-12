@@ -16,10 +16,30 @@ function M.update(gutter, lines)
   local gutter_settings = config.settings.gutters[gutter.index]
   local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    window.refresh_buffer_macro(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
+    if gutter_settings.window.render_method == 'line' then
+      M.refresh_buffer_line(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
+    else
+      window.refresh_buffer_macro(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
+    end
     window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
+end
+
+--- Refresh the content of the gutter line by line.
+function M.refresh_buffer_line(bufnr, lines, count_method)
+  local win_height = M.vim.api.nvim_win_get_height(0)
+  local top_line = M.vim.fn.line('w0')
+  local bottom_line = M.vim.fn.line('w$')
+
+  local strings = {}
+  for i = top_line, bottom_line do
+    local matches = lines[i] or {}
+    local text = window.get_gutter_text(matches, count_method)
+    table.insert(strings, text)
+  end
+
+  M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
 --- Get plugin lines for each gutter

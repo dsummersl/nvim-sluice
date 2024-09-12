@@ -62,25 +62,30 @@ function M.refresh_highlights(bufnr, ns, lines)
   end
 end
 
+--- Get the text for a single gutter line.
+function M.get_gutter_text(matches, count_method)
+  local text = ' '
+  local non_empty_matches = 0
+  for _, match in ipairs(matches) do
+    if match.text ~= " " then
+      non_empty_matches = non_empty_matches + 1
+    end
+  end
+  if count_method ~= nil and non_empty_matches > 1 then
+    text = counters.count(non_empty_matches, count_method)
+  else
+    text = M.find_best_match(matches, "text")['text']
+  end
+  return text
+end
+
 --- Refresh the content of the gutter.
 function M.refresh_buffer_macro(bufnr, lines, count_method)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
   for _, matches in ipairs(lines) do
-    local text = ' '
-    local non_empty_matches = 0
-    for _, match in ipairs(matches) do
-      if match.text ~= " " then
-        non_empty_matches = non_empty_matches + 1
-      end
-    end
-    if count_method ~= nil and non_empty_matches > 1 then
-      text = counters.count(non_empty_matches, count_method)
-    else
-      text = M.find_best_match(matches, "text")['text']
-    end
-
+    local text = M.get_gutter_text(matches, count_method)
     table.insert(strings, text)
   end
 
