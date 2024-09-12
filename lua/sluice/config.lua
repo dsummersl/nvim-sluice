@@ -90,6 +90,9 @@ local default_gutter_settings = {
 
     --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
     count_method = nil,
+
+    --- Layout of the gutter. Can be 'left' or 'right'.
+    layout = 'right',
   },
 }
 
@@ -155,7 +158,11 @@ function M.apply_user_settings(user_settings)
             ['gutters[' .. i .. '].window.default_gutter_hl'] = { gutter.window.default_gutter_hl, 'string', true },
             ['gutters[' .. i .. '].window.enabled_fn'] = { gutter.window.enabled_fn, 'function', true },
             ['gutters[' .. i .. '].window.count_method'] = { gutter.window.count_method, {'string', 'function'}, true },
+            ['gutters[' .. i .. '].window.layout'] = { gutter.window.layout, 'string', true },
           })
+          if gutter.window.layout ~= nil and gutter.window.layout ~= 'left' and gutter.window.layout ~= 'right' then
+            error("gutters[" .. i .. "].window.layout must be 'left' or 'right'")
+          end
         end
       end
     end

@@ -131,6 +131,50 @@ describe('sluice.config', function()
       assert.are.equal('custom_group', config.settings.gutters[1].signs.group)
     end)
 
+    it('should handle window layout setting', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'viewport' },
+            window = {
+              layout = 'left'
+            }
+          }
+        }
+      }
+      config.apply_user_settings(user_settings)
+      assert.are.equal('left', config.settings.gutters[1].window.layout)
+    end)
+
+    it('should default to right layout when not specified', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'viewport' },
+            window = {}
+          }
+        }
+      }
+      config.apply_user_settings(user_settings)
+      assert.are.equal('right', config.settings.gutters[1].window.layout)
+    end)
+
+    it('should throw an error for invalid layout', function()
+      local user_settings = {
+        gutters = {
+          {
+            plugins = { 'viewport' },
+            window = {
+              layout = 'invalid'
+            }
+          }
+        }
+      }
+      assert.has_error(function()
+        config.apply_user_settings(user_settings)
+      end, "gutters[1].window.layout must be 'left' or 'right'")
+    end)
+
     it('should throw an error for invalid types', function()
       assert.has_error(function()
         config.apply_user_settings({ enable = 'true' })
