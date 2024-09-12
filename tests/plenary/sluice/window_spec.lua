@@ -125,15 +125,33 @@ describe('create_window()', function()
       nvim_open_win = function() return 1 end,
       nvim_win_set_config = function() end,
       nvim_win_get_height = function() return 10 end,
+      nvim_win_get_width = function() return 80 end,
       nvim_get_current_win = function() return 0 end,
     },
     fn = {
       win_id2win = function() return 0 end,
     },
+    spy = {
+      on = function(table, key)
+        local original = table[key]
+        table[key] = setmetatable({
+          calls = {},
+          original = original,
+        }, {
+          __call = function(t, ...)
+            table.insert(t.calls, {...})
+            return original(...)
+          end,
+        })
+        return table[key]
+      end,
+    },
   }
 
   before_each(function()
     window.vim = mock_vim
+    package.loaded['sluice.config'] = nil
+    config = require('sluice.config')
     config.settings = {
       gutters = {
         {

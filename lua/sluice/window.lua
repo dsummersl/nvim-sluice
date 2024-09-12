@@ -88,7 +88,7 @@ function M.refresh_buffer(bufnr, lines, count_method)
 end
 
 function M.get_gutter_column(gutters, gutter_index)
-  local column = M.vim.api.nvim_win_get_width(0)
+  local column = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or 80  -- Default to 80 if function not available
   local gutter_count = #gutters
   for i = gutter_count, gutter_index, -1 do
     local gutter_settings = M.vim.tbl_get(require('sluice.config').settings.gutters, i)
