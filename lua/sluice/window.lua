@@ -63,7 +63,7 @@ function M.refresh_highlights(bufnr, ns, lines)
 end
 
 --- Refresh the content of the gutter.
-function M.refresh_buffer(bufnr, lines, count_method)
+function M.refresh_buffer_macro(bufnr, lines, count_method)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
