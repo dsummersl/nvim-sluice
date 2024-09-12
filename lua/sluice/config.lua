@@ -26,27 +26,6 @@ function M.str_table_fn(obj, value)
   return false
 end
 
--- Test cases for str_table_fn
-local function test_str_table_fn()
-  assert(M.str_table_fn("test", "test"), "String equality test failed")
-  assert(not M.str_table_fn("test", "other"), "String inequality test failed")
-  assert(M.str_table_fn("t.*t", "test"), "Regex match test failed")
-  assert(not M.str_table_fn("a.*b", "test"), "Regex non-match test failed")
-  
-  assert(M.str_table_fn({"a", "b", "c"}, "b"), "Table inclusion test failed")
-  assert(not M.str_table_fn({"a", "b", "c"}, "d"), "Table exclusion test failed")
-  assert(M.str_table_fn({"a.*c", "b.*d"}, "abcd"), "Table regex match test failed")
-  assert(not M.str_table_fn({"x.*z", "p.*q"}, "abcd"), "Table regex non-match test failed")
-  
-  assert(M.str_table_fn(function(x) return x > 5 end, 10), "Function true test failed")
-  assert(not M.str_table_fn(function(x) return x > 5 end, 3), "Function false test failed")
-  
-  print("All str_table_fn tests passed!")
-end
-
--- Uncomment the line below to run the tests
--- test_str_table_fn()
-
 --- Whether to display the gutter or not.
 --
 -- Returns boolean indicating whether the gutter is shown on screen or not.
@@ -110,7 +89,7 @@ local default_gutter_settings = {
     enabled_fn = M.default_enabled_fn,
 
     --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
-    count_method = counters.methods.horizontal_block,
+    count_method = nil,
   },
 }
 
@@ -130,6 +109,7 @@ local default_settings = {
       plugins = { 'viewport', 'search' },
       window = {
         enabled_fn = M.make_has_results_fn('search'),
+        count_method = counters.methods.horizontal_block,
       },
     },
     {
@@ -138,9 +118,10 @@ local default_settings = {
         count_method = '',
       },
       extmarks = {
-        hl_groups = { 'Illuminated.*', 'MiniDiff.*' }
+        hl_groups = '.*'
       },
       signs = {
+        -- TODO rename to groups?
         group = '.*'
       }
     },

@@ -75,7 +75,7 @@ function M.refresh_buffer(bufnr, lines, count_method)
         non_empty_matches = non_empty_matches + 1
       end
     end
-    if count_method ~= '' and non_empty_matches > 1 then
+    if count_method ~= nil and non_empty_matches > 1 then
       text = counters.count(non_empty_matches, count_method)
     else
       text = M.find_best_match(matches, "text")['text']

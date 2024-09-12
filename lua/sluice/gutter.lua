@@ -81,7 +81,8 @@ function M.open()
   --   return
   -- end
 
-  if M.gutters == nil then
+  -- TODO we need some better way to init the gutters but only minimally?
+  if M.gutters == nil or #M.gutters ~= #config.settings.gutters then
     M.gutters = M.init_gutters(config)
   end
 

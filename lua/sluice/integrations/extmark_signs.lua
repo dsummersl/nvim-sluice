@@ -18,7 +18,7 @@ function M.update(settings, bufnr)
   for _, mark in ipairs(extmarks) do
     local row = mark[2]
     local details = mark[4]
-    if details['sign_hl_group'] ~= "" and config.str_table_fn(hl_groups, details['sign_hl_group']) then
+    if details['sign_hl_group'] ~= nil and config.str_table_fn(hl_groups, details['sign_hl_group']) then
       table.insert(result, {
         lnum = row + 1,
         text = details["sign_text"],
@@ -38,12 +38,6 @@ function M.enable(_settings, _bufnr)
 end
 
 function M.disable(settings, _bufnr)
-  local hl_groups = settings.extmarks and settings.extmarks.hl_groups
-  if hl_groups then
-    for _, hl_group in ipairs(hl_groups) do
-      M.vim.api.nvim_exec("hi clear " .. hl_group, false)
-    end
-  end
 end
 
 return M
