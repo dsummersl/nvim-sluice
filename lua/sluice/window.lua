@@ -63,7 +63,7 @@ function M.refresh_highlights(bufnr, ns, lines)
 end
 
 --- Refresh the content of the gutter.
-function M.refresh_buffer_macro(bufnr, lines, count_method)
+function M.set_gutter_lines(bufnr, lines, count_method, width)
   local win_height = M.vim.api.nvim_win_get_height(0)
 
   local strings = {}
@@ -81,6 +81,8 @@ function M.refresh_buffer_macro(bufnr, lines, count_method)
       text = M.find_best_match(matches, "text")['text']
     end
 
+    -- pad text to width
+    text = string.rep(' ', width - #text) .. text
     table.insert(strings, text)
   end
 
