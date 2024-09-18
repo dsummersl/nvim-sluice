@@ -131,21 +131,7 @@ describe('create_window()', function()
     fn = {
       win_id2win = function() return 0 end,
     },
-    spy = {
-      on = function(table, key)
-        local original = table[key]
-        table[key] = setmetatable({
-          calls = {},
-          original = original,
-        }, {
-          __call = function(t, ...)
-            table.insert(t.calls, {...})
-            return original(...)
-          end,
-        })
-        return table[key]
-      end,
-    },
+    -- Remove spy object
   }
 
   before_each(function()
@@ -166,25 +152,33 @@ describe('create_window()', function()
 
   it('creates a window with right layout', function()
     local gutters = {{}}
-    local spy = vim.spy.on(mock_vim.api, 'nvim_open_win')
+    local called_with = nil
+    mock_vim.api.nvim_open_win = function(...)
+      called_with = {...}
+      return 1
+    end
     window.create_window(gutters, 1)
-    assert.spy(spy).was_called_with(1, false, {
+    assert.are.same({1, false, {
       relative = 'win',
       width = 2,
       height = 10,
       row = 0,
-      col = vim.api.nvim_win_get_width(0) - 2,
+      col = mock_vim.api.nvim_win_get_width(0) - 2,
       focusable = false,
       style = 'minimal',
-    })
+    }}, called_with)
   end)
 
   it('creates a window with left layout', function()
     config.settings.gutters[1].window.layout = 'left'
     local gutters = {{}}
-    local spy = vim.spy.on(mock_vim.api, 'nvim_open_win')
+    local called_with = nil
+    mock_vim.api.nvim_open_win = function(...)
+      called_with = {...}
+      return 1
+    end
     window.create_window(gutters, 1)
-    assert.spy(spy).was_called_with(1, false, {
+    assert.are.same({1, false, {
       relative = 'win',
       width = 2,
       height = 10,
@@ -192,22 +186,25 @@ describe('create_window()', function()
       col = 0,
       focusable = false,
       style = 'minimal',
-    })
+    }}, called_with)
   end)
 
   it('updates an existing window', function()
     local gutters = {{winid = 1}}
     mock_vim.fn.win_id2win = function() return 1 end
-    local spy = vim.spy.on(mock_vim.api, 'nvim_win_set_config')
+    local called_with = nil
+    mock_vim.api.nvim_win_set_config = function(...)
+      called_with = {...}
+    end
     window.create_window(gutters, 1)
-    assert.spy(spy).was_called_with(1, {
+    assert.are.same({1, {
       win = 0,
       relative = 'win',
       width = 2,
       height = 10,
       row = 0,
-      col = vim.api.nvim_win_get_width(0) - 2,
-    })
+      col = mock_vim.api.nvim_win_get_width(0) - 2,
+    }}, called_with)
   end)
 end)
 
