@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: make-test
+        name: Make Test
+        entry: make test
+        language: system
+        files: '.*'
+        stages: [commit]

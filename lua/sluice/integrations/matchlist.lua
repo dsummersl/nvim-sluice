@@ -60,5 +60,4 @@ end
 function M.disable(settings, winid)
 end
 
-
 return M

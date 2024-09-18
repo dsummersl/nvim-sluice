@@ -1,7 +1,6 @@
 local M = {
   vim = vim,
   gutters = nil,
-  lines = {},
   gutter_lines = {},
 }
 
@@ -11,19 +10,21 @@ local convert = require('sluice.convert')
 
 --- Update the gutter with new lines.
 function M.update(gutter, lines)
-  -- TODO store this plugin and its updated value
-  -- TODO then replay all the plugins in order.
-  local gutter_lines = convert.lines_to_gutter_lines(gutter.settings, lines)
-  window.refresh_buffer(gutter.bufnr, gutter_lines, gutter.settings.window.count_method)
-  window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
+  local gutter_settings = config.settings.gutters[gutter.index]
+  local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
+  M.vim.schedule(function()
+    window.refresh_buffer_macro(gutter.bufnr, gutter_lines, gutter_settings.window.count_method)
+    window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
+  end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end
 
---- Get plugin lines for each gutter
+--- Get all integration lines for a gutter
 function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
-  for _, plugin in ipairs(gutter.settings.plugins) do
+  local gutter_settings = config.settings.gutters[gutter.index]
+  for _, plugin in ipairs(gutter_settings.plugins) do
     local enable_fn = nil
     local update_fn = nil
 
@@ -40,7 +41,7 @@ function M.get_lines(gutter)
     end
 
     if enable_fn ~= nil then
-      enable_fn(gutter.settings, bufnr)
+      enable_fn(gutter_settings, bufnr)
     end
 
     if update_fn == nil then
@@ -49,7 +50,16 @@ function M.get_lines(gutter)
       return
     end
 
-    local integration_lines = update_fn(gutter.settings, bufnr)
+    -- TODO the update_fn of an integration (ie, viewport) is called multiple times when there are multiple
+    -- gutters using it - this doesn't need to happen. We should be able to:
+    --  - obtain a list of all integrations configured for all the gutters
+    --  - call each integration once
+    --  - pass these results to this function and use the values rather than recompute them
+    --
+    -- honestly though, rather than computing the lines for each gutter and
+    -- storing that value, it would be wiser to store them by integration. And
+    -- then coalesce them into the gutter lines at the time of rendering.
+    local integration_lines = update_fn(gutter_settings, bufnr)
     for _, il in ipairs(integration_lines) do
       table.insert(lines, il)
     end
@@ -60,14 +70,12 @@ end
 
 --- Create initial gutter settings
 function M.init_gutters(config)
-  local gutter_count = M.vim.tbl_count(config.settings.gutters)
   local gutters = {}
   for i, v in ipairs(config.settings.gutters) do
-    if gutters[i] == nil then
-      gutters[i] = {}
-      gutters[i].settings = v
-      gutters[i].enabled = true
-    end
+    gutters[i] = {
+      index = i,
+      enabled = v.enabled
+    }
   end
 
   return gutters
@@ -79,7 +87,8 @@ function M.open()
   --   return
   -- end
 
-  if M.gutters == nil then
+  -- TODO we need some better way to init the gutters but only minimally?
+  if M.gutters == nil or #M.gutters ~= #config.settings.gutters then
     M.gutters = M.init_gutters(config)
   end
 
@@ -89,13 +98,15 @@ function M.open()
     gutter.enabled = gutter_settings.window.enabled_fn(gutter)
   end
 
-  for i, v in ipairs(config.settings.gutters) do
-    if M.gutters[i].enabled then
-      M.open_gutter(i)
-    else
-      M.close_gutter(M.gutters[i])
+  M.vim.schedule(function()
+    for i, _ in ipairs(config.settings.gutters) do
+      if M.gutters[i].enabled then
+        M.open_gutter(i)
+      else
+        M.close_gutter(M.gutters[i])
+      end
     end
-  end
+  end)
 end
 
 --- Open one gutter
@@ -114,7 +125,8 @@ function M.close_gutter(gutter)
     return
   end
 
-  for _, plugin in ipairs(gutter.settings.plugins) do
+  local gutter_settings = config.settings.gutters[gutter.index]
+  for _, plugin in ipairs(gutter_settings.plugins) do
     local disable_fn = nil
     if type(plugin) == "string" then
       -- when there is an integration, load it, and enable it.
@@ -126,7 +138,7 @@ function M.close_gutter(gutter)
     end
 
     if M.vim.fn.bufexists(gutter.bufnr) ~= 0 then
-      disable_fn(gutter.settings, gutter.bufnr)
+      disable_fn(gutter_settings, gutter.bufnr)
     end
   end
 
