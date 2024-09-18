@@ -101,7 +101,7 @@ function M.get_gutter_column(gutters, gutter_index, layout)
         column = column + gutter_settings.window.width
       end
     end
-    return window_width - column - 1  -- Subtract 1 to fix the off-by-one error
+    return window_width - column
   else -- 'left' layout
     for i = 1, gutter_index - 1 do
       local gutter_settings = config.settings.gutters[i]

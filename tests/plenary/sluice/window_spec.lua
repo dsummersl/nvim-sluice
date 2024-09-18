@@ -252,8 +252,8 @@ describe('get_gutter_column()', function()
 
   it('returns the right most column by its order', function()
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1, 'right'))
-    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 2, 'right'))
+    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(vim_width - 1, window.get_gutter_column(gutters, 2, 'right'))
   end)
 
   it('would account for a plugin with a custom width', function()
