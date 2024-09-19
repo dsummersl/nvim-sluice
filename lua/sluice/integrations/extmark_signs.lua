@@ -24,7 +24,7 @@ function M.update(settings, bufnr)
         text = details["sign_text"],
         texthl = details["sign_hl_group"],
         priority = details["priority"],
-        plugin = 'extmarks',
+        plugin = 'extmark_signs',
       })
     end
   end
