@@ -5,12 +5,12 @@ local M = {
 }
 
 function M.add_hl_groups(result, bufnr, settings, hl_group_type)
-  -- lookup hl_groups or sign_hl_groups:
+  -- lookup hl_groups or sign_hl_group:
   local plugin_config = (settings.extmark and settings.extmark)
   if not plugin_config then
     return {}
   end
-  local hl_groups = plugin_config[hl_group_type .. "s"]
+  local hl_groups = plugin_config[hl_group_type]
   local text = plugin_config['text'] or ' '
 
   local extmarks = M.vim.api.nvim_buf_get_extmarks(bufnr, -1, 0, -1, {details = true})

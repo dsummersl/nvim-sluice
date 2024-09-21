@@ -27,8 +27,8 @@ extmark.vim = {
 }
 
 describe("update", function()
-  it("should return extmarks as signs when sign_hl_groups match", function()
-    local result = extmark.update({ extmark = { sign_hl_groups = { 'DiagnosticSignWarn', 'MiniDiffSignAdd' } } }, 0)
+  it("should return extmarks as signs when sign_hl_group match", function()
+    local result = extmark.update({ extmark = { sign_hl_group = { 'DiagnosticSignWarn', 'MiniDiffSignAdd' } } }, 0)
     assert.is_table(result)
     assert.equals(2, #result)
     assert.same({
@@ -48,7 +48,7 @@ describe("update", function()
   end)
 
   it("should filter extmarks based on hl_groups", function()
-    local result = extmark.update({ extmark = { sign_hl_groups = 'DiagnosticSignWarn' } }, 0)
+    local result = extmark.update({ extmark = { sign_hl_group = 'DiagnosticSignWarn' } }, 0)
     assert.is_table(result)
     assert.equals(1, #result)
     assert.same({

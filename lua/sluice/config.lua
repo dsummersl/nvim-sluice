@@ -136,7 +136,7 @@ local default_settings = {
       count_method = nil,
       integrations = { 'viewport', 'signs', 'extmark' },
       extmark = {
-        sign_hl_groups = '.*'
+        sign_hl_group = '.*'
       },
       signs = {
         -- TODO rename to groups?
