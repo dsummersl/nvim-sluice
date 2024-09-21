@@ -66,7 +66,7 @@ Here's an example of how to configure Sluice with its default settings:
       throttle_ms = 150,
       gutters = {
         {
-          plugins = { 'viewport', 'search' },
+          integrations = { 'viewport', 'search' },
           window = {
             width = 1,
             default_gutter_hl = 'SluiceColumn',
@@ -75,7 +75,7 @@ Here's an example of how to configure Sluice with its default settings:
           },
         },
         {
-          plugins = { 'viewport', 'signs', 'extmark' },
+          integrations = { 'viewport', 'signs', 'extmark' },
           window = {
             width = 1,
             default_gutter_hl = 'SluiceColumn',
@@ -105,11 +105,11 @@ Here's an example of how to configure Sluice with its default settings:
 
 Sluice supports multiple gutters, each with its own configuration.
 
-`plugins`                                               *NvimSluiceGutterPlugins*
+`integrations`                                               *NvimSluiceGutterPlugins*
     Type: table of strings
     Default: `{ 'viewport', 'search' }` for the first gutter,
              `{ 'viewport', 'signs', 'extmark' }` for the second gutter
-    The plugins to use for this gutter.
+    The integrations to use for this gutter.
 
 `window`                                                *NvimSluiceGutterWindow*
     Type: table

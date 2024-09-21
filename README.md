@@ -40,14 +40,14 @@ Default configuration:
 {
   enable = true,
   gutters = { {
-      plugins = { "viewport", "search" },
+      integrations = { "viewport", "search" },
       window = {
         default_gutter_hl = "SluiceColumn",
         enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
     }, {
-      plugins = { "viewport", "signs" },
+      integrations = { "viewport", "signs" },
       window = {
         count_method = "",
         default_gutter_hl = "SluiceColumn",
@@ -70,7 +70,7 @@ Example configuration with left and right gutters:
   enable = true,
   gutters = {
     left = { -- Define a gutter on the left side
-      plugins = { "gitsigns", "lsp" },
+      integrations = { "gitsigns", "lsp" },
       window = {
         default_gutter_hl = "SluiceGutter",
         enabled = <function 1>,
@@ -80,7 +80,7 @@ Example configuration with left and right gutters:
       }
     },
     right = { -- Define a gutter on the right side (existing functionality)
-      plugins = { "viewport", "search" },
+      integrations = { "viewport", "search" },
       window = {
         default_gutter_hl = "SluiceColumn",
         enabled = <function 2>,
@@ -128,7 +128,7 @@ With the new configuration options, you can:
 - Define gutters on both the left and right sides of the screen.
 - Configure the symbols and width of each gutter.
 - Whitelist or blacklist specific highlight groups to fine-tune what is displayed in the gutters.
-- Create dedicated gutters for specific plugins like gitsigns or LSP messages.
+- Create dedicated gutters for specific integrations like gitsigns or LSP messages.
 
 These features provide greater flexibility in how you view and interact with different signs and messages within Neovim.
 

@@ -6,7 +6,7 @@ local M = {
 }
 
 --- Find the best match, ordered by priority.
--- @param matches List of matches from plugins.
+-- @param matches List of matches from integrations.
 -- @param optional key to prioritize by (beyond priority).
 function M.find_best_match(matches, key)
   local best_match = nil

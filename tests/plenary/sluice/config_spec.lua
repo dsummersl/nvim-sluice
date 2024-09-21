@@ -69,7 +69,7 @@ describe('sluice.config', function()
           {
             width = 2,
             enabled = function() return true end,
-            plugins = { 'viewport', 'counters' },
+            integrations = { 'viewport', 'counters' },
           },
         },
       }
@@ -85,7 +85,7 @@ describe('sluice.config', function()
       assert.is_true(config.settings.enabled)
       -- Check that other settings are still at their default values
       assert.are.equal(150, config.settings.throttle_ms)
-      assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
+      assert.are.equal('viewport', config.settings.gutters[1].integrations[1])
     end)
 
     it('should handle nil user settings', function()
@@ -93,7 +93,7 @@ describe('sluice.config', function()
       -- Check that settings are still at their default values
       assert.is_true(config.settings.enabled)
       assert.are.equal(150, config.settings.throttle_ms)
-      assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
+      assert.are.equal('viewport', config.settings.gutters[1].integrations[1])
     end)
 
     it('should throw an error for invalid types', function()
@@ -118,7 +118,7 @@ describe('sluice.config', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'signs' },
+            integrations = { 'signs' },
             signs = {
               group = 'custom_group'
             }
@@ -134,7 +134,7 @@ describe('sluice.config', function()
         gutters = {
           {
             layout = 'left',
-            plugins = { 'viewport' },
+            integrations = { 'viewport' },
           }
         }
       }
@@ -146,7 +146,7 @@ describe('sluice.config', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
+            integrations = { 'viewport' },
           }
         }
       }
@@ -159,7 +159,7 @@ describe('sluice.config', function()
         gutters = {
           {
             layout = 'invalid',
-            plugins = { 'viewport' },
+            integrations = { 'viewport' },
           }
         }
       }
@@ -173,7 +173,7 @@ describe('sluice.config', function()
         gutters = {
           {
             render_method = 'invalid',
-            plugins = { 'viewport' },
+            integrations = { 'viewport' },
           }
         }
       }
@@ -187,7 +187,7 @@ describe('sluice.config', function()
         gutters = {
           {
             render_method = 'line',
-            plugins = { 'viewport' },
+            integrations = { 'viewport' },
           }
         }
       }
@@ -217,7 +217,7 @@ describe('sluice.config', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'signs' },
+            integrations = { 'signs' },
             signs = {
               group = 'custom_group'
             }

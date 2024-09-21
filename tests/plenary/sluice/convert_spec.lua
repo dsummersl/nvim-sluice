@@ -29,7 +29,7 @@ end)
 local gutter_settings = {
   width = 1,
   default_gutter_hl = 'SluiceColumn',
-  plugins = { 'viewport' },
+  integrations = { 'viewport' },
   viewport = {
     cursor_hl = 'IncSearch',
   },

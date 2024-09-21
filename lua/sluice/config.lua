@@ -112,8 +112,7 @@ local default_gutter_settings = {
   --- Render method for the gutter. Can be 'macro' or 'line'.
   render_method = 'macro',
 
-  -- TODO change to integrations
-  plugins = { 'viewport' },
+  integrations = { 'viewport' },
 }
 
 local apply_gutter_settings = function(gutters)
@@ -131,11 +130,11 @@ local default_settings = {
     {
       enabled = M.make_has_results_fn('search'),
       count_method = counters.methods.horizontal_block,
-      plugins = { 'viewport', 'search' },
+      integrations = { 'viewport', 'search' },
     },
     {
       count_method = nil,
-      plugins = { 'viewport', 'signs', 'extmark' },
+      integrations = { 'viewport', 'signs', 'extmark' },
       extmark = {
         sign_hl_groups = '.*'
       },
@@ -165,7 +164,7 @@ function M.apply_user_settings(user_settings)
       for i, gutter in ipairs(user_settings.gutters) do
         M.vim.validate({
           ['gutters[' .. i .. ']'] = { gutter, 'table' },
-          ['gutters[' .. i .. '].plugins'] = { gutter.plugins, 'table', true },
+          ['gutters[' .. i .. '].integrations'] = { gutter.integrations, 'table', true },
         })
         if gutter ~= nil then
           M.vim.validate({

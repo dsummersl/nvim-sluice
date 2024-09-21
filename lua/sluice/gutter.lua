@@ -24,7 +24,7 @@ function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
   local gutter_settings = config.settings.gutters[gutter.index]
-  for _, plugin in ipairs(gutter_settings.plugins) do
+  for _, plugin in ipairs(gutter_settings.integrations) do
     local enable_fn = nil
     local update_fn = nil
 
@@ -126,7 +126,7 @@ function M.close_gutter(gutter)
   end
 
   local gutter_settings = config.settings.gutters[gutter.index]
-  for _, plugin in ipairs(gutter_settings.plugins) do
+  for _, plugin in ipairs(gutter_settings.integrations) do
     local disable_fn = nil
     if type(plugin) == "string" then
       -- when there is an integration, load it, and enable it.
