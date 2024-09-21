@@ -9,7 +9,7 @@ local default_settings = {
 
 function M.update(settings, _bufnr)
   local cursor_position = M.vim.api.nvim_win_get_cursor(0)[1]
-  local update_settings = M.vim.tbl_deep_extend('keep', settings.viewport or {}, default_settings)
+  local update_settings = M.vim.tbl_deep_extend('keep', settings or {}, default_settings)
 
   local lines = {}
   for lnum = M.vim.fn.line('w0'), M.vim.fn.line('w$') do

@@ -24,13 +24,19 @@ function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
   local gutter_settings = config.settings.gutters[gutter.index]
-  for _, plugin in ipairs(gutter_settings.integrations) do
+  for _, integration_settings in ipairs(gutter_settings.integrations) do
     local enable_fn = nil
     local update_fn = nil
 
-    if type(plugin) == "string" then
-      -- when there is an integration, load it, and enable it.
-      plugin = require('sluice.integrations.' .. plugin)
+    local plugin = nil
+    local plugin_settings = nil
+    if type(integration_settings) == "table" then
+      plugin = require('sluice.integrations.' .. integration_settings[1])
+      plugin_settings = integration_settings[2]
+    else
+      -- a string
+      plugin = require('sluice.integrations.' .. integration_settings)
+      plugin_settings = nil
     end
 
     if plugin.enable ~= nil then
@@ -41,7 +47,8 @@ function M.get_lines(gutter)
     end
 
     if enable_fn ~= nil then
-      enable_fn(gutter_settings, bufnr)
+      -- TODO update all the integrations
+      enable_fn(plugin_settings, bufnr)
     end
 
     if update_fn == nil then
@@ -50,16 +57,7 @@ function M.get_lines(gutter)
       return
     end
 
-    -- TODO the update_fn of an integration (ie, viewport) is called multiple times when there are multiple
-    -- gutters using it - this doesn't need to happen. We should be able to:
-    --  - obtain a list of all integrations configured for all the gutters
-    --  - call each integration once
-    --  - pass these results to this function and use the values rather than recompute them
-    --
-    -- honestly though, rather than computing the lines for each gutter and
-    -- storing that value, it would be wiser to store them by integration. And
-    -- then coalesce them into the gutter lines at the time of rendering.
-    local integration_lines = update_fn(gutter_settings, bufnr)
+    local integration_lines = update_fn(plugin_settings, bufnr)
     for _, il in ipairs(integration_lines) do
       table.insert(lines, il)
     end
@@ -132,9 +130,9 @@ function M.close_gutter(gutter)
       -- when there is an integration, load it, and enable it.
       local integration = require('sluice.integrations.' .. plugin)
       disable_fn = integration.disable
-    end
-    if plugin.disable ~= nil then
-      disable_fn = plugin.disable
+    else
+      local integration = require('sluice.integrations.' .. plugin[1])
+      disable_fn = integration.disable
     end
 
     if M.vim.fn.bufexists(gutter.bufnr) ~= 0 then

@@ -12,7 +12,6 @@ function M.update(settings, winid)
 
   for lnum, line in ipairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
-      -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",
@@ -39,7 +38,6 @@ function M.update(settings, winid)
 
   for lnum, line in ipairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
-      -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",

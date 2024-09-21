@@ -7,10 +7,10 @@ local default_settings = {
   match_line_hl = "SluiceSearchMatchLine",
 }
 
-function M.update(settings, bufnr)
+function M.update(settings, bufnr, idx)
   local pattern = M.vim.fn.getreg('/')
   local current_line = M.vim.fn.getpos('.')[2]
-  local update_settings = M.vim.tbl_deep_extend('keep', settings.search or {}, default_settings)
+  local update_settings = M.vim.tbl_deep_extend('keep', settings or {}, default_settings)
 
   if pattern == '' or M.vim.v.hlsearch == 0 then
     return {}
@@ -30,7 +30,6 @@ function M.update(settings, bufnr)
       if lnum == current_line then
         texthl = update_settings.match_line_hl
       end
-      -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "—",

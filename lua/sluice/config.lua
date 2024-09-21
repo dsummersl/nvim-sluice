@@ -133,15 +133,7 @@ local default_settings = {
       integrations = { 'viewport', 'search' },
     },
     {
-      count_method = nil,
-      integrations = { 'viewport', 'signs', 'extmark' },
-      extmark = {
-        sign_hl_group = '.*'
-      },
-      signs = {
-        -- TODO rename to groups?
-        group = '.*'
-      }
+      integrations = { 'viewport', 'extmark', 'signs' },
     },
   }
 }

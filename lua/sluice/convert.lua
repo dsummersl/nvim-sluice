@@ -38,17 +38,17 @@ end
 --- Convert a list of lines/styles to a list of gutter lines.
 -- @param lines A list of dicts with any keys from :highlight, plus text/line.
 -- @returns A list of dicts (of all plugin entries) for each gutter line.
-function M.lines_to_gutters(settings, lines, buffer_lines, height, top_line_number)
+function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_line_number)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = {{ texthl = "", linehl = settings.default_gutter_hl, text = " " }}
+    gutter_lines[line] = {{ texthl = "", linehl = gutter_settings.default_gutter_hl, text = " " }}
   end
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
     local gutter_line_number = 0
-    if settings.render_method == "macro" then
+    if gutter_settings.render_method == "macro" then
       gutter_line_number = M.line_to_gutter_line_macro(line['lnum'], buffer_lines, height, top_line_number)
     else
       gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height, top_line_number)
@@ -62,7 +62,7 @@ function M.lines_to_gutters(settings, lines, buffer_lines, height, top_line_numb
 end
 
 ---
-function M.lines_to_gutter_lines(settings, lines)
+function M.lines_to_gutter_lines(gutter_settings, lines)
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
   local top_line_number = M.vim.fn.line('w0')
@@ -71,7 +71,7 @@ function M.lines_to_gutter_lines(settings, lines)
     return {}
   end
 
-  return M.lines_to_gutters(settings, lines, buf_lines, win_height, top_line_number)
+  return M.lines_to_gutters(gutter_settings, lines, buf_lines, win_height, top_line_number)
 end
 
 return M
