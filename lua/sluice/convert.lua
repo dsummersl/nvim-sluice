@@ -42,13 +42,13 @@ function M.lines_to_gutters(settings, lines, buffer_lines, height, top_line_numb
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = {{ texthl = "", linehl = settings.window.default_gutter_hl, text = " " }}
+    gutter_lines[line] = {{ texthl = "", linehl = settings.default_gutter_hl, text = " " }}
   end
 
   -- drop in all the lines provided by an integration.
   for _, line in ipairs(lines) do
     local gutter_line_number = 0
-    if settings.window.render_method == "macro" then
+    if settings.render_method == "macro" then
       gutter_line_number = M.line_to_gutter_line_macro(line['lnum'], buffer_lines, height, top_line_number)
     else
       gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height, top_line_number)

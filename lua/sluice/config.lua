@@ -91,33 +91,29 @@ function M.make_has_results_fn(plugin)
 end
 
 local default_gutter_settings = {
-  -- If enabled, Sluice plugin is enabled by default (:SluiceEnable/:SluiceDisable to change)
-  -- TODO add validation: boolean or function
-  enabled = true,
+  --- Width of the gutter.
+  width = 1,
+
+  --- Default highlight to use in the gutter.
+  -- This serves as the base linehl highlight for a column in each gutter. Plugins can
+  -- override parts of this highlight (typically this is the background color of
+  -- areas represented in the gutter of offscreen content)
+  default_gutter_hl = 'SluiceColumn',
+
+  --- Whether to display the gutter or not.
+  enabled = M.default_enabled_fn,
+
+  --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
+  count_method = nil,
+
+  --- Layout of the gutter. Can be 'left' or 'right'.
+  layout = 'right',
+
+  --- Render method for the gutter. Can be 'macro' or 'line'.
+  render_method = 'macro',
+
+  -- TODO change to integrations
   plugins = { 'viewport' },
-  -- TODO move everything in 'window' up to the top level
-  window = {
-    --- Width of the gutter.
-    width = 1,
-
-    --- Default highlight to use in the gutter.
-    -- This serves as the base linehl highlight for a column in each gutter. Plugins can
-    -- override parts of this highlight (typically this is the background color of
-    -- areas represented in the gutter of offscreen content)
-    default_gutter_hl = 'SluiceColumn',
-
-    --- Whether to display the gutter or not.
-    enabled = M.default_enabled_fn,
-
-    --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
-    count_method = nil,
-
-    --- Layout of the gutter. Can be 'left' or 'right'.
-    layout = 'right',
-
-    --- Render method for the gutter. Can be 'macro' or 'line'.
-    render_method = 'macro',
-  },
 }
 
 local apply_gutter_settings = function(gutters)
@@ -133,17 +129,13 @@ local default_settings = {
   throttle_ms = 150,
   gutters = apply_gutter_settings{
     {
+      enabled = M.make_has_results_fn('search'),
+      count_method = counters.methods.horizontal_block,
       plugins = { 'viewport', 'search' },
-      window = {
-        enabled = M.make_has_results_fn('search'),
-        count_method = counters.methods.horizontal_block,
-      },
     },
     {
+      count_method = nil,
       plugins = { 'viewport', 'signs', 'extmark' },
-      window = {
-        count_method = nil,
-      },
       extmark = {
         sign_hl_groups = '.*'
       },
@@ -175,21 +167,21 @@ function M.apply_user_settings(user_settings)
           ['gutters[' .. i .. ']'] = { gutter, 'table' },
           ['gutters[' .. i .. '].plugins'] = { gutter.plugins, 'table', true },
         })
-        if gutter.window ~= nil then
+        if gutter ~= nil then
           M.vim.validate({
-            ['gutters[' .. i .. '].window'] = { gutter.window, 'table' },
-            ['gutters[' .. i .. '].window.width'] = { gutter.window.width, 'number', true },
-            ['gutters[' .. i .. '].window.default_gutter_hl'] = { gutter.window.default_gutter_hl, 'string', true },
-            ['gutters[' .. i .. '].window.enabled'] = { gutter.window.enabled, 'function', true },
-            ['gutters[' .. i .. '].window.count_method'] = { gutter.window.count_method, {'table'}, true },
-            ['gutters[' .. i .. '].window.layout'] = { gutter.window.layout, 'string', true },
-            ['gutters[' .. i .. '].window.render_method'] = { gutter.window.render_method, 'string', true },
+            ['gutters[' .. i .. ']'] = { gutter, 'table' },
+            ['gutters[' .. i .. '].width'] = { gutter.width, 'number', true },
+            ['gutters[' .. i .. '].default_gutter_hl'] = { gutter.default_gutter_hl, 'string', true },
+            ['gutters[' .. i .. '].enabled'] = { gutter.enabled, { 'function', 'boolean' }, true },
+            ['gutters[' .. i .. '].count_method'] = { gutter.count_method, {'table'}, true },
+            ['gutters[' .. i .. '].layout'] = { gutter.layout, 'string', true },
+            ['gutters[' .. i .. '].render_method'] = { gutter.render_method, 'string', true },
           })
-          if gutter.window.layout ~= nil and gutter.window.layout ~= 'left' and gutter.window.layout ~= 'right' then
-            error("gutters[" .. i .. "].window.layout must be 'left' or 'right'")
+          if gutter.layout ~= nil and gutter.layout ~= 'left' and gutter.layout ~= 'right' then
+            error("gutters[" .. i .. "].layout must be 'left' or 'right'")
           end
-          if gutter.window.render_method ~= nil and gutter.window.render_method ~= 'macro' and gutter.window.render_method ~= 'line' then
-            error("gutters[" .. i .. "].window.render_method must be 'macro' or 'line'")
+          if gutter.render_method ~= nil and gutter.render_method ~= 'macro' and gutter.render_method ~= 'line' then
+            error("gutters[" .. i .. "].render_method must be 'macro' or 'line'")
           end
         end
       end

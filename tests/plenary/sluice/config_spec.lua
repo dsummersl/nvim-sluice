@@ -67,19 +67,17 @@ describe('sluice.config', function()
         throttle_ms = 200,
         gutters = {
           {
+            width = 2,
+            enabled = function() return true end,
             plugins = { 'viewport', 'counters' },
-            window = {
-              width = 2,
-              enabled = function() return true end,
-            },
           },
         },
       }
       config.apply_user_settings(user_settings)
       assert.is_false(config.settings.enabled)
       assert.are.equal(200, config.settings.throttle_ms)
-      assert.are.equal(2, config.settings.gutters[1].window.width)
-      assert.is_true(config.settings.gutters[1].window.enabled())
+      assert.are.equal(2, config.settings.gutters[1].width)
+      assert.is_true(config.settings.gutters[1].enabled())
     end)
 
     it('should not override unspecified settings', function()
@@ -112,8 +110,8 @@ describe('sluice.config', function()
       end, "gutters: expected table, got string")
 
       assert.has_error(function()
-        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
-      end, "gutters[1].window.width: expected number, got string")
+        config.apply_user_settings({ gutters = { { width = 'two' } } })
+      end, "gutters[1].width: expected number, got string")
     end)
 
     it('should handle signs group setting', function()
@@ -135,15 +133,13 @@ describe('sluice.config', function()
       local user_settings = {
         gutters = {
           {
+            layout = 'left',
             plugins = { 'viewport' },
-            window = {
-              layout = 'left'
-            }
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('left', config.settings.gutters[1].window.layout)
+      assert.are.equal('left', config.settings.gutters[1].layout)
     end)
 
     it('should default to right layout when not specified', function()
@@ -151,59 +147,52 @@ describe('sluice.config', function()
         gutters = {
           {
             plugins = { 'viewport' },
-            window = {}
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('right', config.settings.gutters[1].window.layout)
+      assert.are.equal('right', config.settings.gutters[1].layout)
     end)
 
     it('should throw an error for invalid layout', function()
       local user_settings = {
         gutters = {
           {
+            layout = 'invalid',
             plugins = { 'viewport' },
-            window = {
-              layout = 'invalid'
-            }
           }
         }
       }
       assert.has_error(function()
         config.apply_user_settings(user_settings)
-      end, "gutters[1].window.layout must be 'left' or 'right'")
+      end, "gutters[1].layout must be 'left' or 'right'")
     end)
 
     it('should throw an error for invalid render_method', function()
       local user_settings = {
         gutters = {
           {
+            render_method = 'invalid',
             plugins = { 'viewport' },
-            window = {
-              render_method = 'invalid'
-            }
           }
         }
       }
       assert.has_error(function()
         config.apply_user_settings(user_settings)
-      end, "gutters[1].window.render_method must be 'macro' or 'line'")
+      end, "gutters[1].render_method must be 'macro' or 'line'")
     end)
 
     it('should accept valid render_method', function()
       local user_settings = {
         gutters = {
           {
+            render_method = 'line',
             plugins = { 'viewport' },
-            window = {
-              render_method = 'line'
-            }
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('line', config.settings.gutters[1].window.render_method)
+      assert.are.equal('line', config.settings.gutters[1].render_method)
     end)
 
     it('should throw an error for invalid types', function()
@@ -220,8 +209,8 @@ describe('sluice.config', function()
       end, "gutters: expected table, got string")
 
       assert.has_error(function()
-        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
-      end, "gutters[1].window.width: expected number, got string")
+        config.apply_user_settings({ gutters = { { width = 'two' } } })
+      end, "gutters[1].width: expected number, got string")
     end)
 
     it('should handle signs group setting', function()

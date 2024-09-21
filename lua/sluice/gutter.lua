@@ -13,7 +13,7 @@ function M.update(gutter, lines)
   local gutter_settings = config.settings.gutters[gutter.index]
   local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    window.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.window.count_method, gutter_settings.window.width)
+    window.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.count_method, gutter_settings.width)
     window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
@@ -95,7 +95,7 @@ function M.open()
   for i, gutter_settings in ipairs(config.settings.gutters) do
     local gutter = M.gutters[i]
     gutter.lines = M.get_lines(gutter)
-    gutter.enabled = gutter_settings.window.enabled(gutter)
+    gutter.enabled = gutter_settings.enabled(gutter)
   end
 
   M.vim.schedule(function()

@@ -141,10 +141,8 @@ describe('create_window()', function()
     config.settings = {
       gutters = {
         {
-          window = {
-            width = 2,
-            layout = 'right',
-          },
+          width = 2,
+          layout = 'right',
         },
       },
     }
@@ -170,7 +168,7 @@ describe('create_window()', function()
   end)
 
   it('creates a window with left layout', function()
-    config.settings.gutters[1].window.layout = 'left'
+    config.settings.gutters[1].layout = 'left'
     local gutters = {{}}
     local called_with = nil
     mock_vim.api.nvim_open_win = function(...)
@@ -212,41 +210,29 @@ describe('get_gutter_column()', function()
   local vim_width = vim.api.nvim_win_get_width(0)
   local one_gutter = {
       gutters = {{
-        window = {
-          width = 3,
-          layout = 'right'
-        }
+        width = 3,
+        layout = 'right'
       }},
     }
     local two_gutters = {
         gutters = {{
-          window = {
-            width = 3,
-            layout = 'right'
-          }
+          width = 3,
+          layout = 'right'
         }, {
-          window = {
-            width = 2,
-            layout = 'right'
-          }
+          width = 2,
+          layout = 'right'
         }},
       }
     local mixed_gutters = {
         gutters = {{
-          window = {
-            width = 3,
-            layout = 'right'
-          }
+          width = 3,
+          layout = 'right'
         }, {
-          window = {
-            width = 2,
-            layout = 'left'
-          }
+          width = 2,
+          layout = 'left'
         }, {
-          window = {
-            width = 1,
-            layout = 'right'
-          }
+          width = 1,
+          layout = 'right'
         }},
       }
 
