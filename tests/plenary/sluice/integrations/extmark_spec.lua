@@ -1,4 +1,4 @@
-local extmark = require("sluice.integrations.extmark_signs")
+local extmark = require("sluice.integrations.extmark")
 local config = require("sluice.config")
 
 extmark.vim = {

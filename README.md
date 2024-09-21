@@ -7,6 +7,7 @@ Sluice:
 A neovim plugin that provides vertical channels along the sides of your window:
 - minimap of the +signs and extmarks for the side of the window.
 - replacement for the signcolumn: customize the width and contents of the column to your liking!
+new text here.
 
 ## Install
 
@@ -42,7 +43,7 @@ Default configuration:
       plugins = { "viewport", "search" },
       window = {
         default_gutter_hl = "SluiceColumn",
-        enabled_fn = 'sluice.config.default_enabled_fn',
+        enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
     }, {
@@ -50,7 +51,7 @@ Default configuration:
       window = {
         count_method = "",
         default_gutter_hl = "SluiceColumn",
-        enabled_fn = 'sluice.config.default_enabled_fn',
+        enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
     } },
@@ -72,7 +73,7 @@ Example configuration with left and right gutters:
       plugins = { "gitsigns", "lsp" },
       window = {
         default_gutter_hl = "SluiceGutter",
-        enabled_fn = <function 1>,
+        enabled = <function 1>,
         width = 2,
         whitelist = { "GitSignsAdd", "GitSignsChange", "LspDiagnosticsSignError" },
         blacklist = { "GitSignsDelete" }
@@ -82,7 +83,7 @@ Example configuration with left and right gutters:
       plugins = { "viewport", "search" },
       window = {
         default_gutter_hl = "SluiceColumn",
-        enabled_fn = <function 2>,
+        enabled = <function 2>,
         width = 1
       }
     }

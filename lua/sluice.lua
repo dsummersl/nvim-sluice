@@ -10,7 +10,7 @@ M.setup = function(settings)
   M.vim.api.nvim_command('command! SluiceDisable lua require("sluice.commands").disable()')
   M.vim.api.nvim_command('command! SluiceToggle lua require("sluice.commands").toggle()')
 
-  if config.settings.enable then
+  if config.bool_table_fn(config.settings.enabled) then
     require("sluice.commands").enable()
   else
     require("sluice.commands").disable()

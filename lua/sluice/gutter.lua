@@ -95,7 +95,7 @@ function M.open()
   for i, gutter_settings in ipairs(config.settings.gutters) do
     local gutter = M.gutters[i]
     gutter.lines = M.get_lines(gutter)
-    gutter.enabled = gutter_settings.window.enabled_fn(gutter)
+    gutter.enabled = gutter_settings.window.enabled(gutter)
   end
 
   M.vim.schedule(function()

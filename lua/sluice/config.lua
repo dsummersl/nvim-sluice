@@ -9,7 +9,9 @@ local M = {
 -- @param value any The value to check
 -- @return boolean True if the value matches, is in the table, or passes the function test
 function M.str_table_fn(obj, value)
-  if type(obj) == "string" then
+  if type(obj) == "nil" then
+    return false
+  elseif type(obj) == "string" then
     return string.match(value, obj) ~= nil
   elseif type(obj) == "table" then
     for _, v in ipairs(obj) do
@@ -22,6 +24,20 @@ function M.str_table_fn(obj, value)
     return false
   elseif type(obj) == "function" then
     return obj(value)
+  end
+  return false
+end
+
+--- Utility function to check if a value matches is boolean, or a function
+-- @param obj boolean|function The object to check against
+-- @return boolean
+function M.bool_table_fn(obj)
+  if type(obj) == "nil" then
+    return false
+  elseif type(obj) == "boolean" then
+    return obj
+  elseif type(obj) == "function" then
+    return obj()
   end
   return false
 end
@@ -55,6 +71,7 @@ function M.default_enabled_fn(_gutter)
 end
 
 --- Create an enable_fn function that returns true if a specific plugin has contributed lines to the gutter.
+--TODO should have a better name (indicate its used by the enabled)
 function M.make_has_results_fn(plugin)
   local function has_results_fn(gutter)
     if not M.default_enabled_fn() then
@@ -74,7 +91,11 @@ function M.make_has_results_fn(plugin)
 end
 
 local default_gutter_settings = {
+  -- If enabled, Sluice plugin is enabled by default (:SluiceEnable/:SluiceDisable to change)
+  -- TODO add validation: boolean or function
+  enabled = true,
   plugins = { 'viewport' },
+  -- TODO move everything in 'window' up to the top level
   window = {
     --- Width of the gutter.
     width = 1,
@@ -86,7 +107,7 @@ local default_gutter_settings = {
     default_gutter_hl = 'SluiceColumn',
 
     --- Whether to display the gutter or not.
-    enabled_fn = M.default_enabled_fn,
+    enabled = M.default_enabled_fn,
 
     --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
     count_method = nil,
@@ -108,23 +129,23 @@ local apply_gutter_settings = function(gutters)
 end
 
 local default_settings = {
-  enable = true,
+  enabled = true,
   throttle_ms = 150,
   gutters = apply_gutter_settings{
     {
       plugins = { 'viewport', 'search' },
       window = {
-        enabled_fn = M.make_has_results_fn('search'),
+        enabled = M.make_has_results_fn('search'),
         count_method = counters.methods.horizontal_block,
       },
     },
     {
-      plugins = { 'viewport', 'signs', 'extmark_signs' },
+      plugins = { 'viewport', 'signs', 'extmark' },
       window = {
-        count_method = '',
+        count_method = nil,
       },
-      extmarks = {
-        hl_groups = '.*'
+      extmark = {
+        sign_hl_groups = '.*'
       },
       signs = {
         -- TODO rename to groups?
@@ -139,8 +160,8 @@ function M.apply_user_settings(user_settings)
     M.vim.validate({ user_settings = { user_settings, 'table', true} })
 
     -- Validate global options
-    if user_settings.enable ~= nil then
-      M.vim.validate({ enable = { user_settings.enable, 'boolean' } })
+    if user_settings.enabled ~= nil then
+      M.vim.validate({ enabled = { user_settings.enabled, 'boolean' } })
     end
     if user_settings.throttle_ms ~= nil then
       M.vim.validate({ throttle_ms = { user_settings.throttle_ms, 'number' } })
@@ -159,7 +180,7 @@ function M.apply_user_settings(user_settings)
             ['gutters[' .. i .. '].window'] = { gutter.window, 'table' },
             ['gutters[' .. i .. '].window.width'] = { gutter.window.width, 'number', true },
             ['gutters[' .. i .. '].window.default_gutter_hl'] = { gutter.window.default_gutter_hl, 'string', true },
-            ['gutters[' .. i .. '].window.enabled_fn'] = { gutter.window.enabled_fn, 'function', true },
+            ['gutters[' .. i .. '].window.enabled'] = { gutter.window.enabled, 'function', true },
             ['gutters[' .. i .. '].window.count_method'] = { gutter.window.count_method, {'table'}, true },
             ['gutters[' .. i .. '].window.layout'] = { gutter.window.layout, 'string', true },
             ['gutters[' .. i .. '].window.render_method'] = { gutter.window.render_method, 'string', true },

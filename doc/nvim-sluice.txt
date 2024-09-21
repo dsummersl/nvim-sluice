@@ -70,16 +70,16 @@ Here's an example of how to configure Sluice with its default settings:
           window = {
             width = 1,
             default_gutter_hl = 'SluiceColumn',
-            enabled_fn = function that checks if search has results,
+            enabled = function that checks if search has results,
             count_method = 'horizontal_block',
           },
         },
         {
-          plugins = { 'viewport', 'signs', 'extmark_signs' },
+          plugins = { 'viewport', 'signs', 'extmark' },
           window = {
             width = 1,
             default_gutter_hl = 'SluiceColumn',
-            enabled_fn = default_enabled_fn,
+            enabled = default_enabled_fn,
             count_method = '',
           },
         },
@@ -108,7 +108,7 @@ Sluice supports multiple gutters, each with its own configuration.
 `plugins`                                               *NvimSluiceGutterPlugins*
     Type: table of strings
     Default: `{ 'viewport', 'search' }` for the first gutter,
-             `{ 'viewport', 'signs', 'extmark_signs' }` for the second gutter
+             `{ 'viewport', 'signs', 'extmark' }` for the second gutter
     The plugins to use for this gutter.
 
 `window`                                                *NvimSluiceGutterWindow*
@@ -125,7 +125,7 @@ Sluice supports multiple gutters, each with its own configuration.
         Default: `'SluiceColumn'`
         The default highlight group for the gutter.
 
-    `enabled_fn`                          *NvimSluiceGutterWindowEnabledFn*
+    `enabled`                          *NvimSluiceGutterWindowEnabledFn*
         Type: function
         Default: `default_enabled_fn` or a function that checks if search has results
         A function that determines whether the gutter should be displayed.
