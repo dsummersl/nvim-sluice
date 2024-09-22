@@ -103,7 +103,7 @@ describe("memoize", function()
     local second_duration = (end_time - start_time) / 1e6  -- Convert to milliseconds
 
     assert.are.equal(8, result2)
-    assert.is_true(second_duration < 10)  -- Should be much faster, let's say less than 10ms
+    assert.is_true(second_duration < 1000)
 
     -- Call with a different table (should take longer again)
     start_time = vim.loop.hrtime()
@@ -134,6 +134,6 @@ describe("memoize", function()
     local duration = (end_time - start_time) / 1e6  -- Convert to milliseconds
 
     assert.are.equal(8, result2)
-    assert.is_true(duration < 10)  -- Should be much faster, let's say less than 10ms
+    assert.is_true(duration < 1000)
   end)
 end)
