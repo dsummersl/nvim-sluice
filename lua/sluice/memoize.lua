@@ -29,7 +29,7 @@ local function memoize(func, max_entries)
       local result = func(...)
       
       -- If we've reached max entries, remove the oldest one
-      if #timestamps >= max_entries then
+      if vim.tbl_count(timestamps) >= max_entries then
         local oldest_key, oldest_time = next(timestamps)
         for k, v in pairs(timestamps) do
           if v < oldest_time then

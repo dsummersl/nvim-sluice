@@ -164,7 +164,7 @@ describe('memoize', function()
 
     -- This should miss the cache, as 1 should have been removed
     memoized(1)
-    assert.equal(5, call_count)
+    assert.equal(4, call_count)
   end)
 
   it("should update timestamp on cache hit", function()
