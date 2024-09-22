@@ -9,6 +9,9 @@ local window = require('sluice.window')
 local convert = require('sluice.convert')
 
 --- Update the gutter with new lines.
+---@param gutter table The gutter object to update
+---@param lines table[] The new lines to set in the gutter
+---@return nil
 function M.update(gutter, lines)
   local gutter_settings = config.settings.gutters[gutter.index]
   local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
@@ -20,6 +23,8 @@ function M.update(gutter, lines)
 end
 
 --- Get all integration lines for a gutter
+---@param gutter table The gutter object to get lines for
+---@return table[] lines The integration lines for the gutter
 function M.get_lines(gutter)
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
@@ -67,6 +72,8 @@ function M.get_lines(gutter)
 end
 
 --- Create initial gutter settings
+---@param config table The configuration object
+---@return table[] gutters The initialized gutter settings
 function M.init_gutters(config)
   local gutters = {}
   for i, v in ipairs(config.settings.gutters) do
@@ -80,6 +87,7 @@ function M.init_gutters(config)
 end
 
 --- Open all gutters configured for this plugin.
+---@return nil
 function M.open()
   -- if M.should_throttle() then
   --   return
@@ -108,6 +116,8 @@ function M.open()
 end
 
 --- Open one gutter
+---@param gutter_index number The index of the gutter to open
+---@return nil
 function M.open_gutter(gutter_index)
   local gutter = M.gutters[gutter_index]
 
@@ -117,6 +127,8 @@ function M.open_gutter(gutter_index)
 end
 
 --- Close one gutter
+---@param gutter table The gutter object to close
+---@return nil
 function M.close_gutter(gutter)
   -- Can't close other windows when the command-line window is open
   if M.vim.api.nvim_call_function('getcmdwintype', {}) ~= '' then
@@ -146,6 +158,8 @@ function M.close_gutter(gutter)
   end
 end
 
+--- Close all gutters
+---@return nil
 function M.close()
   for _, gutter in ipairs(M.gutters) do
     M.close_gutter(gutter)
