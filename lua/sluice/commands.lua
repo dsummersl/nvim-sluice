@@ -10,9 +10,6 @@ local debounce = require('sluice.debounce')
 ---@param group_name string The name of the autocommand group
 ---@param definitions table[] A list of autocommand definitions
 ---@return nil
----@param group_name string The name of the autocommand group
----@param definitions table[] A list of autocommand definitions
----@return nil
 local nvim_augroup = function(group_name, definitions)
   M.vim.api.nvim_command('augroup ' .. group_name)
   M.vim.api.nvim_command('autocmd!')
@@ -26,7 +23,6 @@ local nvim_augroup = function(group_name, definitions)
 end
 
 ---@return nil
----@return nil
 local function update_context()
   if not M.enabled then return end
 
@@ -35,7 +31,6 @@ end
 
 M.update_context = debounce(update_context, 100)
 
----@return nil
 ---@return nil
 function M.enable()
   if M.enabled then return end
@@ -57,7 +52,6 @@ function M.enable()
 end
 
 ---@return nil
----@return nil
 function M.disable()
   if not M.enabled then return end
 
@@ -68,7 +62,6 @@ function M.disable()
   gutter.close()
 end
 
----@return nil
 ---@return nil
 function M.toggle()
   if M.enabled then
