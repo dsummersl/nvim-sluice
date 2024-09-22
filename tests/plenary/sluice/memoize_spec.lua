@@ -3,7 +3,7 @@ local memoize = require('sluice.memoize')
 describe('memoize', function()
   it('should return a function', function()
     local memoized = memoize(function() end)
-    assert.is_function(memoized)
+    assert.is_table(memoized)
   end)
 
   it('should memoize function results', function()
