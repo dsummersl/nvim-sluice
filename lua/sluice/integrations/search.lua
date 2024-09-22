@@ -58,5 +58,4 @@ end
 function M.disable(_settings, _bufnr)
 end
 
-
 return M

@@ -51,7 +51,7 @@ end
 -- - the buffer is not a special &buftype
 -- - the buffer is not a &previewwindow
 -- - the buffer is not a &diff
-function M.default_enabled_fn(_gutter)
+function M.default_enabled_fn()
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
   if win_height >= buf_lines then
@@ -73,6 +73,7 @@ end
 --- Create an enable_fn function that returns true if a specific plugin has contributed lines to the gutter.
 --TODO should have a better name (indicate its used by the enabled)
 function M.make_has_results_fn(plugin)
+  -- TODO this needs to be integration specific
   local function has_results_fn(gutter)
     if not M.default_enabled_fn() then
       return false
@@ -98,7 +99,7 @@ local default_gutter_settings = {
   -- This serves as the base linehl highlight for a column in each gutter. Plugins can
   -- override parts of this highlight (typically this is the background color of
   -- areas represented in the gutter of offscreen content)
-  default_gutter_hl = 'SluiceColumn',
+  gutter_hl = 'SluiceColumn',
 
   --- Whether to display the gutter or not.
   enabled = M.default_enabled_fn,
@@ -162,7 +163,7 @@ function M.apply_user_settings(user_settings)
           M.vim.validate({
             ['gutters[' .. i .. ']'] = { gutter, 'table' },
             ['gutters[' .. i .. '].width'] = { gutter.width, 'number', true },
-            ['gutters[' .. i .. '].default_gutter_hl'] = { gutter.default_gutter_hl, 'string', true },
+            ['gutters[' .. i .. '].gutter_hl'] = { gutter.gutter_hl, 'string', true },
             ['gutters[' .. i .. '].enabled'] = { gutter.enabled, { 'function', 'boolean' }, true },
             ['gutters[' .. i .. '].count_method'] = { gutter.count_method, {'table'}, true },
             ['gutters[' .. i .. '].layout'] = { gutter.layout, 'string', true },

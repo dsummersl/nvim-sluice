@@ -23,7 +23,8 @@ extmark.vim = {
         } }
       }
     end
-  }
+  },
+  tbl_deep_extend = vim.tbl_deep_extend
 }
 
 describe("update", function()
@@ -47,8 +48,8 @@ describe("update", function()
     }, result[2])
   end)
 
-  it("should filter extmarks based on hl_groups", function()
-    local result = extmark.update({ extmark = { sign_hl_group = 'DiagnosticSignWarn' } }, 0)
+  it("should filter extmarks based on hl_group", function()
+    local result = extmark.update({ sign_hl_group = 'DiagnosticSignWarn' }, 0)
     assert.is_table(result)
     assert.equals(1, #result)
     assert.same({
@@ -60,8 +61,8 @@ describe("update", function()
     }, result[1])
   end)
 
-  it("should return empty table when no hl_groups match", function()
-    local result = extmark.update({ extmark = { hl_groups = 'SomeOtherGroup' } }, 0)
+  it("should return empty table when no hl_group match", function()
+    local result = extmark.update({ hl_group = 'SomeOtherGroup', sign_hl_group = '---nothing---' }, 0)
     assert.is_table(result)
     assert.equals(0, #result)
   end)

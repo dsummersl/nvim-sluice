@@ -1,5 +1,6 @@
 local highlight = require('sluice.highlight')
 local counters = require('sluice.integrations.counters')
+local config = require('sluice.config')
 
 local M = {
   vim = vim,
@@ -95,7 +96,6 @@ function M.get_gutter_column(gutters, gutter_index, layout)
   )
   local column = 0
   local gutter_count = #gutters
-  local config = require('sluice.config')
 
   if layout == 'right' then
     for i = gutter_count, gutter_index, -1 do
@@ -131,6 +131,7 @@ function M.create_window(gutters, gutter_index)
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
     gutter.ns = M.vim.api.nvim_create_namespace('sluice' .. gutter.bufnr)
   end
+
   if gutter.winid == nil or M.vim.fn.win_id2win(gutter.winid) == 0 then
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
@@ -140,15 +141,6 @@ function M.create_window(gutters, gutter_index)
       col = col,
       focusable = false,
       style = 'minimal',
-    })
-  else
-    M.vim.api.nvim_win_set_config(gutter.winid, {
-      win = M.vim.api.nvim_get_current_win(),
-      relative = 'win',
-      width = gutter_width,
-      height = height,
-      row = 0,
-      col = col,
     })
   end
 end

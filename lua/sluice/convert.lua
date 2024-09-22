@@ -57,7 +57,7 @@ function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_li
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
   for line = 1, height do
-    gutter_lines[line] = {{ texthl = "", linehl = gutter_settings.default_gutter_hl, text = " " }}
+    gutter_lines[line] = {{ texthl = "", linehl = gutter_settings.gutter_hl, text = " " }}
   end
 
   -- drop in all the lines provided by an integration.

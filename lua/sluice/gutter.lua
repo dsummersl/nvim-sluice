@@ -10,8 +10,6 @@ local convert = require('sluice.convert')
 local memoize = require('sluice.memoize')
 
 M.lines_to_gutter_lines = memoize(convert.lines_to_gutter_lines)
-M.set_gutter_lines = memoize(window.set_gutter_lines)
-M.refresh_highlights = memoize(window.refresh_highlights)
 
 --- Update the gutter with new lines.
 ---@param gutter table The gutter object to update
@@ -21,8 +19,8 @@ function M.update(gutter, lines)
   local gutter_settings = config.settings.gutters[gutter.index]
   local gutter_lines = M.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    M.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.count_method, gutter_settings.width)
-    M.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
+    window.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.count_method, gutter_settings.width)
+    window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end

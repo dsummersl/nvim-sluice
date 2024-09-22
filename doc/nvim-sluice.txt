@@ -69,7 +69,7 @@ Here's an example of how to configure Sluice with its default settings:
           integrations = { 'viewport', 'search' },
           window = {
             width = 1,
-            default_gutter_hl = 'SluiceColumn',
+            gutter_hl = 'SluiceColumn',
             enabled = function that checks if search has results,
             count_method = 'horizontal_block',
           },
@@ -78,7 +78,7 @@ Here's an example of how to configure Sluice with its default settings:
           integrations = { 'viewport', 'signs', 'extmark' },
           window = {
             width = 1,
-            default_gutter_hl = 'SluiceColumn',
+            gutter_hl = 'SluiceColumn',
             enabled = default_enabled_fn,
             count_method = '',
           },
@@ -120,7 +120,7 @@ Sluice supports multiple gutters, each with its own configuration.
         Default: `1`
         The width of the gutter window.
 
-    `default_gutter_hl`              *NvimSluiceGutterWindowDefaultGutterHl*
+    `gutter_hl`              *NvimSluiceGutterWindowDefaultGutterHl*
         Type: string
         Default: `'SluiceColumn'`
         The default highlight group for the gutter.

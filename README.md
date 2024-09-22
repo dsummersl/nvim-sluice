@@ -42,7 +42,7 @@ Default configuration:
   gutters = { {
       integrations = { "viewport", "search" },
       window = {
-        default_gutter_hl = "SluiceColumn",
+        gutter_hl = "SluiceColumn",
         enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
@@ -50,7 +50,7 @@ Default configuration:
       integrations = { "viewport", "signs" },
       window = {
         count_method = "",
-        default_gutter_hl = "SluiceColumn",
+        gutter_hl = "SluiceColumn",
         enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
@@ -72,7 +72,7 @@ Example configuration with left and right gutters:
     left = { -- Define a gutter on the left side
       integrations = { "gitsigns", "lsp" },
       window = {
-        default_gutter_hl = "SluiceGutter",
+        gutter_hl = "SluiceGutter",
         enabled = <function 1>,
         width = 2,
         whitelist = { "GitSignsAdd", "GitSignsChange", "LspDiagnosticsSignError" },
@@ -82,7 +82,7 @@ Example configuration with left and right gutters:
     right = { -- Define a gutter on the right side (existing functionality)
       integrations = { "viewport", "search" },
       window = {
-        default_gutter_hl = "SluiceColumn",
+        gutter_hl = "SluiceColumn",
         enabled = <function 2>,
         width = 1
       }
@@ -119,8 +119,6 @@ Pre commit hooks:
 
 Thanks to [nvim-treesitter-context](https://github.com/romgrk/nvim-treesitter-context) which I based the lua windowing that this plugin uses.
 
-The idea behind this project is based on [vim-sluice](https://github.com/dsummersl/vim-sluice) -- a buggier and more feature-ful version of this plugin for vim/gvim.
-
 ## Features
 
 With the new configuration options, you can:
@@ -129,6 +127,8 @@ With the new configuration options, you can:
 - Configure the symbols and width of each gutter.
 - Whitelist or blacklist specific highlight groups to fine-tune what is displayed in the gutters.
 - Create dedicated gutters for specific integrations like gitsigns or LSP messages.
+
+TODO https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#white_check_mark-do-6
 
 These features provide greater flexibility in how you view and interact with different signs and messages within Neovim.
 
