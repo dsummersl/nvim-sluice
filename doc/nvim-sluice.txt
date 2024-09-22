@@ -8,9 +8,7 @@ CONTENTS                                                    *NvimSluiceContents*
 
     1. Intro ...................... |NvimSluiceIntro|
     2.1 Commands .................. |NvimSluiceCommands|
-        2.1 :SluiceEnable ............... |:SluiceEnable|
-        2.2 :SluiceDisable .............. |:SluiceDisable|
-        2.3 :SluiceToggle ............... |:SluiceToggle|
+        2.1 :Sluice ............... |:Sluice|
     3. Configuration .............. |NvimSluiceConfig|
         3.1 SluiceViewportVisibleArea ........... |hl-SluiceViewportVisibleArea|
         3.2 SluiceViewportCursor ................ |hl-SluiceViewportCursor|
@@ -28,32 +26,14 @@ window.
 2. Commands                                                 *NvimSluiceCommands*
 
 ------------------------------------------------------------------------------
-2.1 :SluiceEnable                                                *:SluiceEnable*
+2.1 :Sluice                                                *:Sluice*
 
-Open the Slice signs window.
+Control the sluice windows.
 
 Usage:
     >
-    :SluiceEnable
+    :Sluice enable/disable/toggle
 <
-------------------------------------------------------------------------------
-2.2 :SluiceDisable                                              *:SluiceDisable*
-
-Close the Sluice signs window.
-
-Usage:
-    >
-    :SluiceDisable
-
-------------------------------------------------------------------------------
-2.3 :SluiceToggle                                                *:SluiceToggle*
-
-Toggle the Slice window off and on.
-
-Usage:
-    >
-    :SluiceToggle
-
 ==============================================================================
 3. Configuration                                              *NvimSluiceConfig*
 
