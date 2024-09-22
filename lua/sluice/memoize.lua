@@ -19,12 +19,12 @@ local function memoize(func, max_entries)
       local arg = select(i, ...)
       table.insert(key, tostring(arg))
     end
-    local key_str = table.concat(key, ":")
+    local key_hash = xxhash32(table.concat(key, ":"))
 
     -- Check if the result is already cached
-    if cache[key_str] then
-      timestamps[key_str] = os.time()
-      return cache[key_str]
+    if cache[key_hash] then
+      timestamps[key_hash] = vim.loop.uptime()
+      return cache[key_hash]
     else
       local result = func(...)
       
@@ -40,8 +40,8 @@ local function memoize(func, max_entries)
         timestamps[oldest_key] = nil
       end
       
-      cache[key_str] = result
-      timestamps[key_str] = os.time()
+      cache[key_hash] = result
+      timestamps[key_hash] = vim.loop.uptime()
       return result
     end
   end
@@ -59,17 +59,17 @@ local function memoize(func, max_entries)
 
   -- Method to report statistics about the memoized function
   function memoized_func.stats()
-    local cache_size = 0
+    local cache_entries = 0
     local total_size = 0
-    for k, v in pairs(cache) do
-      cache_size = cache_size + 1
+    for _, v in pairs(cache) do
+      cache_entries = cache_entries + 1
       -- Estimate memory usage of keys and values
-      total_size = total_size + #k + (type(v) == "string" and #v or 0)
+      total_size = total_size + (type(v) == "string" and #v or 0)
     end
     return {
-      cache_size = cache_size,
-      cache_memory = total_size,
-      total_calls = call_count
+      entries = cache_entries,
+      memory = total_size,
+      calls = call_count
     }
   end
 

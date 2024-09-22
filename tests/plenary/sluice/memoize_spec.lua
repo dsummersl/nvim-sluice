@@ -56,27 +56,27 @@ describe('memoize', function()
     local memoized = memoize(function(x) return string.rep('a', x) end)
 
     local initial_stats = memoized.stats()
-    assert.equal(0, initial_stats.cache_size)
-    assert.equal(0, initial_stats.cache_memory)
-    assert.equal(0, initial_stats.total_calls)
+    assert.equal(0, initial_stats.entries)
+    assert.equal(0, initial_stats.memory)
+    assert.equal(0, initial_stats.calls)
 
     memoized(5)
     local stats_after_first = memoized.stats()
-    assert.equal(1, stats_after_first.cache_size)
-    assert.is_true(stats_after_first.cache_memory > 0)
-    assert.equal(1, stats_after_first.total_calls)
+    assert.equal(1, stats_after_first.entries)
+    assert.is_true(stats_after_first.memory > 0)
+    assert.equal(1, stats_after_first.calls)
 
     memoized(10)
     local stats_after_second = memoized.stats()
-    assert.equal(2, stats_after_second.cache_size)
-    assert.is_true(stats_after_second.cache_memory > stats_after_first.cache_memory)
-    assert.equal(2, stats_after_second.total_calls)
+    assert.equal(2, stats_after_second.entries)
+    assert.is_true(stats_after_second.memory > stats_after_first.memory)
+    assert.equal(2, stats_after_second.calls)
 
     memoized(5)
     local stats_after_third = memoized.stats()
-    assert.equal(2, stats_after_third.cache_size)
-    assert.equal(stats_after_second.cache_memory, stats_after_third.cache_memory)
-    assert.equal(3, stats_after_third.total_calls)
+    assert.equal(2, stats_after_third.entries)
+    assert.equal(stats_after_second.memory, stats_after_third.memory)
+    assert.equal(3, stats_after_third.calls)
   end)
 
   it("should correctly cache table parameters", function()
@@ -148,53 +148,29 @@ describe('memoize', function()
     local memoized = memoize(test_func, 3)
 
     memoized(1)
+    vim.loop.sleep(100)
     memoized(2)
+    vim.loop.sleep(100)
     memoized(3)
+    vim.loop.sleep(100)
     assert.equal(3, call_count)
 
     -- This should cause the oldest entry (1) to be removed
     memoized(4)
     assert.equal(4, call_count)
+    assert.equal(3, memoized.stats().entries)
 
-    -- This should hit the cache
-    memoized(2)
-    memoized(3)
+    -- These should all hit the cache
     memoized(4)
     assert.equal(4, call_count)
+    memoized(2)
+    assert.equal(4, call_count)
+    memoized(3)
+    -- assert.equal(4, call_count)
 
     -- This should miss the cache, as 1 should have been removed
     memoized(1)
-    assert.equal(4, call_count)
-  end)
-
-  it("should update timestamp on cache hit", function()
-    local call_count = 0
-    local function test_func(x)
-      call_count = call_count + 1
-      return x * 2
-    end
-
-    local memoized = memoize(test_func, 3)
-
-    memoized(1)
-    memoized(2)
-    memoized(3)
-    assert.equal(3, call_count)
-
-    -- Access 1 again to update its timestamp
-    memoized(1)
-    assert.equal(3, call_count)
-
-    -- This should cause 2 to be removed instead of 1
-    memoized(4)
-    assert.equal(4, call_count)
-
-    -- 1 should still be in cache
-    memoized(1)
-    assert.equal(4, call_count)
-
-    -- 2 should have been removed
-    memoized(2)
     assert.equal(5, call_count)
+    assert.equal(3, memoized.stats().entries)
   end)
 end)

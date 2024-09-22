@@ -7,6 +7,11 @@ local M = {
 local config = require('sluice.config')
 local window = require('sluice.window')
 local convert = require('sluice.convert')
+local memoize = require('sluice.memoize')
+
+M.lines_to_gutter_lines = memoize(convert.lines_to_gutter_lines)
+M.set_gutter_lines = memoize(window.set_gutter_lines)
+M.refresh_highlights = memoize(window.refresh_highlights)
 
 --- Update the gutter with new lines.
 ---@param gutter table The gutter object to update
@@ -14,10 +19,10 @@ local convert = require('sluice.convert')
 ---@return nil
 function M.update(gutter, lines)
   local gutter_settings = config.settings.gutters[gutter.index]
-  local gutter_lines = convert.lines_to_gutter_lines(gutter_settings, lines)
+  local gutter_lines = M.lines_to_gutter_lines(gutter_settings, lines)
   M.vim.schedule(function()
-    window.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.count_method, gutter_settings.width)
-    window.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
+    M.set_gutter_lines(gutter.bufnr, gutter_lines, gutter_settings.count_method, gutter_settings.width)
+    M.refresh_highlights(gutter.bufnr, gutter.ns, gutter_lines)
   end)
   M.gutter_lines[gutter.bufnr] = gutter_lines
 end
@@ -59,7 +64,7 @@ function M.get_lines(gutter)
     if update_fn == nil then
       print("No update function for gutter")
       -- TODO close the gutter
-      return
+      return table()
     end
 
     local integration_lines = update_fn(plugin_settings, bufnr)
@@ -72,9 +77,8 @@ function M.get_lines(gutter)
 end
 
 --- Create initial gutter settings
----@param config table The configuration object
 ---@return table[] gutters The initialized gutter settings
-function M.init_gutters(config)
+function M.init_gutters()
   local gutters = {}
   for i, v in ipairs(config.settings.gutters) do
     gutters[i] = {
@@ -93,9 +97,10 @@ function M.open()
   --   return
   -- end
 
-  -- TODO we need some better way to init the gutters but only minimally?
+  -- TODO we need some better way to init the gutters but only minimally - we
+  -- need a memoize function based on the config
   if M.gutters == nil or #M.gutters ~= #config.settings.gutters then
-    M.gutters = M.init_gutters(config)
+    M.gutters = M.init_gutters()
   end
 
   for i, gutter_settings in ipairs(config.settings.gutters) do
