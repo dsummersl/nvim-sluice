@@ -1,7 +1,9 @@
 local xxhash32 = require('sluice.luaxxhash')
 
-local function memoize(func)
+local function memoize(func, max_entries)
+  max_entries = max_entries or 10
   local cache = {}
+  local timestamps = {}
   local call_count = 0
 
   -- The memoized function object (a table)
@@ -21,10 +23,25 @@ local function memoize(func)
 
     -- Check if the result is already cached
     if cache[key_str] then
+      timestamps[key_str] = os.time()
       return cache[key_str]
     else
       local result = func(...)
+      
+      -- If we've reached max entries, remove the oldest one
+      if #timestamps >= max_entries then
+        local oldest_key, oldest_time = next(timestamps)
+        for k, v in pairs(timestamps) do
+          if v < oldest_time then
+            oldest_key, oldest_time = k, v
+          end
+        end
+        cache[oldest_key] = nil
+        timestamps[oldest_key] = nil
+      end
+      
       cache[key_str] = result
+      timestamps[key_str] = os.time()
       return result
     end
   end
@@ -37,6 +54,7 @@ local function memoize(func)
   -- Method to clear the memoized data
   function memoized_func.clear_cache()
     cache = {}
+    timestamps = {}
   end
 
   -- Method to report statistics about the memoized function

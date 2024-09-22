@@ -78,10 +78,7 @@ describe('memoize', function()
     assert.equal(stats_after_second.cache_memory, stats_after_third.cache_memory)
     assert.equal(3, stats_after_third.total_calls)
   end)
-end)
-local memoize = require('sluice.memoize')
 
-describe("memoize", function()
   it("should correctly cache table parameters", function()
     local function expensive_function(t)
       -- Simulate an expensive operation
@@ -139,5 +136,65 @@ describe("memoize", function()
 
     assert.are.equal(8, result2)
     assert.is_true(duration < 1000)
+  end)
+
+  it("should respect max_entries parameter", function()
+    local call_count = 0
+    local function test_func(x)
+      call_count = call_count + 1
+      return x * 2
+    end
+
+    local memoized = memoize(test_func, 3)
+
+    memoized(1)
+    memoized(2)
+    memoized(3)
+    assert.equal(3, call_count)
+
+    -- This should cause the oldest entry (1) to be removed
+    memoized(4)
+    assert.equal(4, call_count)
+
+    -- This should hit the cache
+    memoized(2)
+    memoized(3)
+    memoized(4)
+    assert.equal(4, call_count)
+
+    -- This should miss the cache, as 1 should have been removed
+    memoized(1)
+    assert.equal(5, call_count)
+  end)
+
+  it("should update timestamp on cache hit", function()
+    local call_count = 0
+    local function test_func(x)
+      call_count = call_count + 1
+      return x * 2
+    end
+
+    local memoized = memoize(test_func, 3)
+
+    memoized(1)
+    memoized(2)
+    memoized(3)
+    assert.equal(3, call_count)
+
+    -- Access 1 again to update its timestamp
+    memoized(1)
+    assert.equal(3, call_count)
+
+    -- This should cause 2 to be removed instead of 1
+    memoized(4)
+    assert.equal(4, call_count)
+
+    -- 1 should still be in cache
+    memoized(1)
+    assert.equal(4, call_count)
+
+    -- 2 should have been removed
+    memoized(2)
+    assert.equal(5, call_count)
   end)
 end)
