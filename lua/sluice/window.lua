@@ -142,6 +142,16 @@ function M.create_window(gutters, gutter_index)
       focusable = false,
       style = 'minimal',
     })
+  else
+    -- in case the window size changed, we can keep up with it.
+    M.vim.api.nvim_win_set_config(gutter.winid, {
+      win = M.vim.api.nvim_get_current_win(),
+      relative = 'win',
+      width = gutter_width,
+      height = height,
+      row = 0,
+      col = col,
+    })
   end
 end
 
