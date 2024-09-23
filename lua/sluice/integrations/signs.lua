@@ -4,6 +4,11 @@ local M = {
   vim = vim
 }
 
+local default_settings = {
+  group = '.*'
+}
+
+
 --- Get a table with keys set to the `name` of each sign that is defined.
 local function sign_getdefined()
   local get_defined = M.vim.fn.sign_getdefined()
@@ -18,7 +23,7 @@ end
 --- Returns a table of signs, and whether they have changed since the last call to this method.
 function M.update(settings, bufnr)
   local get_defined = sign_getdefined()
-  local group = (settings.signs and settings.signs.group) or '.*'
+  local update_settings = M.vim.tbl_deep_extend('keep', settings or {}, default_settings)
   local get_placed = M.vim.fn.sign_getplaced(bufnr, { group = '*' })
 
   -- local new_hash = xxh32(M.vim.inspect(get_placed))
@@ -31,7 +36,7 @@ function M.update(settings, bufnr)
 
   local result = {}
   for _, v in ipairs(get_placed[1]["signs"]) do
-    if config.str_table_fn(group, v["name"]) and v["name"] ~= "" then
+    if config.str_table_fn(update_settings.group, v["name"]) and v["name"] ~= "" then
       local line = M.vim.tbl_extend('force', get_defined[v["name"]], v)
       line.plugin = 'signs'
       table.insert(result, line)

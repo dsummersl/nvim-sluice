@@ -13,11 +13,20 @@ local P5 = (0x165667B1)
 
 -- multiplication with modulo2 semantics
 -- see https://github.com/luapower/murmurhash3
+---Multiplication with modulo2 semantics
+---@param a number
+---@param b number
+---@return number
 local function mmul(a, b)
 	local type = 'uint32_t'
 	return tonumber(ffi.cast(type, ffi.cast(type, a) * ffi.cast(type, b)))
 end
 
+---Compute xxHash32 hash
+---@param data string The input data to hash
+---@param len? number The length of the input data (optional, defaults to #data)
+---@param seed? number The seed for the hash (optional, defaults to 0)
+---@return number hash The computed 32-bit hash
 local function xxhash32(data, len, seed)
 	seed, len = seed or 0, len or #data
 	local i,n = 0, 0 -- byte and word index

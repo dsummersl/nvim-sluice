@@ -63,45 +63,43 @@ describe('sluice.config', function()
   describe('apply_user_settings', function()
     it('should override default settings with user settings', function()
       local user_settings = {
-        enable = false,
+        enabled = false,
         throttle_ms = 200,
         gutters = {
           {
-            plugins = { 'viewport', 'counters' },
-            window = {
-              width = 2,
-              enabled_fn = function() return true end,
-            },
+            width = 2,
+            enabled = function() return true end,
+            integrations = { 'viewport', 'counters' },
           },
         },
       }
       config.apply_user_settings(user_settings)
-      assert.is_false(config.settings.enable)
+      assert.is_false(config.settings.enabled)
       assert.are.equal(200, config.settings.throttle_ms)
-      assert.are.equal(2, config.settings.gutters[1].window.width)
-      assert.is_true(config.settings.gutters[1].window.enabled_fn())
+      assert.are.equal(2, config.settings.gutters[1].width)
+      assert.is_true(config.settings.gutters[1].enabled())
     end)
 
     it('should not override unspecified settings', function()
       config.apply_user_settings({})
-      assert.is_true(config.settings.enable)
+      assert.is_true(config.settings.enabled)
       -- Check that other settings are still at their default values
       assert.are.equal(150, config.settings.throttle_ms)
-      assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
+      assert.are.equal('viewport', config.settings.gutters[1].integrations[1])
     end)
 
     it('should handle nil user settings', function()
       config.apply_user_settings(nil)
       -- Check that settings are still at their default values
-      assert.is_true(config.settings.enable)
+      assert.is_true(config.settings.enabled)
       assert.are.equal(150, config.settings.throttle_ms)
-      assert.are.equal('viewport', config.settings.gutters[1].plugins[1])
+      assert.are.equal('viewport', config.settings.gutters[1].integrations[1])
     end)
 
     it('should throw an error for invalid types', function()
       assert.has_error(function()
-        config.apply_user_settings({ enable = 'true' })
-      end, "enable: expected boolean, got string")
+        config.apply_user_settings({ enabled = 'true' })
+      end, "enabled: expected boolean, got string")
 
       assert.has_error(function()
         config.apply_user_settings({ throttle_ms = '200' })
@@ -112,15 +110,15 @@ describe('sluice.config', function()
       end, "gutters: expected table, got string")
 
       assert.has_error(function()
-        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
-      end, "gutters[1].window.width: expected number, got string")
+        config.apply_user_settings({ gutters = { { width = 'two' } } })
+      end, "gutters[1].width: expected number, got string")
     end)
 
     it('should handle signs group setting', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'signs' },
+            integrations = { 'signs' },
             signs = {
               group = 'custom_group'
             }
@@ -135,81 +133,72 @@ describe('sluice.config', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
-            window = {
-              layout = 'left'
-            }
+            layout = 'left',
+            integrations = { 'viewport' },
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('left', config.settings.gutters[1].window.layout)
+      assert.are.equal('left', config.settings.gutters[1].layout)
     end)
 
     it('should default to right layout when not specified', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
-            window = {}
+            integrations = { 'viewport' },
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('right', config.settings.gutters[1].window.layout)
+      assert.are.equal('right', config.settings.gutters[1].layout)
     end)
 
     it('should throw an error for invalid layout', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
-            window = {
-              layout = 'invalid'
-            }
+            layout = 'invalid',
+            integrations = { 'viewport' },
           }
         }
       }
       assert.has_error(function()
         config.apply_user_settings(user_settings)
-      end, "gutters[1].window.layout must be 'left' or 'right'")
+      end, "gutters[1].layout must be 'left' or 'right'")
     end)
 
     it('should throw an error for invalid render_method', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
-            window = {
-              render_method = 'invalid'
-            }
+            render_method = 'invalid',
+            integrations = { 'viewport' },
           }
         }
       }
       assert.has_error(function()
         config.apply_user_settings(user_settings)
-      end, "gutters[1].window.render_method must be 'macro' or 'line'")
+      end, "gutters[1].render_method must be 'macro' or 'line'")
     end)
 
     it('should accept valid render_method', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'viewport' },
-            window = {
-              render_method = 'line'
-            }
+            render_method = 'line',
+            integrations = { 'viewport' },
           }
         }
       }
       config.apply_user_settings(user_settings)
-      assert.are.equal('line', config.settings.gutters[1].window.render_method)
+      assert.are.equal('line', config.settings.gutters[1].render_method)
     end)
 
     it('should throw an error for invalid types', function()
       assert.has_error(function()
-        config.apply_user_settings({ enable = 'true' })
-      end, "enable: expected boolean, got string")
+        config.apply_user_settings({ enabled = 'true' })
+      end, "enabled: expected boolean, got string")
 
       assert.has_error(function()
         config.apply_user_settings({ throttle_ms = '200' })
@@ -220,15 +209,15 @@ describe('sluice.config', function()
       end, "gutters: expected table, got string")
 
       assert.has_error(function()
-        config.apply_user_settings({ gutters = { { window = { width = 'two' } } } })
-      end, "gutters[1].window.width: expected number, got string")
+        config.apply_user_settings({ gutters = { { width = 'two' } } })
+      end, "gutters[1].width: expected number, got string")
     end)
 
     it('should handle signs group setting', function()
       local user_settings = {
         gutters = {
           {
-            plugins = { 'signs' },
+            integrations = { 'signs' },
             signs = {
               group = 'custom_group'
             }

@@ -27,14 +27,12 @@ describe('line_to_gutter_line_macro()', function()
 end)
 
 local gutter_settings = {
-  plugins = { 'viewport' },
+  width = 1,
+  gutter_hl = 'SluiceColumn',
+  integrations = { 'viewport' },
   viewport = {
     cursor_hl = 'IncSearch',
   },
-  window = {
-    width = 1,
-    default_gutter_hl = 'SluiceColumn',
-  }
 }
 
 describe('lines_to_gutters()', function()

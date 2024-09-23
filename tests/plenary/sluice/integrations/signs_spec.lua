@@ -1,5 +1,4 @@
 local signs = require('sluice.integrations.signs')
-local config = require('sluice.config')
 
 -- Mock vim functions
 signs.vim = {
@@ -19,7 +18,8 @@ signs.vim = {
       } }
     end
   },
-  tbl_extend = vim.tbl_extend
+  tbl_extend = vim.tbl_extend,
+  tbl_deep_extend = vim.tbl_deep_extend
 }
 
 describe("signs update() integration", function()
@@ -31,7 +31,7 @@ describe("signs update() integration", function()
   end)
 
   it("should return correct sign data if filtered by settings", function()
-    local result = signs.update({ signs = { group = "sign1" } }, 0)
+    local result = signs.update({ group = "sign1" }, 0)
     assert.equal(1, #result)
     assert.same({ name = "sign1", texthl = "HL1", lnum = 1, plugin = "signs" }, result[1])
   end)

@@ -1,12 +1,13 @@
 local highlight = require('sluice.highlight')
 local counters = require('sluice.integrations.counters')
+local config = require('sluice.config')
 
 local M = {
   vim = vim,
 }
 
 --- Find the best match, ordered by priority.
--- @param matches List of matches from plugins.
+-- @param matches List of matches from integrations.
 -- @param optional key to prioritize by (beyond priority).
 function M.find_best_match(matches, key)
   local best_match = nil
@@ -90,25 +91,25 @@ function M.set_gutter_lines(bufnr, lines, count_method, width)
 end
 
 function M.get_gutter_column(gutters, gutter_index, layout)
-  local window_width = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or
-  80                                                                                          -- Default to 80 if function not available
+  local window_width = (
+    M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or 80
+  )
   local column = 0
   local gutter_count = #gutters
-  local config = require('sluice.config')
 
   if layout == 'right' then
     for i = gutter_count, gutter_index, -1 do
       local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'right' then
-        column = column + gutter_settings.window.width
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.layout == 'right' then
+        column = column + gutter_settings.width
       end
     end
     return window_width - column
   else -- 'left' layout
     for i = 1, gutter_index - 1 do
       local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'left' then
-        column = column + gutter_settings.window.width
+      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.layout == 'left' then
+        column = column + gutter_settings.width
       end
     end
     return column
@@ -120,8 +121,8 @@ end
 function M.create_window(gutters, gutter_index)
   local gutter = gutters[gutter_index]
   local gutter_settings = require('sluice.config').settings.gutters[gutter_index]
-  local gutter_width = gutter_settings.window.width
-  local layout = gutter_settings.window.layout
+  local gutter_width = gutter_settings.width
+  local layout = gutter_settings.layout
 
   local col = M.get_gutter_column(gutters, gutter_index, layout)
   local height = M.vim.api.nvim_win_get_height(0)
@@ -130,6 +131,7 @@ function M.create_window(gutters, gutter_index)
     gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
     gutter.ns = M.vim.api.nvim_create_namespace('sluice' .. gutter.bufnr)
   end
+
   if gutter.winid == nil or M.vim.fn.win_id2win(gutter.winid) == 0 then
     gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
       relative = 'win',
@@ -141,6 +143,7 @@ function M.create_window(gutters, gutter_index)
       style = 'minimal',
     })
   else
+    -- in case the window size changed, we can keep up with it.
     M.vim.api.nvim_win_set_config(gutter.winid, {
       win = M.vim.api.nvim_get_current_win(),
       relative = 'win',

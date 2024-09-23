@@ -141,10 +141,8 @@ describe('create_window()', function()
     config.settings = {
       gutters = {
         {
-          window = {
-            width = 2,
-            layout = 'right',
-          },
+          width = 2,
+          layout = 'right',
         },
       },
     }
@@ -163,14 +161,14 @@ describe('create_window()', function()
       width = 2,
       height = 10,
       row = 0,
-      col = mock_vim.api.nvim_win_get_width(0) - 2,
+      col = mock_vim.api.nvim_win_get_width(0) - 1,
       focusable = false,
       style = 'minimal',
     }}, called_with)
   end)
 
   it('creates a window with left layout', function()
-    config.settings.gutters[1].window.layout = 'left'
+    config.settings.gutters[1].layout = 'left'
     local gutters = {{}}
     local called_with = nil
     mock_vim.api.nvim_open_win = function(...)
@@ -203,7 +201,7 @@ describe('create_window()', function()
       width = 2,
       height = 10,
       row = 0,
-      col = mock_vim.api.nvim_win_get_width(0) - 2,
+      col = mock_vim.api.nvim_win_get_width(0) - 1,
     }}, called_with)
   end)
 end)
@@ -212,69 +210,57 @@ describe('get_gutter_column()', function()
   local vim_width = vim.api.nvim_win_get_width(0)
   local one_gutter = {
       gutters = {{
-        window = {
-          width = 3,
-          layout = 'right'
-        }
+        width = 3,
+        layout = 'right'
       }},
     }
     local two_gutters = {
         gutters = {{
-          window = {
-            width = 3,
-            layout = 'right'
-          }
+          width = 3,
+          layout = 'right'
         }, {
-          window = {
-            width = 2,
-            layout = 'right'
-          }
+          width = 2,
+          layout = 'right'
         }},
       }
     local mixed_gutters = {
         gutters = {{
-          window = {
-            width = 3,
-            layout = 'right'
-          }
+          width = 3,
+          layout = 'right'
         }, {
-          window = {
-            width = 2,
-            layout = 'left'
-          }
+          width = 2,
+          layout = 'left'
         }, {
-          window = {
-            width = 1,
-            layout = 'right'
-          }
+          width = 1,
+          layout = 'right'
         }},
       }
 
   it('would account for a plugin with a custom width', function()
     config.apply_user_settings(one_gutter)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(window.get_gutter_column(gutters, 1, 'right'), vim_width - 2)
   end)
 
   it('would count multiple gutters with the same layout', function()
     config.apply_user_settings(two_gutters)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 5, window.get_gutter_column(gutters, 1, 'right'))
-    assert.are.same(vim_width - 2, window.get_gutter_column(gutters, 2, 'right'))
+    assert.are.same(window.get_gutter_column(gutters, 1, 'right'), vim_width - 2)
+    assert.are.same(window.get_gutter_column(gutters, 2, 'right'), vim_width - 1)
   end)
 
   it('ignores gutters that are not enabled', function()
     two_gutters.gutters[2].enabled = false
     config.apply_user_settings(two_gutters)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 3, window.get_gutter_column(gutters, 1, 'right'))
+    assert.are.same(window.get_gutter_column(gutters, 1, 'right'), vim_width - 2)
   end)
 
   it('handles mixed layouts correctly', function()
     config.apply_user_settings(mixed_gutters)
     local gutters = gutter.init_gutters(config)
-    assert.are.same(vim_width - 4, window.get_gutter_column(gutters, 1, 'right'))
-    assert.are.same(0, window.get_gutter_column(gutters, 2, 'left'))
-    assert.are.same(vim_width - 1, window.get_gutter_column(gutters, 3, 'right'))
+    assert.are.same(window.get_gutter_column(gutters, 1, 'right'), vim_width - 2)
+    assert.are.same(window.get_gutter_column(gutters, 2, 'left'), 0)
+    assert.are.same(window.get_gutter_column(gutters, 3, 'right'), vim_width)
   end)
 end)
