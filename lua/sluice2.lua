@@ -8,8 +8,8 @@ local config = require('sluice2.config')
 local gutter = require('sluice2.gutter')
 local window = require('sluice2.window')
 
-M.setup = function(settings)
-  config.apply_user_settings(settings)
+M.setup = function(user_settings)
+  config.setup(user_settings)
 
   -- Initialize buffer-specific data
   local function init_buffer()
