@@ -83,7 +83,7 @@ function M.set_gutter_lines(bufnr, lines, count_method, width)
     end
 
     -- pad text to width
-    text = string.rep(' ', width - #text) .. text
+    text = string.rep(' ', width - M.vim.str_utfindex(text)) .. text
     table.insert(strings, text)
   end
 
