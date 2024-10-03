@@ -1,15 +1,18 @@
 local config = require('sluice.config')
+local logger = require('sluice.logger')
 
 local M = {
-  vim = vim
+  vim = vim,
+  auto_command_ids_by_bufnr = {}
 }
 
 local default_settings = {
   hl_group = nil,
   sign_hl_group = '.*',
   text = ' ',
+  events = { 'DiagnosticChanged' },
+  user_events = {},
 }
-
 
 function M.add_hl_groups(result, bufnr, settings, hl_group_type)
   -- lookup hl_groups or sign_hl_group:
@@ -48,12 +51,18 @@ function M.update(settings, bufnr)
   return results
 end
 
-function M.enable(_settings, _bufnr)
-  -- TODO setup the listeners for this.
-  -- Specific events to update on - DiagnosticChanged would be one
+function M.enable(settings, bufnr)
+  local update_settings = M.vim.tbl_deep_extend('keep', settings or {}, default_settings)
+  if #update_settings.events > 0 then
+    local au_ids = config.trigger_update_on_event(update_settings.events, update_settings.user_events)
+    table.insert(M.auto_command_ids_by_bufnr, bufnr, au_ids)
+  end
+
+  return update_settings
 end
 
-function M.disable(settings, _bufnr)
+function M.disable(settings, bufnr)
+  config.remove_autocmds(bufnr)
 end
 
 return M

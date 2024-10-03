@@ -1,17 +1,20 @@
 local M = {
   vim = vim,
+  -- TODO We need to re-organize this so that its by bufnr (and more than one can
+  -- exist).
   gutters = nil,
   gutter_lines = {},
 }
 
+local logger = require('sluice.logger')
 local config = require('sluice.config')
 local window = require('sluice.window')
 local convert = require('sluice.convert')
 local memoize = require('sluice.memoize')
 
 M.lines_to_gutter_lines = memoize(convert.lines_to_gutter_lines)
-M.set_gutter_lines = memoize(window.set_gutter_lines)
-M.refresh_highlights = memoize(window.refresh_highlights)
+M.set_gutter_lines = memoize(window.set_gutter_lines, 1)
+M.refresh_highlights = memoize(window.refresh_highlights, 1)
 
 --- Update the gutter with new lines.
 ---@param gutter table The gutter object to update
@@ -31,6 +34,9 @@ end
 ---@param gutter table The gutter object to get lines for
 ---@return table[] lines The integration lines for the gutter
 function M.get_lines(gutter)
+  -- TODO ideally this function could be triggered at the integration level (we
+  -- have an integration that might want to retrigger an update based on some
+  -- event - but its wasteful to trigger everyone
   local bufnr = M.vim.fn.bufnr()
   local lines = {}
   local gutter_settings = config.settings.gutters[gutter.index]
@@ -57,6 +63,7 @@ function M.get_lines(gutter)
     end
 
     if enable_fn ~= nil then
+      -- TODO Should only happen if it hasn't already been initialized
       -- TODO update all the integrations
       enable_fn(plugin_settings, bufnr)
     end
@@ -76,33 +83,24 @@ function M.get_lines(gutter)
   return lines
 end
 
---- Create initial gutter settings
----@return table[] gutters The initialized gutter settings
-function M.init_gutters()
-  local gutters = {}
-  for i, v in ipairs(config.settings.gutters) do
-    gutters[i] = {
-      index = i,
-      enabled = v.enabled
-    }
-  end
+function M.enable()
+  -- TODO no really fix this
+  if M.gutters == nil or #M.gutters ~= #config.settings.gutters then
+    local gutters = {}
+    for i, v in ipairs(config.settings.gutters) do
+      gutters[i] = {
+        index = i,
+        enabled = v.enabled,
+      }
+    end
 
-  return gutters
+    M.gutters = gutters
+  end
 end
 
 --- Open all gutters configured for this plugin.
 ---@return nil
 function M.open()
-  -- if M.should_throttle() then
-  --   return
-  -- end
-
-  -- TODO we need some better way to init the gutters but only minimally - we
-  -- need a memoize function based on the config
-  if M.gutters == nil or #M.gutters ~= #config.settings.gutters then
-    M.gutters = M.init_gutters()
-  end
-
   for i, gutter_settings in ipairs(config.settings.gutters) do
     local gutter = M.gutters[i]
     gutter.lines = M.get_lines(gutter)
@@ -111,6 +109,7 @@ function M.open()
 
   M.vim.schedule(function()
     for i, _ in ipairs(config.settings.gutters) do
+      logger.log("gutter", "gutter " .. i .. " enabled: " .. tostring(M.gutters[i].enabled) .. " lines: " .. #M.gutters[i].lines)
       if M.gutters[i].enabled then
         M.open_gutter(i)
       else

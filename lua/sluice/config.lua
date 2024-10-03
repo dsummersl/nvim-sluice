@@ -1,8 +1,44 @@
 local counters = require('sluice.integrations.counters')
+local logger = require('sluice.logger')
 
 local M = {
   vim = vim
 }
+
+function M.remove_autocmds(bufnr)
+  local au_ids = M.auto_command_ids_by_bufnr[bufnr]
+  if au_ids then
+    for _, id in ipairs(au_ids) do
+      M.vim.api.nvim_del_autocmd(id)
+    end
+  end
+end
+
+function M.trigger_update_on_event(events, user_events)
+  local results = {}
+  local au_id = M.vim.api.nvim_create_autocmd(events, {
+    callback = function()
+      logger.log('config', 'triggered update')
+      require("sluice.commands").update_context()
+    end,
+  })
+  table.insert(results, au_id)
+
+  for _, value in ipairs(user_events) do
+    local an_id M.vim.api.nvim_create_autocmd('User', {
+      pattern = value,
+      callback = function()
+        logger.log('config', 'triggered update')
+        -- TODO ideally this would only update this buffer, not all of them.
+        require("sluice.commands").update_context()
+      end,
+    })
+    table.insert(results, an_id)
+  end
+
+  return results
+end
+
 
 --- Utility function to check if a value matches a string, is in a table, or passes a function test
 -- @param obj string|table|function The object to check against

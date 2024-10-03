@@ -32,6 +32,7 @@ end
 
 --- Add styling to the gutter.
 function M.refresh_highlights(bufnr, ns, lines)
+  -- TODO log when these get changed
   M.vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   for i, matches in ipairs(lines) do
     local best_texthl_match = M.find_best_match(matches, "texthl")
@@ -87,6 +88,8 @@ function M.set_gutter_lines(bufnr, lines, count_method, width)
     table.insert(strings, text)
   end
 
+  -- TODO log when this gets called in some stats somewhere
+  -- TODO error: Vim:E440: Undo line missing
   M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
 end
 
