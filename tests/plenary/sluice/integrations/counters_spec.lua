@@ -1,4 +1,4 @@
-local counters = require('sluice.integrations.counters')
+local counters = require('sluice.utils.counters')
 
 describe('count()', function()
   it('returns an empty string for <= 0', function()

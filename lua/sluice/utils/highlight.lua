@@ -1,4 +1,4 @@
-local xxhash32 = require('sluice.luaxxhash')
+local xxhash32 = require('sluice.utils.luaxxhash')
 
 local M = {
   vim = vim,

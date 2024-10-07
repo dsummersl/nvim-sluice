@@ -1,5 +1,5 @@
-local counters = require('sluice.integrations.counters')
-local logger = require('sluice.logger')
+local counters = require('sluice.utils.counters')
+local logger = require('sluice.utils.logger')
 
 local M = {
   vim = vim
@@ -13,32 +13,6 @@ function M.remove_autocmds(bufnr)
     end
   end
 end
-
-function M.trigger_update_on_event(events, user_events)
-  local results = {}
-  local au_id = M.vim.api.nvim_create_autocmd(events, {
-    callback = function()
-      logger.log('config', 'triggered update')
-      require("sluice.commands").update_context()
-    end,
-  })
-  table.insert(results, au_id)
-
-  for _, value in ipairs(user_events) do
-    local an_id M.vim.api.nvim_create_autocmd('User', {
-      pattern = value,
-      callback = function()
-        logger.log('config', 'triggered update')
-        -- TODO ideally this would only update this buffer, not all of them.
-        require("sluice.commands").update_context()
-      end,
-    })
-    table.insert(results, an_id)
-  end
-
-  return results
-end
-
 
 --- Utility function to check if a value matches a string, is in a table, or passes a function test
 -- @param obj string|table|function The object to check against
@@ -87,6 +61,7 @@ end
 -- - the buffer is not a special &buftype
 -- - the buffer is not a &previewwindow
 -- - the buffer is not a &diff
+-- TODO this now needs to take in a win/bufnr b/c its not just the current one.
 function M.default_enabled_fn()
   local win_height = M.vim.api.nvim_win_get_height(0)
   local buf_lines = M.vim.api.nvim_buf_line_count(0)
@@ -149,7 +124,7 @@ local default_gutter_settings = {
   --- Render method for the gutter. Can be 'macro' or 'line'.
   render_method = 'macro',
 
-  integrations = { 'viewport' },
+  plugins = { 'viewport' },
 }
 
 local apply_gutter_settings = function(gutters)
@@ -167,15 +142,16 @@ local default_settings = {
     {
       enabled = M.make_has_results_fn('search'),
       count_method = counters.methods.horizontal_block,
-      integrations = { 'viewport', 'search' },
+      plugins = { 'viewport', 'search' },
     },
     {
-      integrations = { 'viewport', 'extmark', 'signs' },
+      plugins = { 'viewport', 'extmark', 'signs' },
     },
   }
 }
 
 function M.apply_user_settings(user_settings)
+  logger.log('config', 'apply_user_settings')
   if user_settings ~= nil then
     M.vim.validate({ user_settings = { user_settings, 'table', true} })
 
@@ -193,9 +169,12 @@ function M.apply_user_settings(user_settings)
       for i, gutter in ipairs(user_settings.gutters) do
         M.vim.validate({
           ['gutters[' .. i .. ']'] = { gutter, 'table' },
-          ['gutters[' .. i .. '].integrations'] = { gutter.integrations, 'table', true },
+          ['gutters[' .. i .. '].plugins'] = { gutter.plugins, 'table', true },
+          -- TODO each integration should be validated
         })
         if gutter ~= nil then
+          -- TODO these are 'window' settings. They should be part of the
+          -- window.
           M.vim.validate({
             ['gutters[' .. i .. ']'] = { gutter, 'table' },
             ['gutters[' .. i .. '].width'] = { gutter.width, 'number', true },

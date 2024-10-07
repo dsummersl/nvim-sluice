@@ -1,4 +1,4 @@
-local xxhash32 = require('sluice.luaxxhash')
+local xxhash32 = require('sluice.utils.luaxxhash')
 
 local function memoize(func, max_entries)
   max_entries = max_entries or 10

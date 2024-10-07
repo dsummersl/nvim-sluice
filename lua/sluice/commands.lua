@@ -1,38 +1,61 @@
+local Sluice = require('sluice.sluice')
+local logger = require('sluice.utils.logger')
+
 local M = {
   vim = vim,
-  enabled = false
+  enabled = false,
+  au_id = nil,
+  sluices = {},
 }
 
-local gutter = require('sluice.gutter')
-local debounce = require('sluice.debounce')
-
 ---@return nil
-local function update_context()
+local function update_context(ctx)
+  logger.log('commands', 'update_context triggered by '.. ctx.event)
+
   if not M.enabled then return end
 
-  gutter.open()
-end
+  local windows = vim.api.nvim_list_wins()
+  for _, win in ipairs(windows) do
+    local win_config = vim.api.nvim_win_get_config(win)
+    if win_config.focusable then
+      if M.sluices[win] == nil then
+        M.sluices[win] = Sluice.new(win)
+      end
 
-M.update_context = debounce(update_context, 100)
+      M.sluices[win]:update()
+    end
+  end
+end
 
 ---@return nil
 function M.enable()
+  logger.log('commands', 'enable')
   if M.enabled then return end
   M.enabled = true
 
-  gutter.enable()
-  M.update_context()
+  -- call once to get things going
+  update_context({ event = "" })
+
+  M.au_id = M.vim.api.nvim_create_autocmd({ "WinEnter", "WinLeave", "WinNew", "WinClosed", "VimResized" }, {
+    callback = update_context
+  })
 end
 
 ---@return nil
 function M.disable()
+  logger.log('commands', 'disable')
   if not M.enabled then return end
 
   M.enabled = false
+  M.vim.api.nvim_del_autocmd(M.au_id)
+  M.au_id = nil
 
-  nvim_augroup('sluice', {})
-
-  gutter.close()
+  local windows = vim.api.nvim_list_wins()
+  for _, win in ipairs(windows) do
+    if M.sluices[win] ~= nil then
+      M.sluices[win]:close()
+    end
+  end
 end
 
 ---@return nil

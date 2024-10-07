@@ -1,10 +1,11 @@
+local commands = require('sluice.commands')
+local config = require('sluice.config')
+
 local M = {
   vim = vim
 }
 
 M.setup = function(settings)
-  local commands = require('sluice.commands')
-  local config = require('sluice.config')
   config.apply_user_settings(settings)
 
   local subcommands = {
@@ -52,12 +53,10 @@ M.setup = function(settings)
   })
 
   if config.bool_table_fn(config.settings.enabled) then
-    require("sluice.commands").enable()
+    commands.enable()
   else
-    require("sluice.commands").disable()
+    commands.disable()
   end
 end
-
-M.setup()
 
 return M
