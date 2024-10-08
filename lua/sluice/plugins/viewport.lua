@@ -1,10 +1,10 @@
-local config = require('sluice.config')
 local logger = require('sluice.utils.logger')
+local guards = require('sluice.utils.guards')
+
 -- not used, just imported for typing.
 require('sluice.plugins.plugin_type')
 
 local M = {
-  vim = vim,
 }
 
 ---@class ViewportSettings : PluginSettings
@@ -35,13 +35,13 @@ function M.new(plugin_settings, winid)
 
   function viewport:enable()
     logger.log("viewport", "enable win: " .. viewport.winid)
-    viewport.settings = M.vim.tbl_deep_extend('keep', viewport.plugin_settings or {}, default_settings)
+    viewport.settings = vim.tbl_deep_extend('keep', viewport.plugin_settings or {}, default_settings)
 
-    if M.vim.fn.hlexists('SluiceViewportVisibleArea') == 0 then
-      M.vim.cmd('hi link SluiceViewportVisibleArea Normal')
+    if vim.fn.hlexists('SluiceViewportVisibleArea') == 0 then
+      vim.cmd('hi link SluiceViewportVisibleArea Normal')
     end
-    if M.vim.fn.hlexists('SluiceViewportCursor') == 0 then
-      M.vim.cmd('hi link SluiceViewportCursor Normal')
+    if vim.fn.hlexists('SluiceViewportCursor') == 0 then
+      vim.cmd('hi link SluiceViewportCursor Normal')
     end
   end
 
@@ -50,17 +50,21 @@ function M.new(plugin_settings, winid)
   end
 
   function viewport:get_lines()
-    local bufnr = M.vim.api.nvim_win_get_buf(viewport.winid)
+    if not guards.win_exists(viewport.winid) then
+      logger.log("viewport", "get_lines: " .. viewport.winid .. " not found", "WARNING")
+      return {}
+    end
+
+    local bufnr = vim.api.nvim_win_get_buf(viewport.winid)
     logger.log("viewport", "get_lines: " .. viewport.winid .. " bufnr: " .. bufnr)
 
     local cursor_position = -1
-
-    if M.vim.api.nvim_get_current_buf() == viewport.bufnr then
-      cursor_position = M.vim.api.nvim_win_get_cursor(0)[1]
+    if vim.api.nvim_get_current_buf() == viewport.bufnr then
+      cursor_position = vim.api.nvim_win_get_cursor(0)[1]
     end
 
     local lines = {}
-    for lnum = M.vim.fn.line('w0', viewport.winid), M.vim.fn.line('w$', viewport.winid) do
+    for lnum = vim.fn.line('w0', viewport.winid), vim.fn.line('w$', viewport.winid) do
       local linehl = viewport.settings.visible_area_hl
       local text = " "
       local priority = 0

@@ -10,13 +10,22 @@ local M = {
 
 ---@return nil
 local function update_context(ctx)
-  logger.log('commands', 'update_context triggered by '.. ctx.event)
-
   if not M.enabled then return end
+  logger.log('commands', 'update_context triggered by ' .. vim.inspect(ctx))
+
+  if ctx.event == "WinClosed" then
+    local sluice = M.sluices[ctx.match]
+    if sluice ~= nil then
+      sluice:close()
+    end
+    return
+  end
 
   local windows = vim.api.nvim_list_wins()
+  logger.log('commands', 'update_context windows: ' .. vim.inspect(windows))
   for _, win in ipairs(windows) do
     local win_config = vim.api.nvim_win_get_config(win)
+    logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config))
     if win_config.focusable then
       if M.sluices[win] == nil then
         M.sluices[win] = Sluice.new(win)
@@ -36,7 +45,7 @@ function M.enable()
   -- call once to get things going
   update_context({ event = "" })
 
-  M.au_id = M.vim.api.nvim_create_autocmd({ "WinEnter", "WinLeave", "WinNew", "WinClosed", "VimResized" }, {
+  M.au_id = M.vim.api.nvim_create_autocmd({ "WinNew", "WinClosed" }, {
     callback = update_context
   })
 end

@@ -6,6 +6,7 @@ local M = {
 
 local convert = require('sluice.utils.convert')
 local logger = require('sluice.utils.logger')
+local guards = require('sluice.utils.guards')
 local Window = require('sluice.window')
 -- not used, just imported for typing.
 require('sluice.plugins.plugin_type')
@@ -45,7 +46,7 @@ function M.new(i, gutter_settings, winid)
   -- @field gutter_settings table
   -- @field window Window
   -- @field plugins Plugin[]
-  -- @field event_autocammand_ids number[]
+  -- @field event_au_ids number[]
   -- @field lines PluginLine[]
   -- @field enabled boolean
   -- @type Gutter
@@ -53,9 +54,9 @@ function M.new(i, gutter_settings, winid)
     index = i,
     winid = winid,
     settings = update_settings,
-    window = Window.new(i, update_settings),
+    window = Window.new(i, update_settings, winid),
     plugins = {},
-    event_autocammand_ids = {},
+    event_au_ids = {},
     lines = {},
     enabled = false,
   }
@@ -122,7 +123,7 @@ function M.new(i, gutter_settings, winid)
         end
       end
     end
-    gutter:setup_events(all_events, all_user_events)
+    M.event_au_ids = gutter:setup_events(all_events, all_user_events)
   end
 
   --- Whether to display the gutter or not.
@@ -161,9 +162,21 @@ function M.new(i, gutter_settings, winid)
 
   function gutter:close()
     logger.log("gutter", "close: " .. gutter.index)
+    for _, plugin in pairs(gutter.event_au_ids) do
+      vim.api.nvim_del_autocmd(gutter.event_au_ids)
+    end
+    for _, plugin in ipairs(gutter.plugins) do
+      plugin:disable()
+    end
+    gutter.window:close()
   end
 
   function gutter:update()
+    if not guards.win_exists(gutter.winid) then
+      logger.log("gutter", "update: " .. gutter.winid .. " not found", "WARN")
+      return
+    end
+
     logger.log("gutter", "update: " .. gutter.index)
 
     local lines = {}

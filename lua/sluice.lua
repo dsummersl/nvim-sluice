@@ -1,11 +1,13 @@
 local commands = require('sluice.commands')
 local config = require('sluice.config')
+local logger = require('sluice.utils.logger')
 
 local M = {
   vim = vim
 }
 
 M.setup = function(settings)
+  logger.log("sluice", "setup")
   config.apply_user_settings(settings)
 
   local subcommands = {
