@@ -9,7 +9,7 @@ local M = {
 }
 
 
----@param bufnr number
+---@param winid number
 ---@return nil
 local function remove(winid)
   local sluice = M.sluices[winid]

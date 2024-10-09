@@ -4,8 +4,7 @@ local guards = require('sluice.utils.guards')
 -- not used, just imported for typing.
 require('sluice.plugins.plugin_type')
 
-local M = {
-}
+local M = {}
 
 ---@class ViewportSettings : PluginSettings
 ---@field visible_area_hl string
@@ -51,7 +50,7 @@ function M.new(plugin_settings, winid)
 
   function viewport:get_lines()
     if not guards.win_exists(viewport.winid) then
-      logger.log("viewport", "get_lines: " .. viewport.winid .. " not found", "WARNING")
+      logger.log("viewport", "get_lines: " .. viewport.winid .. " not found", "WARN")
       return {}
     end
 

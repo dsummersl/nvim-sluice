@@ -75,7 +75,7 @@ function M.new(i, gutter_settings, winid)
   end
 
   function gutter:setup_events(events, user_events)
-    logger.log("gutter", "setup_events: " .. M.vim.inspect(events) .. " " .. M.vim.inspect(user_events))
+    logger.log("gutter", "setup_events: " .. vim.inspect(events) .. " " .. vim.inspect(user_events))
     local results = {}
     local au_id = vim.api.nvim_create_autocmd(events, {
       callback = function(ctx)
@@ -85,11 +85,12 @@ function M.new(i, gutter_settings, winid)
     })
     table.insert(results, au_id)
 
-    for _, value in ipairs(user_events) do
+    for _, user_au in ipairs(user_events) do
       local an_id vim.api.nvim_create_autocmd('User', {
-        pattern = value,
+        pattern = user_au,
         callback = function()
           logger.log('config', 'triggered update')
+          gutter:update()
         end,
       })
       table.insert(results, an_id)
