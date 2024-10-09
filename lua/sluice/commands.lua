@@ -8,16 +8,24 @@ local M = {
   sluices = {},
 }
 
+
+---@param bufnr number
+---@return nil
+local function remove(winid)
+  local sluice = M.sluices[winid]
+  if sluice ~= nil then
+    sluice:close()
+  end
+  M.sluices[winid] = nil
+end
+
 ---@return nil
 local function update_context(ctx)
   if not M.enabled then return end
   logger.log('commands', 'update_context triggered by ' .. vim.inspect(ctx))
 
   if ctx.event == "WinClosed" then
-    local sluice = M.sluices[ctx.match]
-    if sluice ~= nil then
-      sluice:close()
-    end
+    remove(tonumber(ctx.match))
     return
   end
 
@@ -61,9 +69,7 @@ function M.disable()
 
   local windows = vim.api.nvim_list_wins()
   for _, win in ipairs(windows) do
-    if M.sluices[win] ~= nil then
-      M.sluices[win]:close()
-    end
+    remove(win)
   end
 end
 

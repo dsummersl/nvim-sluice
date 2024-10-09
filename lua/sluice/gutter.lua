@@ -1,8 +1,4 @@
-local M = {
-  vim = vim,
-  gutters = nil,
-  gutter_lines = {},
-}
+local M = {}
 
 local convert = require('sluice.utils.convert')
 local logger = require('sluice.utils.logger')
@@ -37,7 +33,7 @@ function M.new(i, gutter_settings, winid)
     plugins = { 'viewport' },
   }
 
-  local update_settings = M.vim.tbl_deep_extend('keep', gutter_settings, default_settings)
+  local update_settings = vim.tbl_deep_extend('keep', gutter_settings, default_settings)
 
   -- @class Gutter
   -- @field index number
@@ -81,7 +77,7 @@ function M.new(i, gutter_settings, winid)
   function gutter:setup_events(events, user_events)
     logger.log("gutter", "setup_events: " .. M.vim.inspect(events) .. " " .. M.vim.inspect(user_events))
     local results = {}
-    local au_id = M.vim.api.nvim_create_autocmd(events, {
+    local au_id = vim.api.nvim_create_autocmd(events, {
       callback = function(ctx)
         logger.log('gutter', 'triggered update by: '.. ctx.event)
         gutter:update()
@@ -90,7 +86,7 @@ function M.new(i, gutter_settings, winid)
     table.insert(results, au_id)
 
     for _, value in ipairs(user_events) do
-      local an_id M.vim.api.nvim_create_autocmd('User', {
+      local an_id vim.api.nvim_create_autocmd('User', {
         pattern = value,
         callback = function()
           logger.log('config', 'triggered update')
@@ -113,17 +109,17 @@ function M.new(i, gutter_settings, winid)
     local all_user_events = {}
     for _, plugin in ipairs(gutter.plugins) do
       for _, event in ipairs(plugin.settings.events) do
-        if not M.vim.tbl_contains(all_events, event) then
+        if not vim.tbl_contains(all_events, event) then
           table.insert(all_events, event)
         end
       end
       for _, user_event in ipairs(plugin.settings.user_events) do
-        if not M.vim.tbl_contains(all_user_events, user_event) then
+        if not vim.tbl_contains(all_user_events, user_event) then
           table.insert(all_user_events, user_event)
         end
       end
     end
-    M.event_au_ids = gutter:setup_events(all_events, all_user_events)
+    gutter.event_au_ids = gutter:setup_events(all_events, all_user_events)
   end
 
   --- Whether to display the gutter or not.
@@ -137,18 +133,18 @@ function M.new(i, gutter_settings, winid)
   -- - the buffer is not a &diff
   -- TODO this now needs to take in a win/bufnr b/c its not just the current one.
   function gutter:default_enabled()
-    local win_height = M.vim.api.nvim_win_get_height(0)
-    local buf_lines = M.vim.api.nvim_buf_line_count(0)
+    local win_height = vim.api.nvim_win_get_height(0)
+    local buf_lines = vim.api.nvim_buf_line_count(0)
     if win_height >= buf_lines then
       return false
     end
-    if M.vim.fn.getwinvar(0, '&buftype') ~= '' then
+    if vim.fn.getwinvar(0, '&buftype') ~= '' then
       return false
     end
-    if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
+    if vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
       return false
     end
-    if M.vim.fn.getwinvar(0, '&diff') ~= 0 then
+    if vim.fn.getwinvar(0, '&diff') ~= 0 then
       return false
     end
 
@@ -161,13 +157,15 @@ function M.new(i, gutter_settings, winid)
   end
 
   function gutter:close()
-    logger.log("gutter", "close: " .. gutter.index)
-    for _, plugin in pairs(gutter.event_au_ids) do
-      vim.api.nvim_del_autocmd(gutter.event_au_ids)
+    logger.log("gutter", "close: " .. gutter.index, "WARN")
+    gutter.enabled = false
+    for _, au_id in pairs(gutter.event_au_ids) do
+      vim.api.nvim_del_autocmd(au_id)
     end
     for _, plugin in ipairs(gutter.plugins) do
       plugin:disable()
     end
+    gutter.event_au_ids = {}
     gutter.window:close()
   end
 
@@ -191,7 +189,7 @@ function M.new(i, gutter_settings, winid)
     gutter.enabled = gutter.settings.enabled(gutter)
     gutter.gutter_lines = convert.lines_to_gutter_lines(gutter.settings, gutter.lines)
 
-    M.vim.schedule(function()
+    vim.schedule(function()
       if gutter.enabled then
         gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method, gutter.settings.width)
         gutter.window:refresh_highlights(gutter.gutter_lines)
