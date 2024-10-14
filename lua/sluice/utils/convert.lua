@@ -1,6 +1,7 @@
-local M = {
-  vim = vim
-}
+local guards = require('sluice.utils.guards')
+local logger = require('sluice.utils.logger')
+
+local M = {}
 
 ---Convert a line in the file to the corresponding line in the gutter's window.
 ---@param line integer The line number in the file
@@ -47,12 +48,12 @@ function M.find_definition(definitions, name)
 end
 
 ---Convert a list of lines/styles to a list of gutter lines.
----@param gutter_settings table The settings for the gutter
----@param lines table[] A list of dicts with any keys from :highlight, plus text/line
+---@param gutter_settings GutterSettings The settings for the gutter
+---@param lines PluginLine[] A list of dicts with any keys from :highlight, plus text/line
 ---@param buffer_lines integer The total number of lines in the buffer
 ---@param height integer The height of the gutter window
 ---@param top_line_number integer The top line number visible in the window
----@return table[] A list of dicts (of all plugin entries) for each gutter line
+---@return string[] A list of dicts (of all plugin entries) for each gutter line
 function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_line_number)
   -- ensure that each line of the gutter has a definition.
   local gutter_lines = {}
@@ -77,13 +78,20 @@ function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_li
 end
 
 ---Convert lines to gutter lines based on the current window and buffer state.
----@param gutter_settings table The settings for the gutter
----@param lines table[] A list of lines to convert
----@return table[] A list of gutter lines
-function M.lines_to_gutter_lines(gutter_settings, lines)
-  local win_height = M.vim.api.nvim_win_get_height(0)
-  local buf_lines = M.vim.api.nvim_buf_line_count(0)
-  local top_line_number = M.vim.fn.line('w0')
+---@param winid number The window ID
+---@param gutter_settings GutterSettings The settings for the gutter
+---@param lines PluginLine[] A list of lines to convert
+---@return string[] A list of gutter lines
+function M.lines_to_gutter_lines(winid, gutter_settings, lines)
+  if not guards.win_exists(winid) then
+    logger.log("convert", "lines_to_gutter_lines: " .. winid .. " not found", "WARN")
+    return {}
+  end
+
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local win_height = vim.api.nvim_win_get_height(winid)
+  local buf_lines = vim.api.nvim_buf_line_count(bufnr)
+  local top_line_number = vim.fn.line('w0', winid)
 
   if win_height >= buf_lines then
     return {}

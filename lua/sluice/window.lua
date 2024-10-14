@@ -32,16 +32,15 @@ end
 --- Create a new window.
 --- @param i number
 --- @param column number
---- @param width number
 --- @param winid number
 --- @return Window
-function M.new(i, column, width, winid)
+function M.new(i, column, winid)
   local height = vim.api.nvim_win_get_height(winid)
   local bufnr = vim.api.nvim_create_buf(false, true)
   local ns_id = vim.api.nvim_create_namespace('sluice' .. bufnr)
   local win_id = vim.api.nvim_open_win(bufnr, false, {
     relative = 'win',
-    width = width,
+    width = 1,
     height = height,
     row = 0,
     col = column,
@@ -62,7 +61,7 @@ function M.new(i, column, width, winid)
     bufnr = bufnr,
     ns_id = ns_id,
     win_id = win_id,
-    width = width,
+    width = 1,
     column = column,
     height = height,
     parent_winid = winid,
@@ -72,8 +71,7 @@ function M.new(i, column, width, winid)
   --- Refresh the content of the gutter.
   --- @param lines PluginLine[]
   --- @param count_method table
-  --- @param w number
-  function window:set_gutter_lines(lines, count_method, w)
+  function window:set_gutter_lines(lines, count_method)
     local win_height = vim.api.nvim_win_get_height(window.parent_winid)
 
     local strings = {}
@@ -91,8 +89,6 @@ function M.new(i, column, width, winid)
         text = M.find_best_match(matches, "text")['text']
       end
 
-      -- pad text to width
-      text = string.rep(' ', w - vim.str_utfindex(text)) .. text
       table.insert(strings, text)
     end
 
@@ -133,11 +129,16 @@ function M.new(i, column, width, winid)
   end
 
   local function update_config()
+    if not guards.win_exists(window.win_id) then
+      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
+      return
+    end
+
     -- in case the window size changed, we can keep up with it.
     vim.api.nvim_win_set_config(window.win_id, {
       win = window.parent_winid,
       relative = 'win',
-      width = window.width,
+      width = 1,
       height = window.height,
       row = 0,
       col = window.column,
@@ -150,6 +151,11 @@ function M.new(i, column, width, winid)
   --- @param hidden boolean
   --- @param col number|nil
   function window:set_options(hidden, col)
+    if not guards.win_exists(window.parent_winid) then
+      logger.log("window", "set_options: " .. window.parent_winid .. " not found", "WARN")
+      return
+    end
+
     window.hide = hidden
     if col ~= nil then
       window.column = col

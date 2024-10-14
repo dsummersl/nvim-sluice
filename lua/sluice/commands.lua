@@ -25,7 +25,12 @@ local function update_context(ctx)
   logger.log('commands', 'update_context triggered by ' .. vim.inspect(ctx))
 
   if ctx.event == "WinClosed" then
-    remove(tonumber(ctx.match))
+    local winid = tonumber(ctx.match)
+    if type(winid) == "number" then
+      remove(winid)
+    else
+      logger.log('commands', 'update_context unable to remove ' .. ctx.match)
+    end
     return
   end
 
@@ -34,7 +39,7 @@ local function update_context(ctx)
   for _, win in ipairs(windows) do
     local win_config = vim.api.nvim_win_get_config(win)
     logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config))
-    if win_config.focusable then
+    if win_config.focusable and win_config.relative ~= nil then
       if M.sluices[win] == nil then
         M.sluices[win] = Sluice.new(win)
       end

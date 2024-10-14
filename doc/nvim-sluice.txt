@@ -48,7 +48,6 @@ Here's an example of how to configure Sluice with its default settings:
         {
           integrations = { 'viewport', 'search' },
           window = {
-            width = 1,
             gutter_hl = 'SluiceColumn',
             enabled = function that checks if search has results,
             count_method = 'horizontal_block',
@@ -57,7 +56,6 @@ Here's an example of how to configure Sluice with its default settings:
         {
           integrations = { 'viewport', 'signs', 'extmark' },
           window = {
-            width = 1,
             gutter_hl = 'SluiceColumn',
             enabled = default_enabled_fn,
             count_method = '',

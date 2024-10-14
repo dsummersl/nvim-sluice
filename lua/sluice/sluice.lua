@@ -39,7 +39,7 @@ function M.new(winid)
         logger.log("sluice", "gutter.enabled: " .. vim.inspect(gutter.enabled))
         logger.log("sluice", "get_gutter_column: " .. vim.inspect(gutter_settings))
         if gutter.enabled ~= false and gutter_settings.layout == 'right' then
-          column = column + gutter_settings.width
+          column = column + 1
         end
       end
       return window_width - column
@@ -49,7 +49,7 @@ function M.new(winid)
         local gutter = index_and_gutter.gutter
         local gutter_settings = index_and_gutter.gutter.settings
         if gutter.enabled ~= false and gutter_settings.layout == 'left' then
-          column = column + gutter_settings.width
+          column = column + 1
         end
       end
       return column
