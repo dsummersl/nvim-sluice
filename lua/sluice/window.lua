@@ -56,6 +56,7 @@ function M.new(i, column, width, winid)
   --- @field win_id number
   --- @field column number
   --- @field parent_winid number
+  --- @field hide boolean
   local window = {
     index = i,
     bufnr = bufnr,
@@ -65,6 +66,7 @@ function M.new(i, column, width, winid)
     column = column,
     height = height,
     parent_winid = winid,
+    hide = false,
   }
 
   --- Refresh the content of the gutter.
@@ -130,11 +132,7 @@ function M.new(i, column, width, winid)
     end
   end
 
-  --- @param c number
-  function window:set_column(c)
-    window.column = c
-    window.height = vim.api.nvim_win_get_height(window.parent_winid)
-
+  local function update_config()
     -- in case the window size changed, we can keep up with it.
     vim.api.nvim_win_set_config(window.win_id, {
       win = window.parent_winid,
@@ -143,10 +141,23 @@ function M.new(i, column, width, winid)
       height = window.height,
       row = 0,
       col = window.column,
+      focusable = false,
+      style = 'minimal',
     })
   end
 
-  function window:close()
+  --- @param hidden boolean
+  --- @param col number|nil
+  function window:set_options(hidden, col)
+    window.hide = hidden
+    if col ~= nil then
+      window.column = col
+      window.height = vim.api.nvim_win_get_height(window.parent_winid)
+    end
+    update_config()
+  end
+
+  function window:teardown()
     vim.api.nvim_win_close(window.win_id, true)
     vim.api.nvim_buf_delete(window.bufnr, { force = true })
   end

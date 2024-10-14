@@ -14,7 +14,7 @@ local M = {
 local function remove(winid)
   local sluice = M.sluices[winid]
   if sluice ~= nil then
-    sluice:close()
+    sluice:teardown()
   end
   M.sluices[winid] = nil
 end

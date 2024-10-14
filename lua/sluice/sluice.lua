@@ -63,7 +63,9 @@ function M.new(winid)
     for i, gutter_settings in ipairs(config.settings.gutters) do
       sluice.gutters[i] = {
         index = i,
-        gutter = Gutter.new(i, gutter_settings, sluice.winid),
+        gutter = Gutter.new(i, gutter_settings, sluice.winid, function(layout)
+          return get_gutter_column(i, layout)
+        end)
       }
     end
 
@@ -71,7 +73,7 @@ function M.new(winid)
       for _, v in pairs(sluice.gutters) do
         local gutter = v.gutter
         local column = get_gutter_column(v.index, gutter.settings.layout)
-        gutter.window:set_column(column)
+        gutter.window:set_options(false, column)
       end
     end
 
@@ -103,15 +105,15 @@ function M.new(winid)
     end
   end
 
-  --- Close all gutters
+  --- Teardown all gutters
   ---@return nil
-  function sluice:close()
-    logger.log("sluice", "close: " .. self.winid)
+  function sluice:teardown()
+    logger.log("sluice", "teardown: " .. self.winid)
 
     vim.api.nvim_del_autocmd(sluice.au_id)
 
     for _, v in pairs(sluice.gutters) do
-      v.gutter:close()
+      v.gutter:teardown()
     end
   end
 

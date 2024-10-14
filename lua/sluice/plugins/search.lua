@@ -1,61 +1,95 @@
-local M = {
-  vim = vim
-}
+local logger = require('sluice.utils.logger')
+local guards = require('sluice.utils.guards')
 
+-- not used, just imported for typing.
+require('sluice.plugins.plugin_type')
+
+local M = {}
+
+---@class SearchSettings : PluginSettings
+---@field match_hl string
+---@field match_line_hl string
 local default_settings = {
   match_hl = "SluiceSearchMatch",
   match_line_hl = "SluiceSearchMatchLine",
+  events = { 'CmdlineLeave', 'TextChanged' },
+  user_events = {},
 }
 
-function M.update(settings, bufnr, idx)
-  local pattern = M.vim.fn.getreg('/')
-  local current_line = M.vim.fn.getpos('.')[2]
-  local update_settings = M.vim.tbl_deep_extend('keep', settings or {}, default_settings)
+---@param plugin_settings SearchSettings
+---@param winid number
+---@return Plugin
+function M.new(plugin_settings, winid)
+  ---@class Search : Plugin
+  ---@field plugin_settings SearchSettings
+  ---@field settings SearchSettings|nil
+  ---@field bufnr number
+  local search = {
+    plugin_settings = plugin_settings,
+    settings = nil,
+    winid = winid,
+  }
 
-  if pattern == '' or M.vim.v.hlsearch == 0 then
-    return {}
-  end
+  function search:enable()
+    logger.log("search", "enable win: " .. search.winid)
+    search.settings = vim.tbl_deep_extend('keep', search.plugin_settings or {}, default_settings)
 
-  if M.vim.o.ignorecase and not M.vim.o.ignorecase then
-    pattern = '\\C' .. pattern
-  end
-
-  local lines_with_matches = {}
-
-  local lines = M.vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
-
-  for lnum, line in ipairs(lines) do
-    if M.vim.fn.match(line, pattern) ~= -1 then
-      local texthl = update_settings.match_hl
-      if lnum == current_line then
-        texthl = update_settings.match_line_hl
-      end
-      table.insert(lines_with_matches, {
-        lnum = lnum,
-        text = "—",
-        texthl = texthl,
-        priority = 10,
-        plugin = 'search',
-      })
+    if vim.fn.hlexists('SluiceSearchMatch') == 0 then
+      vim.cmd('hi link SluiceSearchMatch Comment')
+    end
+    if vim.fn.hlexists('SluiceSearchMatchLine') == 0 then
+      vim.cmd('hi link SluiceSearchMatchLine Error')
     end
   end
 
-  return lines_with_matches
-end
-
-
-function M.enable(_settings, _bufnr)
-  -- TODO shouldn't there be a way to make these go away on cursor move
-  if M.vim.fn.hlexists('SluiceSearchMatch') == 0 then
-    M.vim.cmd('hi link SluiceSearchMatch Comment')
+  function search:disable()
+    logger.log("search", "cleanup: " .. search.winid)
   end
-  if M.vim.fn.hlexists('SluiceSearchMatchLine') == 0 then
-    M.vim.cmd('hi link SluiceSearchMatchLine Error')
+
+  function search:get_lines()
+    if not guards.win_exists(search.winid) then
+      logger.log("search", "get_lines: " .. search.winid .. " not found", "WARN")
+      return {}
+    end
+
+    local pattern = vim.fn.getreg('/')
+    local current_line = vim.fn.getcurpos(search.winid)[2]
+
+    if pattern == '' or vim.v.hlsearch == 0 then
+      return {}
+    end
+
+    if vim.o.ignorecase and not vim.o.ignorecase then
+      pattern = '\\C' .. pattern
+    end
+
+    local lines_with_matches = {}
+
+    local bufnr = vim.api.nvim_win_get_buf(search.winid)
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+
+    for lnum, line in ipairs(lines) do
+      if vim.fn.match(line, pattern) ~= -1 then
+        local texthl = search.settings.match_hl
+        if lnum == current_line then
+          texthl = search.settings.match_line_hl
+        end
+        table.insert(lines_with_matches, {
+          lnum = lnum,
+          text = "—",
+          texthl = texthl,
+          priority = 10,
+          plugin = 'search',
+        })
+      end
+    end
+
+    return lines_with_matches
   end
-end
 
+  search:enable()
 
-function M.disable(_settings, _bufnr)
+  return search
 end
 
 return M

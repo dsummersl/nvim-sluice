@@ -9,8 +9,12 @@ require('sluice.plugins.plugin_type')
 
 --- Gutter: A single column of information overlaid on the left/right side of
 --- a window.
+--- @param i number Index of the gutter.
+--- @param gutter_settings GutterSettings Settings for the gutter.
+--- @param winid number Window ID to attach the gutter to.
+--- @param column_fn fun(layout: string): integer Function to get the column of the gutter.
 --- @return Gutter
-function M.new(i, gutter_settings, winid)
+function M.new(i, gutter_settings, winid, column_fn)
   --- @class GutterSettings
   --- @field width number
   --- @field gutter_hl string
@@ -165,18 +169,14 @@ function M.new(i, gutter_settings, winid)
     return true
   end
 
-  function gutter:open()
-    logger.log("gutter", "open: " .. gutter.index)
-    gutter:update()
-  end
-
-  function gutter:close()
-    logger.log("gutter", "close: " .. gutter.index)
-    gutter.window:close()
+  -- Teardown this gutter and all its resources.
+  function gutter:teardown()
+    logger.log("gutter", "teardown: " .. gutter.index)
+    gutter.window:teardown()
     gutter.enabled = false
     for _, au_id in pairs(gutter.event_au_ids) do
       vim.api.nvim_del_autocmd(au_id)
-    end
+  end
     for _, plugin in ipairs(gutter.plugins) do
       plugin:disable()
     end
@@ -201,7 +201,7 @@ function M.new(i, gutter_settings, winid)
 
     gutter.lines = lines
     if type(gutter.settings.enabled) == "boolean" then
-      gutter.enabled = gutter.settings.enabled
+      gutter.enabled = gutter.settings.enabled and true
     else
       gutter.enabled = gutter.settings.enabled(gutter)
     end
@@ -211,16 +211,17 @@ function M.new(i, gutter_settings, winid)
 
     vim.schedule(function()
       if gutter.enabled then
+        gutter.window:set_options(false, column_fn(gutter.settings.layout))
         gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method, gutter.settings.width)
         gutter.window:refresh_highlights(gutter.gutter_lines)
       else
-        gutter:close()
+        gutter.window:set_options(true)
       end
     end)
   end
 
   setup_plugins()
-  gutter:open()
+  gutter:update()
 
   return gutter
 end
