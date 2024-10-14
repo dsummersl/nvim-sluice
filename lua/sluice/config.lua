@@ -102,58 +102,23 @@ function M.make_has_results_fn(plugin)
   return has_results_fn
 end
 
-local default_gutter_settings = {
-  --- Width of the gutter.
-  width = 1,
-
-  --- Default highlight to use in the gutter.
-  -- This serves as the base linehl highlight for a column in each gutter. Plugins can
-  -- override parts of this highlight (typically this is the background color of
-  -- areas represented in the gutter of offscreen content)
-  gutter_hl = 'SluiceColumn',
-
-  --- Whether to display the gutter or not.
-  enabled = M.default_enabled_fn,
-
-  --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
-  count_method = nil,
-
-  --- Layout of the gutter. Can be 'left' or 'right'.
-  layout = 'right',
-
-  --- Render method for the gutter. Can be 'macro' or 'line'.
-  render_method = 'macro',
-
-  plugins = { 'viewport' },
-}
-
-local apply_gutter_settings = function(gutters)
-  local result = {}
-  for _, gutter in ipairs(gutters) do
-    table.insert(result, M.vim.tbl_deep_extend('keep', gutter or {}, default_gutter_settings))
-  end
-  return result
-end
-
 local default_settings = {
   enabled = true,
   throttle_ms = 150,
-  gutters = apply_gutter_settings{
+  gutters = {
     {
-      enabled = M.make_has_results_fn('search'),
-      count_method = counters.methods.horizontal_block,
       plugins = { 'viewport', 'search' },
     },
     {
       plugins = { 'viewport', 'extmark', 'signs' },
-    },
+    }
   }
 }
 
 function M.apply_user_settings(user_settings)
   logger.log('config', 'apply_user_settings')
   if user_settings ~= nil then
-    M.vim.validate({ user_settings = { user_settings, 'table', true} })
+    M.vim.validate({ user_settings = { user_settings, 'table', true } })
 
     -- Validate global options
     if user_settings.enabled ~= nil then
@@ -162,43 +127,9 @@ function M.apply_user_settings(user_settings)
     if user_settings.throttle_ms ~= nil then
       M.vim.validate({ throttle_ms = { user_settings.throttle_ms, 'number' } })
     end
-
-    -- Validate gutters
-    if user_settings.gutters ~= nil then
-      M.vim.validate({ gutters = { user_settings.gutters, 'table' } })
-      for i, gutter in ipairs(user_settings.gutters) do
-        M.vim.validate({
-          ['gutters[' .. i .. ']'] = { gutter, 'table' },
-          ['gutters[' .. i .. '].plugins'] = { gutter.plugins, 'table', true },
-          -- TODO each integration should be validated
-        })
-        if gutter ~= nil then
-          -- TODO these are 'window' settings. They should be part of the
-          -- window.
-          M.vim.validate({
-            ['gutters[' .. i .. ']'] = { gutter, 'table' },
-            ['gutters[' .. i .. '].width'] = { gutter.width, 'number', true },
-            ['gutters[' .. i .. '].gutter_hl'] = { gutter.gutter_hl, 'string', true },
-            ['gutters[' .. i .. '].enabled'] = { gutter.enabled, { 'function', 'boolean' }, true },
-            ['gutters[' .. i .. '].count_method'] = { gutter.count_method, {'table'}, true },
-            ['gutters[' .. i .. '].layout'] = { gutter.layout, 'string', true },
-            ['gutters[' .. i .. '].render_method'] = { gutter.render_method, 'string', true },
-          })
-          if gutter.layout ~= nil and gutter.layout ~= 'left' and gutter.layout ~= 'right' then
-            error("gutters[" .. i .. "].layout must be 'left' or 'right'")
-          end
-          if gutter.render_method ~= nil and gutter.render_method ~= 'macro' and gutter.render_method ~= 'line' then
-            error("gutters[" .. i .. "].render_method must be 'macro' or 'line'")
-          end
-        end
-      end
-    end
   end
 
   M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
-  if user_settings ~= nil and user_settings.gutters ~= nil then
-    M.settings.gutters = apply_gutter_settings(user_settings.gutters)
-  end
 end
 
 M.settings = default_settings

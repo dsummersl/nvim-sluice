@@ -8,7 +8,6 @@ local M = {}
 ---@field hl_group string|nil
 ---@field sign_hl_group string|nil
 ---@field text string
--- @type ExtmarkSettings
 local default_settings = {
   hl_group = nil,
   sign_hl_group = '.*',
@@ -25,7 +24,6 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings ExtmarkSettings
   ---@field settings ExtmarkSettings|nil
   ---@field bufnr number
-  -- @type Extmark
   local extmark = {
     plugin_settings = plugin_settings,
     settings = nil,

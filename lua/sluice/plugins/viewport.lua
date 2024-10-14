@@ -9,7 +9,6 @@ local M = {}
 ---@class ViewportSettings : PluginSettings
 ---@field visible_area_hl string
 ---@field cursor_hl string
--- @type ViewportSettings
 local default_settings = {
   visible_area_hl = "SluiceViewportVisibleArea",
   cursor_hl = "SluiceViewportCursor",
@@ -25,7 +24,6 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings ViewportSettings
   ---@field settings ViewportSettings|nil
   ---@field bufnr number
-  -- @type Viewport
   local viewport = {
     plugin_settings = plugin_settings,
     settings = nil,

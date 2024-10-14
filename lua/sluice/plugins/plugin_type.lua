@@ -1,7 +1,13 @@
 ---@meta
 
 ---@class Plugin
-local Plugin = {}
+---@field settings PluginSettings
+local Plugin = {
+  settings = {
+    events = {},
+    user_events = {},
+  },
+}
 
 ---@class PluginSettings
 ---@field events string[]

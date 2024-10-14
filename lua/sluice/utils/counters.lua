@@ -12,6 +12,8 @@ M.methods = {
 }
 
 --- Functions that allow showing a value for a count of items in different ways
+--- @param number number
+--- @param method table
 function M.count(number, method)
   if number <= 0 then
     return ' '
