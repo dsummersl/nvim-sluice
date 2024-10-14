@@ -1,9 +1,11 @@
 local M = {}
 
+local xxhash32 = require('sluice.utils.luaxxhash')
 local convert = require('sluice.utils.convert')
 local logger = require('sluice.utils.logger')
 local guards = require('sluice.utils.guards')
 local Window = require('sluice.window')
+
 -- not used, just imported for typing.
 require('sluice.plugins.plugin_type')
 
@@ -61,6 +63,7 @@ function M.new(i, gutter_settings, winid, column_fn)
   --- @field plugins Plugin[]
   --- @field event_au_ids number[]
   --- @field lines PluginLine[]
+  --- @field plugin_lines { [number]: PluginLine[] }
   --- @field enabled boolean
   local gutter = {
     index = i,
@@ -71,6 +74,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     plugins = {},
     event_au_ids = {},
     lines = {},
+    plugin_lines = {},
     enabled = false,
   }
 
@@ -91,13 +95,31 @@ function M.new(i, gutter_settings, winid, column_fn)
     return PluginByString.new(PluginByString.default_settings, gutter.winid)
   end
 
+  --- @param index number
+  --- @return boolean
+  function gutter:update_plugin(index)
+    local plugin = gutter.plugins[index]
+    local plugin_lines = plugin:get_lines()
+    local old_hash = xxhash32(vim.inspect(gutter.plugin_lines[index]))
+    gutter.plugin_lines[index] = plugin_lines
+    return old_hash ~= xxhash32(vim.inspect(plugin_lines))
+  end
+
   function gutter:setup_events(events, user_events)
     logger.log("gutter", "setup_events: " .. vim.inspect(events) .. " " .. vim.inspect(user_events))
     local results = {}
     local au_id = vim.api.nvim_create_autocmd(events, {
       callback = function(ctx)
         logger.log('gutter', 'triggered update by: '.. ctx.event)
-        gutter:update()
+        local updated = false
+        for idx, plugin in ipairs(gutter.plugins) do
+          if vim.tbl_contains(plugin.settings.events, ctx.event) then
+            updated = updated or gutter:update_plugin(idx)
+          end
+        end
+        if updated then
+          gutter:update()
+        end
       end,
     })
     table.insert(results, au_id)
@@ -106,8 +128,16 @@ function M.new(i, gutter_settings, winid, column_fn)
       local an_id = vim.api.nvim_create_autocmd('User', {
         pattern = user_au,
         callback = function()
-          logger.log('config', 'triggered update')
-          gutter:update()
+          logger.log('gutter', 'triggered update by: '.. user_au)
+          local updated = false
+          for idx, plugin in ipairs(gutter.plugins) do
+            if vim.tbl_contains(plugin.settings.user_events, user_au) then
+              updated = updated or gutter:update_plugin(idx)
+            end
+          end
+          if updated then
+            gutter:update()
+          end
         end,
       })
       table.insert(results, an_id)
@@ -192,14 +222,13 @@ function M.new(i, gutter_settings, winid, column_fn)
     logger.log("gutter", "update: " .. gutter.index)
 
     local lines = {}
-    for _, plugin in ipairs(gutter.plugins) do
-      local plugin_lines = plugin:get_lines()
-      for _, il in ipairs(plugin_lines) do
-        table.insert(lines, il)
+    for _, plugin_lines in pairs(gutter.plugin_lines) do
+      for _, line in pairs(plugin_lines) do
+        table.insert(lines, line)
       end
     end
-
     gutter.lines = lines
+
     if type(gutter.settings.enabled) == "boolean" then
       gutter.enabled = gutter.settings.enabled and true
     else
@@ -207,20 +236,26 @@ function M.new(i, gutter_settings, winid, column_fn)
     end
 
     logger.log("gutter", "update: " .. gutter.index .. " enabled: " .. vim.inspect(gutter.enabled))
-    gutter.gutter_lines = convert.lines_to_gutter_lines(gutter.settings, gutter.lines)
 
-    vim.schedule(function()
-      if gutter.enabled then
-        gutter.window:set_options(false, column_fn(gutter.settings.layout))
-        gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method, gutter.settings.width)
-        gutter.window:refresh_highlights(gutter.gutter_lines)
-      else
+    if not gutter.enabled then
+      vim.schedule(function()
         gutter.window:set_options(true)
-      end
+      end)
+      return
+    end
+
+    gutter.gutter_lines = convert.lines_to_gutter_lines(gutter.settings, gutter.lines)
+    vim.schedule(function()
+      gutter.window:set_options(false, column_fn(gutter.settings.layout))
+      gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method, gutter.settings.width)
+      gutter.window:refresh_highlights(gutter.gutter_lines)
     end)
   end
 
   setup_plugins()
+  for idx, _ in ipairs(gutter.plugins) do
+    gutter:update_plugin(idx)
+  end
   gutter:update()
 
   return gutter

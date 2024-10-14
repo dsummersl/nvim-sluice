@@ -143,6 +143,7 @@ function M.new(i, column, width, winid)
       col = window.column,
       focusable = false,
       style = 'minimal',
+      hide = window.hide,
     })
   end
 
