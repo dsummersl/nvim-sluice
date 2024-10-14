@@ -12,7 +12,7 @@ local M = {}
 local default_settings = {
   match_hl = "SluiceSearchMatch",
   match_line_hl = "SluiceSearchMatchLine",
-  events = { 'CmdlineLeave', 'TextChanged' },
+  events = { 'CmdlineLeave', 'TextChanged', 'CursorMoved', 'CursorHold' },
   user_events = {},
 }
 
