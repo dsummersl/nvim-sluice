@@ -38,8 +38,10 @@ local function update_context(ctx)
   logger.log('commands', 'update_context windows: ' .. vim.inspect(windows))
   for _, win in ipairs(windows) do
     local win_config = vim.api.nvim_win_get_config(win)
-    logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config))
-    if win_config.focusable and win_config.relative ~= nil then
+    local bufnr = vim.api.nvim_win_get_buf(win)
+    logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config) .. ' bufnr: ' .. bufnr)
+    if vim.api.nvim_buf_get_option(bufnr, 'buflisted') and win_config.relative == nil then
+      logger.log('commands', 'update_context listed: "' .. vim.inspect(vim.api.nvim_buf_get_option(bufnr, 'buflisted')) .. '"')
       if M.sluices[win] == nil then
         M.sluices[win] = Sluice.new(win)
       end

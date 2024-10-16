@@ -107,9 +107,6 @@ local default_settings = {
   throttle_ms = 150,
   gutters = {
     {
-      plugins = { 'viewport', 'search' },
-    },
-    {
       plugins = { 'viewport', 'extmark', 'signs' },
     }
   }
