@@ -38,15 +38,20 @@ function M.new(i, column, winid)
   local height = vim.api.nvim_win_get_height(winid)
   local bufnr = vim.api.nvim_create_buf(false, true)
   local ns_id = vim.api.nvim_create_namespace('sluice' .. bufnr)
-  local win_id = vim.api.nvim_open_win(bufnr, false, {
-    relative = 'win',
-    width = 1,
-    height = height,
-    row = 0,
-    col = column,
-    focusable = false,
-    style = 'minimal',
-  })
+
+  local function open_window(ht)
+    return vim.api.nvim_open_win(bufnr, false, {
+      relative = 'win',
+      width = 1,
+      height = ht,
+      row = 0,
+      col = column,
+      focusable = false,
+      style = 'minimal',
+    })
+  end
+
+  local win_id = open_window(height)
 
   --- @class Window
   --- @field index number
@@ -131,7 +136,7 @@ function M.new(i, column, winid)
   local function update_config()
     if not guards.win_exists(window.win_id) then
       logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
-      return
+      window.win_id = open_window(window.height)
     end
 
     -- in case the window size changed, we can keep up with it.
