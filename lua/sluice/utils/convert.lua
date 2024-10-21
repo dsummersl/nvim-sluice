@@ -5,11 +5,10 @@ local M = {}
 
 ---Convert a line in the file to the corresponding line in the gutter's window.
 ---@param line integer The line number in the file
----@param buffer_lines integer The total number of lines in the buffer
 ---@param height integer The height of the gutter window
 ---@param top_line_number integer The top line number visible in the window
----@return integer The corresponding line number in the gutter, or 0 if out of range
-function M.line_to_gutter_line(line, buffer_lines, height, top_line_number)
+---@return integer line corresponding line number in the gutter, or 0 if out of range
+local function line_to_gutter_line(line, height, top_line_number)
   if line < top_line_number or line > top_line_number + height then
     return 0
   end
@@ -22,9 +21,8 @@ end
 ---@param line integer The line number in the file
 ---@param buffer_lines integer The total number of lines in the buffer
 ---@param height integer The height of the gutter window
----@param cursor_position integer The current cursor position (unused in this function)
----@return integer The corresponding line number in the gutter
-function M.line_to_gutter_line_macro(line, buffer_lines, height, cursor_position)
+---@return integer line corresponding line number in the gutter
+local function line_to_gutter_line_macro(line, buffer_lines, height)
   local gutter_line = math.floor(line / buffer_lines * height)
   if gutter_line == 0 then
     return 1
@@ -65,9 +63,9 @@ function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_li
   for _, line in ipairs(lines) do
     local gutter_line_number = 0
     if gutter_settings.render_method == "macro" then
-      gutter_line_number = M.line_to_gutter_line_macro(line['lnum'], buffer_lines, height, top_line_number)
+      gutter_line_number = line_to_gutter_line_macro(line['lnum'], buffer_lines, height)
     else
-      gutter_line_number = M.line_to_gutter_line(line['lnum'], buffer_lines, height, top_line_number)
+      gutter_line_number = line_to_gutter_line(line['lnum'], height, top_line_number)
     end
     if not (gutter_line_number < 1 or gutter_line_number > height) then
       table.insert(gutter_lines[gutter_line_number], line)
@@ -92,10 +90,6 @@ function M.lines_to_gutter_lines(winid, gutter_settings, lines)
   local win_height = vim.api.nvim_win_get_height(winid)
   local buf_lines = vim.api.nvim_buf_line_count(bufnr)
   local top_line_number = vim.fn.line('w0', winid)
-
-  if win_height >= buf_lines then
-    return {}
-  end
 
   return M.lines_to_gutters(gutter_settings, lines, buf_lines, win_height, top_line_number)
 end

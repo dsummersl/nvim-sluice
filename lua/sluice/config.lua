@@ -1,15 +1,12 @@
-local counters = require('sluice.utils.counters')
 local logger = require('sluice.utils.logger')
 
-local M = {
-  vim = vim
-}
+local M = { }
 
 function M.remove_autocmds(bufnr)
   local au_ids = M.auto_command_ids_by_bufnr[bufnr]
   if au_ids then
     for _, id in ipairs(au_ids) do
-      M.vim.api.nvim_del_autocmd(id)
+      vim.api.nvim_del_autocmd(id)
     end
   end
 end
@@ -52,56 +49,10 @@ function M.bool_table_fn(obj)
   return false
 end
 
---- Whether to display the gutter or not.
---
--- Returns boolean indicating whether the gutter is shown on screen or not.
---
--- Show the gutter if:
--- - the buffer is not smaller than the window
--- - the buffer is not a special &buftype
--- - the buffer is not a &previewwindow
--- - the buffer is not a &diff
--- TODO this now needs to take in a win/bufnr b/c its not just the current one.
-function M.default_enabled_fn()
-  local win_height = M.vim.api.nvim_win_get_height(0)
-  local buf_lines = M.vim.api.nvim_buf_line_count(0)
-  if win_height >= buf_lines then
-    return false
-  end
-  if M.vim.fn.getwinvar(0, '&buftype') ~= '' then
-    return false
-  end
-  if M.vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
-    return false
-  end
-  if M.vim.fn.getwinvar(0, '&diff') ~= 0 then
-    return false
-  end
-
-  return true
-end
-
---- Create an enable_fn function that returns true if a specific plugin has contributed lines to the gutter.
---TODO should have a better name (indicate its used by the enabled)
-function M.make_has_results_fn(plugin)
-  -- TODO this needs to be integration specific
-  local function has_results_fn(gutter)
-    if not M.default_enabled_fn() then
-      return false
-    end
-
-    for _, line in pairs(gutter.lines) do
-      if line.plugin == plugin then
-        return true
-      end
-    end
-
-    return false
-  end
-
-  return has_results_fn
-end
-
+--- @class SluiceSettings
+--- @field enabled boolean|nil
+--- @field throttle_ms number|nil
+--- @field gutters GutterSettings[]|nil
 local default_settings = {
   enabled = true,
   throttle_ms = 150,
@@ -112,21 +63,23 @@ local default_settings = {
   }
 }
 
+--- Apply user settings to the default settings.
+--- @param user_settings SluiceSettings
 function M.apply_user_settings(user_settings)
   logger.log('config', 'apply_user_settings')
   if user_settings ~= nil then
-    M.vim.validate({ user_settings = { user_settings, 'table', true } })
+    vim.validate({ user_settings = { user_settings, 'table', true } })
 
     -- Validate global options
     if user_settings.enabled ~= nil then
-      M.vim.validate({ enabled = { user_settings.enabled, 'boolean' } })
+      vim.validate({ enabled = { user_settings.enabled, 'boolean' } })
     end
     if user_settings.throttle_ms ~= nil then
-      M.vim.validate({ throttle_ms = { user_settings.throttle_ms, 'number' } })
+      vim.validate({ throttle_ms = { user_settings.throttle_ms, 'number' } })
     end
   end
 
-  M.settings = M.vim.tbl_deep_extend('force', M.vim.deepcopy(default_settings), user_settings or {})
+  M.settings = vim.tbl_deep_extend('force', vim.deepcopy(default_settings), user_settings or {})
 end
 
 M.settings = default_settings

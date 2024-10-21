@@ -9,6 +9,74 @@ local Window = require('sluice.window')
 -- not used, just imported for typing.
 require('sluice.plugins.plugin_type')
 
+--- Whether to display the gutter or not.
+--
+-- Returns boolean indicating whether the gutter is shown on screen or not.
+--
+-- Show the gutter if:
+-- - the buffer is not smaller than the window
+-- - the buffer is not a special &buftype
+-- - the buffer is not a &previewwindow
+-- - the buffer is not a &diff
+--- @param gutter Gutter
+function M.default_enabled_fn(gutter)
+  local win_height = vim.api.nvim_win_get_height(gutter.winid)
+  local bufnr = vim.api.nvim_win_get_buf(gutter.winid)
+  local buf_lines = vim.api.nvim_buf_line_count(bufnr)
+  if win_height >= buf_lines then
+    logger.log("gutter", "default_enabled_fn: " .. gutter.index .. " false - 1")
+    return false
+  end
+  if vim.fn.getwinvar(0, '&buftype') ~= '' then
+    logger.log("gutter", "default_enabled_fn: " .. gutter.index .. " false - 2")
+    return false
+  end
+  if vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
+    logger.log("gutter", "default_enabled_fn: " .. gutter.index .. " false - 3")
+    return false
+  end
+  if vim.fn.getwinvar(0, '&diff') ~= 0 then
+    logger.log("gutter", "default_enabled_fn: " .. gutter.index .. " false - 4")
+    return false
+  end
+
+  return true
+end
+
+--- Create an enable_fn function that returns true if any plugin is active
+--- @param gutter Gutter
+function M.any_plugin_active(gutter)
+  if not M.default_enabled_fn(gutter) then
+    return false
+  end
+
+  for _, line in pairs(gutter.lines) do
+    if line.plugin ~= "" then
+      return true
+    end
+  end
+
+  logger.log("gutter", "any_plugin_active: " .. gutter.index .. " false")
+  return false
+end
+
+--- Create an enabled_fn function that returns true if any non-viewport plugin is active
+--- @param gutter Gutter
+function M.any_non_viewport_plugin_active(gutter)
+  if not M.default_enabled_fn(gutter) then
+    return false
+  end
+
+  for _, line in pairs(gutter.lines) do
+    if line.plugin ~= "" and line.plugin ~= "viewport" then
+      return true
+    end
+  end
+
+  logger.log("gutter", "any_non_viewport_plugin_active: " .. gutter.index .. " false")
+  return false
+end
+
 --- Gutter: A single column of information overlaid on the left/right side of
 --- a window.
 --- @param i number Index of the gutter.
@@ -18,11 +86,11 @@ require('sluice.plugins.plugin_type')
 --- @return Gutter
 function M.new(i, gutter_settings, winid, column_fn)
   --- @class GutterSettings
-  --- @field gutter_hl string
-  --- @field enabled function|boolean
-  --- @field count_method table|nil
-  --- @field layout string `left`|`right`
-  --- @field render_method `macro`|`line`
+  --- @field gutter_hl nil|string
+  --- @field enabled nil|boolean|fun(gutter: Gutter): boolean
+  --- @field count_method nil|table
+  --- @field layout 'left'|'right'|nil
+  --- @field render_method 'macro'|'line'|nil
   --- @field plugins table
   --- @type GutterSettings
   local default_settings = {
@@ -33,7 +101,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     gutter_hl = 'SluiceColumn',
 
     --- Whether to display the gutter or not (boolean or function that takes this gutter)
-    enabled = true,
+    enabled = nil,
 
     --- When there are many matches in an area, how to show the number. Set to 'nil' to disable.
     count_method = nil,
@@ -48,11 +116,13 @@ function M.new(i, gutter_settings, winid, column_fn)
   }
 
   local update_settings = vim.tbl_deep_extend('keep', gutter_settings, default_settings)
+  if type(update_settings.enabled) == "nil" then
+    update_settings.enabled = true
+  end
 
   --- @class Gutter
   --- @field index number
   --- @field winid number
-  --- @field bufnr number
   --- @field settings GutterSettings
   --- @field window Window
   --- @field column number
@@ -93,6 +163,24 @@ function M.new(i, gutter_settings, winid, column_fn)
     return PluginByString.new(PluginByString.default_settings, gutter.winid)
   end
 
+  --- Update all plugins that are registered to listen to the event.
+  --- @param event string|nil
+  --- @return boolean True if any plugin was updated.
+  local function update_plugins(event)
+    logger.log('gutter', 'triggered update by: '.. vim.inspect(event))
+    local updated = false
+    for idx, plugin in ipairs(gutter.plugins) do
+      if event == nil or vim.tbl_contains(plugin.settings.events, event) then
+        updated = updated or gutter:update_plugin(idx)
+      end
+    end
+    if event == nil or updated then
+      gutter:update()
+    end
+
+    return updated
+  end
+
   --- @param index number
   --- @return boolean
   function gutter:update_plugin(index)
@@ -110,16 +198,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     if #events > 0 then
       local au_id = vim.api.nvim_create_autocmd(events, {
         callback = function(ctx)
-          logger.log('gutter', 'triggered update by: '.. ctx.event)
-          local updated = false
-          for idx, plugin in ipairs(gutter.plugins) do
-            if vim.tbl_contains(plugin.settings.events, ctx.event) then
-              updated = updated or gutter:update_plugin(idx)
-            end
-          end
-          if updated then
-            gutter:update()
-          end
+          update_plugins(ctx.event)
         end,
       })
       table.insert(results, au_id)
@@ -130,16 +209,7 @@ function M.new(i, gutter_settings, winid, column_fn)
         local an_id = vim.api.nvim_create_autocmd('User', {
           pattern = user_au,
           callback = function()
-            logger.log('gutter', 'triggered update by: '.. user_au)
-            local updated = false
-            for idx, plugin in ipairs(gutter.plugins) do
-              if vim.tbl_contains(plugin.settings.user_events, user_au) then
-                updated = updated or gutter:update_plugin(idx)
-              end
-            end
-            if updated then
-              gutter:update()
-            end
+            update_plugins(user_au)
           end,
         })
         table.insert(results, an_id)
@@ -147,7 +217,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     end
 
     if gutter.settings.render_method == 'line' then
-      au_id = vim.api.nvim_create_autocmd({ 'WinScrolled' }, {
+      local au_id = vim.api.nvim_create_autocmd({ 'WinScrolled' }, {
         callback = function(ctx)
           logger.log('gutter', 'triggered update by: '.. ctx.event)
           gutter:update()
@@ -213,9 +283,10 @@ function M.new(i, gutter_settings, winid, column_fn)
     end
     gutter.lines = lines
 
+    gutter.enabled = false
     if type(gutter.settings.enabled) == "boolean" then
-      gutter.enabled = gutter.settings.enabled and true
-    else
+      gutter.enabled = gutter.settings.enabled
+    elseif type(gutter.settings.enabled) == "function" then
       gutter.enabled = gutter.settings.enabled(gutter)
     end
 
@@ -230,6 +301,7 @@ function M.new(i, gutter_settings, winid, column_fn)
 
     gutter.gutter_lines = convert.lines_to_gutter_lines(gutter.winid, gutter.settings, gutter.lines)
     vim.schedule(function()
+      logger.log("gutter", "update: " .. gutter.index .. " gutter_lines: " .. #gutter.gutter_lines)
       gutter.window:set_options(false, column_fn(gutter.settings.layout))
       gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method)
       gutter.window:refresh_highlights(gutter.gutter_lines)
@@ -237,10 +309,7 @@ function M.new(i, gutter_settings, winid, column_fn)
   end
 
   setup_plugins()
-  for idx, _ in ipairs(gutter.plugins) do
-    gutter:update_plugin(idx)
-  end
-  gutter:update()
+  update_plugins()
 
   return gutter
 end
