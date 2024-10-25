@@ -40,6 +40,11 @@ function M.new(i, column, winid)
   local ns_id = vim.api.nvim_create_namespace('sluice' .. bufnr)
 
   local function open_window(ht)
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
+      return false
+    end
+
     return vim.api.nvim_open_win(bufnr, false, {
       relative = 'win',
       width = 1,
@@ -73,10 +78,26 @@ function M.new(i, column, winid)
     hide = false,
   }
 
+  local function guard()
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
+      return false
+    end
+    if not guards.win_exists(window.win_id) then
+      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
+      return false
+      -- window.win_id = open_window(window.height)
+    end
+
+    return true
+  end
+
   --- Refresh the content of the gutter.
   --- @param lines PluginLine[]
   --- @param count_method table
   function window:set_gutter_lines(lines, count_method)
+    if not guard() then return end
+
     local win_height = vim.api.nvim_win_get_height(window.parent_winid)
 
     local strings = {}
@@ -102,6 +123,8 @@ function M.new(i, column, winid)
 
   --- Add styling to the gutter.
   function window:refresh_highlights(lines)
+    if not guard() then return end
+
     vim.api.nvim_buf_clear_namespace(window.bufnr, window.ns_id, 0, -1)
     for i2, matches in pairs(lines) do
       local best_texthl_match = M.find_best_match(matches, "texthl")
@@ -134,12 +157,10 @@ function M.new(i, column, winid)
   end
 
   local function update_config()
-    if not guards.win_exists(window.win_id) then
-      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
-      window.win_id = open_window(window.height)
-    end
+    if not guard() then return end
 
     -- in case the window size changed, we can keep up with it.
+    -- logger.log("window", "update_config: " .. window.win_id .. " height: " .. window.height .. " parent_winid: " .. window.parent_winid)
     vim.api.nvim_win_set_config(window.win_id, {
       win = window.parent_winid,
       relative = 'win',
@@ -156,10 +177,7 @@ function M.new(i, column, winid)
   --- @param hidden boolean
   --- @param col number|nil
   function window:set_options(hidden, col)
-    if not guards.win_exists(window.parent_winid) then
-      logger.log("window", "set_options: " .. window.parent_winid .. " not found", "WARN")
-      return
-    end
+    if not guard() then return end
 
     window.hide = hidden
     if col ~= nil then
