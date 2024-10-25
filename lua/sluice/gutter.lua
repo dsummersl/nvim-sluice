@@ -24,19 +24,19 @@ function M.default_enabled_fn(gutter)
   local bufnr = vim.api.nvim_win_get_buf(gutter.winid)
   local buf_lines = vim.api.nvim_buf_line_count(bufnr)
   if win_height >= buf_lines then
-    gutter:log("default_enabled_fn: " .. gutter.index .. " false - 1")
+    gutter:log("default_enabled_fn: false - 1")
     return false
   end
-  if vim.fn.getwinvar(0, '&buftype') ~= '' then
-    gutter:log("default_enabled_fn: " .. gutter.index .. " false - 2")
+  if vim.fn.getwinvar(gutter.winid, '&buftype') ~= '' then
+    gutter:log("default_enabled_fn: false - 2")
     return false
   end
-  if vim.fn.getwinvar(0, '&previewwindow') ~= 0 then
-    gutter:log("default_enabled_fn: " .. gutter.index .. " false - 3")
+  if vim.fn.getwinvar(gutter.winid, '&previewwindow') ~= 0 then
+    gutter:log("default_enabled_fn: false - 3")
     return false
   end
-  if vim.fn.getwinvar(0, '&diff') ~= 0 then
-    gutter:log("default_enabled_fn: " .. gutter.index .. " false - 4")
+  if vim.fn.getwinvar(gutter.winid, '&diff') ~= 0 then
+    gutter:log("default_enabled_fn: false - 4")
     return false
   end
 
