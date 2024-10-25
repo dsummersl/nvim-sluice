@@ -28,16 +28,13 @@ function M.new(winid)
     )
     local column = 0
     local gutter_count = #sluice.gutters
-    logger.log("sluice", "get_gutter_column: " .. gutter_index .. " " .. layout)
+    sluice:log("get_gutter_column: " .. gutter_index .. " " .. layout)
 
     if layout == 'right' then
       for i = gutter_count, gutter_index, -1 do
-        logger.log("sluice", "get_gutter_column: " .. i)
         local index_and_gutter = sluice.gutters[i]
         local gutter = index_and_gutter.gutter
         local gutter_settings = index_and_gutter.gutter.settings
-        logger.log("sluice", "gutter.enabled: " .. vim.inspect(gutter.enabled))
-        logger.log("sluice", "get_gutter_column: " .. vim.inspect(gutter_settings))
         if gutter.enabled ~= false and gutter_settings.layout == 'right' then
           column = column + 1
         end
@@ -58,9 +55,9 @@ function M.new(winid)
 
 
   function sluice:enable()
-    logger.log("sluice", "enable: " .. self.winid .. " gutters: ".. #config.settings.gutters)
+    sluice:log("enable: " .. self.winid .. " gutters: ".. #config.settings.gutters)
 
-    for i, gutter_settings in ipairs(config.settings.gutters) do
+    for i, gutter_settings in pairs(config.settings.gutters) do
       sluice.gutters[i] = {
         index = i,
         gutter = Gutter.new(i, gutter_settings, sluice.winid, function(layout)
@@ -79,13 +76,14 @@ function M.new(winid)
 
     local function update_window_size(ctx)
       if not guards.win_exists(sluice.winid) then
-        logger.log("sluice", "get_lines: " .. sluice.winid .. " not found", "WARN")
+        sluice:log("get_lines: " .. sluice.winid .. " not found", "WARN")
         return {}
       end
 
-      logger.log('sluice', 'update_window_size triggered by ' .. ctx.event)
+      sluice:log('update_window_size triggered by ' .. ctx.event)
 
       compute_columns()
+      sluice:update()
     end
 
     sluice.au_id = vim.api.nvim_create_autocmd({ "WinResized" }, {
@@ -98,7 +96,7 @@ function M.new(winid)
   --- Open all gutters configured for this plugin.
   ---@return nil
   function sluice:update()
-    logger.log("sluice", "update: " .. self.winid)
+    sluice:log("update: " .. self.winid)
 
     for _, v in pairs(sluice.gutters) do
       v.gutter:update()
@@ -108,7 +106,7 @@ function M.new(winid)
   --- Teardown all gutters
   ---@return nil
   function sluice:teardown()
-    logger.log("sluice", "teardown: " .. self.winid)
+    sluice:log("teardown: " .. self.winid)
 
     vim.api.nvim_del_autocmd(sluice.au_id)
 
@@ -116,6 +114,13 @@ function M.new(winid)
       v.gutter:teardown()
     end
   end
+
+  --- @param message string
+  --- @param level string|nil
+  function sluice:log(message, level)
+    logger.log("".. sluice.winid ..":sluice:", message, level)
+  end
+
 
   sluice:enable()
   sluice:update()

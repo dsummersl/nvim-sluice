@@ -37,7 +37,7 @@ function M.new(plugin_settings, winid)
 
     local extmarks = vim.api.nvim_buf_get_extmarks(bufnr, -1, 0, -1, {details = true})
 
-    for _, mark in ipairs(extmarks) do
+    for _, mark in pairs(extmarks) do
       local row = mark[2]
       local details = mark[4]
       if details[hl_group_type] ~= nil and config.str_table_fn(hl_groups, details[hl_group_type]) then
@@ -79,6 +79,7 @@ function M.new(plugin_settings, winid)
     local results = {}
     add_hl_groups(results, bufnr, 'sign_hl_group')
     add_hl_groups(results, bufnr, 'hl_group')
+    logger.log("extmark", "results: " .. #results)
     return results
   end
 

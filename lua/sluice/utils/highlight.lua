@@ -14,7 +14,7 @@ local function copy_highlight(highlight, is_gui_mode, override_bg)
   local properties = {}
 
   local attribs = { "bg", "fg", "sp" }
-  for _, v in ipairs(attribs) do
+  for _, v in pairs(attribs) do
     local attrib = M.vim.fn.synIDattr(M.vim.fn.synIDtrans(M.vim.fn.hlID(highlight)), v, mode)
     if attrib ~= "" then
       properties[mode .. v] = attrib
@@ -24,7 +24,7 @@ local function copy_highlight(highlight, is_gui_mode, override_bg)
   local cterms = { "bold", "italic", "reverse", "inverse", "standout", "underline", "undercurl",
     "strikethrough" }
   local cterm_attribs = {}
-  for _, v in ipairs(cterms) do
+  for _, v in pairs(cterms) do
     local attrib = M.vim.fn.synIDattr(M.vim.fn.synIDtrans(M.vim.fn.hlID(highlight)), v, mode)
     if attrib ~= "" then
       table.insert(cterm_attribs, v)

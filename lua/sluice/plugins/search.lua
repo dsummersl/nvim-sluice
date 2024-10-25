@@ -68,7 +68,7 @@ function M.new(plugin_settings, winid)
     local bufnr = vim.api.nvim_win_get_buf(search.winid)
     local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
-    for lnum, line in ipairs(lines) do
+    for lnum, line in pairs(lines) do
       if vim.fn.match(line, pattern) ~= -1 then
         local texthl = search.settings.match_hl
         if lnum == current_line then

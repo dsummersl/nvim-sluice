@@ -36,7 +36,7 @@ end
 ---@param name string The name of the highlight to find
 ---@return table|nil The highlight definition if found, nil otherwise
 function M.find_definition(definitions, name)
-  for _, v in ipairs(definitions) do
+  for _, v in pairs(definitions) do
     if v["name"] == name then
       return v
     end
@@ -60,7 +60,7 @@ function M.lines_to_gutters(gutter_settings, lines, buffer_lines, height, top_li
   end
 
   -- drop in all the lines provided by an integration.
-  for _, line in ipairs(lines) do
+  for _, line in pairs(lines) do
     local gutter_line_number = 0
     if gutter_settings.render_method == "macro" then
       gutter_line_number = line_to_gutter_line_macro(line['lnum'], buffer_lines, height)

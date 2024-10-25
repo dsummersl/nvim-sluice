@@ -16,7 +16,7 @@ local default_settings = {
 local function sign_getdefined()
   local get_defined = vim.fn.sign_getdefined()
   local signs_defined = {}
-  for _, v in ipairs(get_defined) do
+  for _, v in pairs(get_defined) do
     signs_defined[v["name"]] = v
   end
 
@@ -58,7 +58,7 @@ function M.new(plugin_settings, winid)
     local get_placed = vim.fn.sign_getplaced(bufnr, { group = '*' })
 
     local result = {}
-    for _, v in ipairs(get_placed[1]["signs"]) do
+    for _, v in pairs(get_placed[1]["signs"]) do
       if config.str_table_fn(signs.settings.group, v["name"]) and v["name"] ~= "" then
         local line = vim.tbl_extend('force', get_defined[v["name"]], v)
         line.plugin = 'signs'

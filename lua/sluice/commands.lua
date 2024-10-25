@@ -36,7 +36,7 @@ local function update_context(ctx)
 
   local windows = vim.api.nvim_list_wins()
   logger.log('commands', 'update_context windows: ' .. vim.inspect(windows))
-  for _, win in ipairs(windows) do
+  for _, win in pairs(windows) do
     local win_config = vim.api.nvim_win_get_config(win)
     local bufnr = vim.api.nvim_win_get_buf(win)
     logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config) .. ' bufnr: ' .. bufnr)
@@ -75,7 +75,7 @@ function M.disable()
   M.au_id = nil
 
   local windows = vim.api.nvim_list_wins()
-  for _, win in ipairs(windows) do
+  for _, win in pairs(windows) do
     remove(win)
   end
 end

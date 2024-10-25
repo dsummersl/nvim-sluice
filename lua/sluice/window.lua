@@ -10,7 +10,7 @@ local M = {}
 -- @param optional key to prioritize by (beyond priority).
 function M.find_best_match(matches, key)
   local best_match = nil
-  for _, match in ipairs(matches) do
+  for _, match in pairs(matches) do
     if best_match == nil then
       best_match = match
     else
@@ -80,10 +80,10 @@ function M.new(i, column, winid)
     local win_height = vim.api.nvim_win_get_height(window.parent_winid)
 
     local strings = {}
-    for _, matches in ipairs(lines) do
+    for _, matches in pairs(lines) do
       local text = ' '
       local non_empty_matches = 0
-      for _, match in ipairs(matches) do
+      for _, match in pairs(matches) do
         if match.text ~= " " then
           non_empty_matches = non_empty_matches + 1
         end
@@ -103,7 +103,7 @@ function M.new(i, column, winid)
   --- Add styling to the gutter.
   function window:refresh_highlights(lines)
     vim.api.nvim_buf_clear_namespace(window.bufnr, window.ns_id, 0, -1)
-    for i2, matches in ipairs(lines) do
+    for i2, matches in pairs(lines) do
       local best_texthl_match = M.find_best_match(matches, "texthl")
       local best_linehl_match = M.find_best_match(matches, "linehl")
       local best_linehl = nil

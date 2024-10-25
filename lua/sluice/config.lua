@@ -5,7 +5,7 @@ local M = { }
 function M.remove_autocmds(bufnr)
   local au_ids = M.auto_command_ids_by_bufnr[bufnr]
   if au_ids then
-    for _, id in ipairs(au_ids) do
+    for _, id in pairs(au_ids) do
       vim.api.nvim_del_autocmd(id)
     end
   end
@@ -21,7 +21,7 @@ function M.str_table_fn(obj, value)
   elseif type(obj) == "string" then
     return string.match(value, obj) ~= nil
   elseif type(obj) == "table" then
-    for _, v in ipairs(obj) do
+    for _, v in pairs(obj) do
       if type(v) == "string" and string.match(value, v) then
         return true
       elseif v == value then
