@@ -12,7 +12,7 @@ local default_settings = {
   hl_group = nil,
   sign_hl_group = '.*',
   text = ' ',
-  events = { 'DiagnosticChanged' },
+  events = { 'DiagnosticChanged', 'CursorHold' },
   user_events = {},
 }
 

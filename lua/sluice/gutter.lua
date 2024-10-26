@@ -199,7 +199,9 @@ function M.new(i, gutter_settings, winid, column_fn)
     if #events > 0 then
       local au_id = vim.api.nvim_create_autocmd(events, {
         callback = function(ctx)
-          update_plugins(ctx.event)
+          vim.defer_fn(function()
+            update_plugins(ctx.event)
+          end, 50)
         end,
       })
       table.insert(results, au_id)
@@ -210,7 +212,9 @@ function M.new(i, gutter_settings, winid, column_fn)
         local an_id = vim.api.nvim_create_autocmd('User', {
           pattern = user_au,
           callback = function()
-            update_plugins(user_au)
+            vim.defer_fn(function()
+              update_plugins(user_au)
+            end, 50)
           end,
         })
         table.insert(results, an_id)
