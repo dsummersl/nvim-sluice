@@ -1,5 +1,4 @@
 local M = {
-  vim = vim,
   level = "WARN",
 }
 

@@ -35,17 +35,52 @@ end
 --- @param winid number
 --- @return Window
 function M.new(i, column, winid)
-  local height = vim.api.nvim_win_get_height(winid)
-  local bufnr = vim.api.nvim_create_buf(false, true)
-  local ns_id = vim.api.nvim_create_namespace('sluice' .. bufnr)
+  --- @class Window
+  --- @field index number
+  --- @field bufnr number
+  --- @field ns_id number
+  --- @field win_id number
+  --- @field column number
+  --- @field parent_winid number
+  --- @field hide boolean
+  --- @field winclosed_au_id number
+  local window = {
+    index = i,
+    bufnr = -1,
+    ns_id = -1,
+    win_id = 0,
+    width = 1,
+    column = column,
+    height = -1,
+    parent_winid = winid,
+    hide = false,
+    winclosed_au_id = 0,
+  }
 
-  local function open_window(ht)
-    if not vim.api.nvim_buf_is_valid(bufnr) then
+  window.height = vim.api.nvim_win_get_height(winid)
+  window.bufnr = vim.api.nvim_create_buf(false, true)
+  window.ns_id = vim.api.nvim_create_namespace('sluice' .. window.bufnr)
+
+  local function guard()
+    if not vim.api.nvim_buf_is_valid(window.bufnr) then
       logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
       return false
     end
+    if not guards.win_exists(window.win_id) then
+      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
+      return false
+    end
 
-    return vim.api.nvim_open_win(bufnr, false, {
+    return true
+  end
+
+  local function open_window(ht)
+    if not vim.api.nvim_buf_is_valid(window.bufnr) then
+      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
+      return -1
+    end
+
+    return vim.api.nvim_open_win(window.bufnr, false, {
       relative = 'win',
       width = 1,
       height = ht,
@@ -56,41 +91,33 @@ function M.new(i, column, winid)
     })
   end
 
-  local win_id = open_window(height)
+  local function update_config()
+    if not guard() then return end
 
-  --- @class Window
-  --- @field index number
-  --- @field bufnr number
-  --- @field ns_id number
-  --- @field win_id number
-  --- @field column number
-  --- @field parent_winid number
-  --- @field hide boolean
-  local window = {
-    index = i,
-    bufnr = bufnr,
-    ns_id = ns_id,
-    win_id = win_id,
-    width = 1,
-    column = column,
-    height = height,
-    parent_winid = winid,
-    hide = false,
-  }
-
-  local function guard()
-    if not vim.api.nvim_buf_is_valid(bufnr) then
-      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
-      return false
-    end
-    if not guards.win_exists(window.win_id) then
-      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
-      return false
-      -- window.win_id = open_window(window.height)
-    end
-
-    return true
+    -- in case the window size changed, we can keep up with it.
+    -- logger.log("window", "update_config: " .. window.win_id .. " height: " .. window.height .. " parent_winid: " .. window.parent_winid)
+    vim.api.nvim_win_set_config(window.win_id, {
+      win = window.parent_winid,
+      relative = 'win',
+      width = 1,
+      height = window.height,
+      row = 0,
+      col = window.column,
+      focusable = false,
+      style = 'minimal',
+      hide = window.hide,
+    })
   end
+
+  window.win_id = open_window(window.height)
+  window.winclosed_au_id = vim.api.nvim_create_autocmd("WinClosed", {
+    callback = function(args)
+      if tonumber(args.match) == window.win_id then
+        window.win_id = open_window(window.win_id)
+        update_config()
+      end
+    end,
+  })
 
   --- Refresh the content of the gutter.
   --- @param lines PluginLine[]
@@ -156,24 +183,7 @@ function M.new(i, column, winid)
     end
   end
 
-  local function update_config()
-    if not guard() then return end
-
-    -- in case the window size changed, we can keep up with it.
-    -- logger.log("window", "update_config: " .. window.win_id .. " height: " .. window.height .. " parent_winid: " .. window.parent_winid)
-    vim.api.nvim_win_set_config(window.win_id, {
-      win = window.parent_winid,
-      relative = 'win',
-      width = 1,
-      height = window.height,
-      row = 0,
-      col = window.column,
-      focusable = false,
-      style = 'minimal',
-      hide = window.hide,
-    })
-  end
-
+  --- Update the window options.
   --- @param hidden boolean
   --- @param col number|nil
   function window:set_options(hidden, col)
@@ -182,12 +192,13 @@ function M.new(i, column, winid)
     window.hide = hidden
     if col ~= nil then
       window.column = col
-      window.height = vim.api.nvim_win_get_height(window.parent_winid)
     end
+    window.height = vim.api.nvim_win_get_height(window.parent_winid)
     update_config()
   end
 
   function window:teardown()
+    vim.api.nvim_del_autocmd(window.winclosed_au_id)
     vim.api.nvim_win_close(window.win_id, true)
     vim.api.nvim_buf_delete(window.bufnr, { force = true })
   end

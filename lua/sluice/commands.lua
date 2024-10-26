@@ -2,7 +2,6 @@ local Sluice = require('sluice.sluice')
 local logger = require('sluice.utils.logger')
 
 local M = {
-  vim = vim,
   enabled = false,
   au_id = nil,
   sluices = {},
@@ -54,21 +53,23 @@ local function update_context(ctx)
   local windows = vim.api.nvim_list_wins()
   logger.log('commands', 'update_context windows: ' .. vim.inspect(windows))
   for _, win in pairs(windows) do
-    local win_config = vim.api.nvim_win_get_config(win)
-    local bufnr = vim.api.nvim_win_get_buf(win)
-    local is_temp_buf = is_temp_buffer(bufnr)
-    if not is_temp_buf then
-      logger.log('commands', 'update_context is_temp_buffer: ' .. vim.inspect(is_temp_buffer(bufnr)) .. ' win: '.. win .. ' bufnr: ' .. bufnr)
-      logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config))
-      logger.log('commands',
-        'update_context listed: "' .. vim.inspect(vim.api.nvim_buf_get_option(bufnr, 'buflisted')) .. '"')
-      if M.sluices[win] == nil then
-        M.sluices[win] = Sluice.new(win)
-      end
+    if vim.api.nvim_win_is_valid(win) then
+      local win_config = vim.api.nvim_win_get_config(win)
+      local bufnr = vim.api.nvim_win_get_buf(win)
+      local is_temp_buf = is_temp_buffer(bufnr)
+      if not is_temp_buf then
+        logger.log('commands', 'update_context is_temp_buffer: ' .. vim.inspect(is_temp_buffer(bufnr)) .. ' win: '.. win .. ' bufnr: ' .. bufnr)
+        logger.log('commands', 'update_context win_config: ' .. vim.inspect(win_config))
+        logger.log('commands',
+          'update_context listed: "' .. vim.inspect(vim.api.nvim_buf_get_option(bufnr, 'buflisted')) .. '"')
+        if M.sluices[win] == nil then
+          M.sluices[win] = Sluice.new(win)
+        end
 
-      M.sluices[win]:update()
-    elseif is_temp_buf and M.sluices[win] ~= nil then
-      remove(win)
+        M.sluices[win]:update()
+      elseif is_temp_buf and M.sluices[win] ~= nil then
+        remove(win)
+      end
     end
   end
 end
@@ -82,7 +83,7 @@ function M.enable()
   -- call once to get things going
   update_context({ event = "" })
 
-  M.au_id = M.vim.api.nvim_create_autocmd({ "WinNew", "BufWinEnter", "WinClosed" }, {
+  M.au_id = vim.api.nvim_create_autocmd({ "WinNew", "BufWinEnter", "WinClosed" }, {
     callback = update_context
   })
 end
@@ -93,7 +94,7 @@ function M.disable()
   if not M.enabled then return end
 
   M.enabled = false
-  M.vim.api.nvim_del_autocmd(M.au_id)
+  vim.api.nvim_del_autocmd(M.au_id)
   M.au_id = nil
 
   local windows = vim.api.nvim_list_wins()
