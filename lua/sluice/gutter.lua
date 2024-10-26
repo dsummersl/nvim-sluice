@@ -87,6 +87,7 @@ end
 function M.new(i, gutter_settings, winid, column_fn)
   --- @class GutterSettings
   --- @field gutter_hl nil|string
+  --- @field defer_updates_ms number
   --- @field enabled nil|boolean|fun(gutter: Gutter): boolean
   --- @field count_method nil|table
   --- @field layout 'left'|'right'|nil
@@ -99,6 +100,9 @@ function M.new(i, gutter_settings, winid, column_fn)
     -- override parts of this highlight (typically this is the background color of
     -- areas represented in the gutter of offscreen content)
     gutter_hl = 'SluiceColumn',
+
+    --- How long to defer updates to plugins from events:
+    defer_updates_ms = 50,
 
     --- Whether to display the gutter or not (boolean or function that takes this gutter)
     enabled = nil,
@@ -201,7 +205,7 @@ function M.new(i, gutter_settings, winid, column_fn)
         callback = function(ctx)
           vim.defer_fn(function()
             update_plugins(ctx.event)
-          end, 50)
+          end, gutter.settings.defer_updates_ms)
         end,
       })
       table.insert(results, au_id)
@@ -214,7 +218,7 @@ function M.new(i, gutter_settings, winid, column_fn)
           callback = function()
             vim.defer_fn(function()
               update_plugins(user_au)
-            end, 50)
+            end, gutter.settings.defer_updates_ms)
           end,
         })
         table.insert(results, an_id)
