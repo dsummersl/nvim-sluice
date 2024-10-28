@@ -43,38 +43,32 @@ function M.default_enabled_fn(gutter)
   return true
 end
 
---- Create an enable_fn function that returns true if any plugin is active
---- @param gutter Gutter
-function M.any_plugin_active(gutter)
-  if not M.default_enabled_fn(gutter) then
-    return false
-  end
-
-  for _, line in pairs(gutter.lines) do
-    if line.plugin ~= "" then
-      return true
-    end
-  end
-
-  gutter:log("any_plugin_active: " .. gutter.index .. " false")
-  return false
-end
-
 --- Create an enabled_fn function that returns true if any non-viewport plugin is active
 --- @param gutter Gutter
-function M.any_non_viewport_plugin_active(gutter)
+--- @param plugins string[]|nil Optional specify the plugins that should be active.
+function M.any_non_viewport_plugin_active(gutter, plugins)
   if not M.default_enabled_fn(gutter) then
     return false
   end
 
   for _, line in pairs(gutter.lines) do
-    if line.plugin ~= "" and line.plugin ~= "viewport" then
+    if plugins == nil and line.plugin ~= "viewport" then
+      return true
+    elseif plugins ~= nil and vim.tbl_contains(plugins, line.plugin) then
       return true
     end
   end
 
   gutter:log("any_non_viewport_plugin_active: " .. gutter.index .. " false")
   return false
+end
+
+--- Create an enabled_fn function that returns true if any non-viewport plugin is active
+--- @param plugins string[]
+function M.make_any_plugins_active_fn(plugins)
+  return function(g)
+    return M.any_non_viewport_plugin_active(g, plugins)
+  end
 end
 
 --- Gutter: A single column of information overlaid on the left/right side of
@@ -150,6 +144,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     enabled = false,
   }
 
+  --- TODO move into its own module
   --- @return Plugin
   local function make_plugin(plugin_settings)
     if type(plugin_settings) == "table" then

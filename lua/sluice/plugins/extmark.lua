@@ -8,14 +8,14 @@ local M = {}
 ---@field hl_group string|nil
 ---@field sign_hl_group string|nil
 ---@field text string
----@field priority number|nil
+---@field priority number
 local default_settings = {
   hl_group = nil,
   sign_hl_group = '.*',
   text = ' ',
   events = { 'DiagnosticChanged', 'CursorHold' },
   user_events = {},
-  priority = nil,
+  priority = 20,
 }
 
 ---@param plugin_settings ExtmarkSettings
@@ -26,7 +26,7 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings ExtmarkSettings
   ---@field settings ExtmarkSettings|nil
   ---@field bufnr number
-  ---@field priority number|nil
+  ---@field priority number
   local extmark = {
     plugin_settings = plugin_settings,
     settings = nil,
@@ -46,16 +46,12 @@ function M.new(plugin_settings, winid)
       if details[hl_group_type] ~= nil and config.str_table_fn(hl_groups, details[hl_group_type]) then
         local row_text = details['sign_text'] or text
         local use_linehl = row_text == ' '
-        local priority = details["priority"]
-        if extmark.settings["priority"] ~= nil then
-          priority = extmark.settings["priority"]
-        end
         table.insert(result, {
           lnum = row + 1,
           text = row_text,
           texthl = details[hl_group_type],
           linehl = (use_linehl and details[hl_group_type]) or nil,
-          priority = priority,
+          priority = extmark.settings.priority,
           plugin = 'extmark',
         })
       end
@@ -84,8 +80,12 @@ function M.new(plugin_settings, winid)
     logger.log("extmark", "get_lines: " .. extmark.winid .. " bufnr: " .. bufnr)
 
     local results = {}
+    -- TODO there is a bug here if hl_group and sign_hl_group are on the same
+    -- lines - somehow one is getting higher prioriy - this might be a window
+    -- bug?
     add_hl_groups(results, bufnr, 'sign_hl_group')
     add_hl_groups(results, bufnr, 'hl_group')
+    -- TODO support multiline extmarks (highlights of a function)
     logger.log("extmark", "results: " .. #results)
     return results
   end

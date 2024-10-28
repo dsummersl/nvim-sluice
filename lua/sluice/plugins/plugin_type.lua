@@ -12,6 +12,7 @@ local Plugin = {
 ---@class PluginSettings
 ---@field events string[]
 ---@field user_events string[]
+---@field priority number
 
 ---@class PluginLine
 ---@field text string          @The text of the line.
