@@ -9,11 +9,13 @@ local M = {}
 ---@class ViewportSettings : PluginSettings
 ---@field visible_area_hl string
 ---@field cursor_hl string
+---@field priority number
 local default_settings = {
   visible_area_hl = "SluiceViewportVisibleArea",
   cursor_hl = "SluiceViewportCursor",
   events = { 'WinScrolled', 'CursorMoved', 'CursorHold', 'CursorHoldI', 'BufEnter', 'WinEnter', 'VimResized' },
   user_events = {},
+  priority = 5,
 }
 
 ---@param plugin_settings ViewportSettings
@@ -24,6 +26,7 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings ViewportSettings
   ---@field settings ViewportSettings|nil
   ---@field bufnr number
+  ---@field priority number
   local viewport = {
     plugin_settings = plugin_settings,
     settings = nil,
@@ -64,11 +67,11 @@ function M.new(plugin_settings, winid)
     for lnum = vim.fn.line('w0', viewport.winid), vim.fn.line('w$', viewport.winid) do
       local linehl = viewport.settings.visible_area_hl
       local text = " "
-      local priority = 0
+      local priority = viewport.settings.priority
       if lnum == cursor_position then
         linehl = viewport.settings.cursor_hl
         text = " "
-        priority = 1
+        priority = viewport.settings.priority + 1
       end
       table.insert(lines, {
         text = text,

@@ -8,12 +8,14 @@ local M = {}
 ---@field hl_group string|nil
 ---@field sign_hl_group string|nil
 ---@field text string
+---@field priority number|nil
 local default_settings = {
   hl_group = nil,
   sign_hl_group = '.*',
   text = ' ',
   events = { 'DiagnosticChanged', 'CursorHold' },
   user_events = {},
+  priority = nil,
 }
 
 ---@param plugin_settings ExtmarkSettings
@@ -24,6 +26,7 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings ExtmarkSettings
   ---@field settings ExtmarkSettings|nil
   ---@field bufnr number
+  ---@field priority number|nil
   local extmark = {
     plugin_settings = plugin_settings,
     settings = nil,
@@ -43,12 +46,16 @@ function M.new(plugin_settings, winid)
       if details[hl_group_type] ~= nil and config.str_table_fn(hl_groups, details[hl_group_type]) then
         local row_text = details['sign_text'] or text
         local use_linehl = row_text == ' '
+        local priority = details["priority"]
+        if extmark.settings["priority"] ~= nil then
+          priority = extmark.settings["priority"]
+        end
         table.insert(result, {
           lnum = row + 1,
           text = row_text,
           texthl = details[hl_group_type],
           linehl = (use_linehl and details[hl_group_type]) or nil,
-          priority = details["priority"],
+          priority = priority,
           plugin = 'extmark',
         })
       end

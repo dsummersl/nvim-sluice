@@ -9,11 +9,13 @@ local M = {}
 ---@class SearchSettings : PluginSettings
 ---@field match_hl string
 ---@field match_line_hl string
+---@field priority number
 local default_settings = {
   match_hl = "SluiceSearchMatch",
   match_line_hl = "SluiceSearchMatchLine",
   events = { 'CmdlineLeave', 'TextChanged', 'CursorMoved', 'CursorHold' },
   user_events = {},
+  priority = 10,
 }
 
 ---@param plugin_settings SearchSettings
@@ -24,6 +26,7 @@ function M.new(plugin_settings, winid)
   ---@field plugin_settings SearchSettings
   ---@field settings SearchSettings|nil
   ---@field bufnr number
+  ---@field priority number
   local search = {
     plugin_settings = plugin_settings,
     settings = nil,
@@ -78,7 +81,7 @@ function M.new(plugin_settings, winid)
           lnum = lnum,
           text = "—",
           texthl = texthl,
-          priority = 10,
+          priority = search.settings.priority,
           plugin = 'search',
         })
       end
