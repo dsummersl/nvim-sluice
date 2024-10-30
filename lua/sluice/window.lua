@@ -66,8 +66,12 @@ function M.new(i, column, winid)
       logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
       return false
     end
+    if not guards.win_exists(window.parent_winid) then
+      logger.log("window", "update_config: parent win " .. window.parent_winid .. " not found", "WARN")
+      return false
+    end
     if not guards.win_exists(window.win_id) then
-      logger.log("window", "update_config: " .. window.win_id .. " not found", "WARN")
+      logger.log("window", "update_config: win " .. window.win_id .. " not found", "WARN")
       return false
     end
 
