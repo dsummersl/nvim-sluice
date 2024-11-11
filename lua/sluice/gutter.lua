@@ -180,6 +180,15 @@ function M.new(i, gutter_settings, winid, column_fn)
     return updated
   end
 
+  local function render_window()
+    vim.schedule(function()
+      gutter:log("render_window: " .. gutter.index .. " gutter_lines: " .. #gutter.gutter_lines)
+      gutter.window:set_options(false, column_fn(gutter.settings.layout))
+      gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method)
+      gutter.window:refresh_highlights(gutter.gutter_lines)
+    end)
+  end
+
   --- @param index number
   --- @return boolean
   function gutter:update_plugin(index)
@@ -221,7 +230,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     end
 
     if gutter.settings.render_method == 'line' then
-      local au_id = vim.api.nvim_create_autocmd({ 'WinScrolled' }, {
+      local au_id = vim.api.nvim_create_autocmd({ 'WinScrolled', 'ColorScheme' }, {
         callback = function(ctx)
           gutter:log('triggered update by: '.. ctx.event)
           gutter:update()
@@ -271,6 +280,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     gutter.event_au_ids = {}
   end
 
+  --- Refetch the latest information and update re-render.
   function gutter:update()
     if not guards.win_exists(gutter.winid) then
       gutter:log("update: " .. gutter.winid .. " not found", "WARN")
@@ -306,12 +316,7 @@ function M.new(i, gutter_settings, winid, column_fn)
     end
 
     gutter.gutter_lines = convert.lines_to_gutter_lines(gutter.winid, gutter.settings, gutter.lines)
-    vim.schedule(function()
-      gutter:log("update: " .. gutter.index .. " gutter_lines: " .. #gutter.gutter_lines)
-      gutter.window:set_options(false, column_fn(gutter.settings.layout))
-      gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method)
-      gutter.window:refresh_highlights(gutter.gutter_lines)
-    end)
+    render_window()
   end
 
   --- @param message string
