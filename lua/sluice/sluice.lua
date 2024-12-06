@@ -23,9 +23,7 @@ function M.new(winid)
   }
 
   local function get_gutter_column(gutter_index, layout)
-    local window_width = (
-      vim.api.nvim_win_get_width and vim.api.nvim_win_get_width(0) or 80
-    )
+    local window_width = vim.api.nvim_win_get_width(sluice.winid)
     local column = 0
     local gutter_count = #sluice.gutters
     sluice:log("get_gutter_column: " .. gutter_index .. " " .. layout)
