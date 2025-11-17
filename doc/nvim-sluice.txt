@@ -8,9 +8,7 @@ CONTENTS                                                    *NvimSluiceContents*
 
     1. Intro ...................... |NvimSluiceIntro|
     2.1 Commands .................. |NvimSluiceCommands|
-        2.1 :SluiceEnable ............... |:SluiceEnable|
-        2.2 :SluiceDisable .............. |:SluiceDisable|
-        2.3 :SluiceToggle ............... |:SluiceToggle|
+        2.1 :Sluice ............... |:Sluice|
     3. Configuration .............. |NvimSluiceConfig|
         3.1 SluiceViewportVisibleArea ........... |hl-SluiceViewportVisibleArea|
         3.2 SluiceViewportCursor ................ |hl-SluiceViewportCursor|
@@ -28,32 +26,14 @@ window.
 2. Commands                                                 *NvimSluiceCommands*
 
 ------------------------------------------------------------------------------
-2.1 :SluiceEnable                                                *:SluiceEnable*
+2.1 :Sluice                                                *:Sluice*
 
-Open the Slice signs window.
+Control the sluice windows.
 
 Usage:
     >
-    :SluiceEnable
+    :Sluice enable/disable/toggle
 <
-------------------------------------------------------------------------------
-2.2 :SluiceDisable                                              *:SluiceDisable*
-
-Close the Sluice signs window.
-
-Usage:
-    >
-    :SluiceDisable
-
-------------------------------------------------------------------------------
-2.3 :SluiceToggle                                                *:SluiceToggle*
-
-Toggle the Slice window off and on.
-
-Usage:
-    >
-    :SluiceToggle
-
 ==============================================================================
 3. Configuration                                              *NvimSluiceConfig*
 
@@ -66,20 +46,18 @@ Here's an example of how to configure Sluice with its default settings:
       throttle_ms = 150,
       gutters = {
         {
-          plugins = { 'viewport', 'search' },
+          integrations = { 'viewport', 'search' },
           window = {
-            width = 1,
-            default_gutter_hl = 'SluiceColumn',
-            enabled_fn = function that checks if search has results,
+            gutter_hl = 'SluiceColumn',
+            enabled = function that checks if search has results,
             count_method = 'horizontal_block',
           },
         },
         {
-          plugins = { 'viewport', 'signs', 'extmark_signs' },
+          integrations = { 'viewport', 'signs', 'extmark' },
           window = {
-            width = 1,
-            default_gutter_hl = 'SluiceColumn',
-            enabled_fn = default_enabled_fn,
+            gutter_hl = 'SluiceColumn',
+            enabled = default_enabled_fn,
             count_method = '',
           },
         },
@@ -105,11 +83,11 @@ Here's an example of how to configure Sluice with its default settings:
 
 Sluice supports multiple gutters, each with its own configuration.
 
-`plugins`                                               *NvimSluiceGutterPlugins*
+`integrations`                                               *NvimSluiceGutterPlugins*
     Type: table of strings
     Default: `{ 'viewport', 'search' }` for the first gutter,
-             `{ 'viewport', 'signs', 'extmark_signs' }` for the second gutter
-    The plugins to use for this gutter.
+             `{ 'viewport', 'signs', 'extmark' }` for the second gutter
+    The integrations to use for this gutter.
 
 `window`                                                *NvimSluiceGutterWindow*
     Type: table
@@ -120,12 +98,12 @@ Sluice supports multiple gutters, each with its own configuration.
         Default: `1`
         The width of the gutter window.
 
-    `default_gutter_hl`              *NvimSluiceGutterWindowDefaultGutterHl*
+    `gutter_hl`              *NvimSluiceGutterWindowDefaultGutterHl*
         Type: string
         Default: `'SluiceColumn'`
         The default highlight group for the gutter.
 
-    `enabled_fn`                          *NvimSluiceGutterWindowEnabledFn*
+    `enabled`                          *NvimSluiceGutterWindowEnabledFn*
         Type: function
         Default: `default_enabled_fn` or a function that checks if search has results
         A function that determines whether the gutter should be displayed.

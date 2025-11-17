@@ -1,16 +1,17 @@
-local highlight = require('sluice.highlight')
-local counters = require('sluice.integrations.counters')
+local highlight = require('sluice.utils.highlight')
+local counters = require('sluice.utils.counters')
+local logger = require('sluice.utils.logger')
+local guards = require('sluice.utils.guards')
 
-local M = {
-  vim = vim,
-}
+local M = {}
+-- TODO when the colorscheme changes, we need a refresh
 
 --- Find the best match, ordered by priority.
 -- @param matches List of matches from plugins.
 -- @param optional key to prioritize by (beyond priority).
 function M.find_best_match(matches, key)
   local best_match = nil
-  for _, match in ipairs(matches) do
+  for _, match in pairs(matches) do
     if best_match == nil then
       best_match = match
     else
@@ -29,127 +30,185 @@ function M.find_best_match(matches, key)
   return best_match
 end
 
---- Add styling to the gutter.
-function M.refresh_highlights(bufnr, ns, lines)
-  M.vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-  for i, matches in ipairs(lines) do
-    local best_texthl_match = M.find_best_match(matches, "texthl")
-    local best_linehl_match = M.find_best_match(matches, "linehl")
-    local best_linehl = nil
-    local best_texthl = nil
-    if best_linehl_match ~= nil then
-      best_linehl = best_linehl_match.linehl
+--- Create a new window.
+--- @param i number
+--- @param column number
+--- @param winid number
+--- @return Window
+function M.new(i, column, winid)
+  --- @class Window
+  --- @field index number
+  --- @field bufnr number
+  --- @field ns_id number
+  --- @field win_id number
+  --- @field column number
+  --- @field parent_winid number
+  --- @field hide boolean
+  --- @field winclosed_au_id number
+  local window = {
+    index = i,
+    bufnr = -1,
+    ns_id = -1,
+    win_id = 0,
+    width = 1,
+    column = column,
+    height = -1,
+    parent_winid = winid,
+    hide = false,
+    winclosed_au_id = 0,
+  }
+
+  window.height = vim.api.nvim_win_get_height(winid)
+  window.bufnr = vim.api.nvim_create_buf(false, true)
+  window.ns_id = vim.api.nvim_create_namespace('sluice' .. window.bufnr)
+
+  local function guard()
+    if not vim.api.nvim_buf_is_valid(window.bufnr) then
+      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
+      return false
     end
-    if best_texthl_match ~= nil then
-      best_texthl = best_texthl_match.texthl
+    if not guards.win_exists(window.parent_winid) then
+      logger.log("window", "update_config: parent win " .. window.parent_winid .. " not found", "WARN")
+      return false
+    end
+    if not guards.win_exists(window.win_id) then
+      logger.log("window", "update_config: win " .. window.win_id .. " not found", "WARN")
+      return false
     end
 
-    if best_texthl ~= nil then
-      local mode = "cterm"
-      if vim.o.termguicolors then
-        mode = "gui"
-      end
-      if best_linehl ~= nil then
-        local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(best_linehl)), "bg", mode)
-        local highlight_name = highlight.copy_highlight(best_texthl, mode == "gui", line_bg)
-        M.vim.api.nvim_buf_add_highlight(bufnr, ns, highlight_name, i - 1, 0, -1)
-      else
-        M.vim.api.nvim_buf_add_highlight(bufnr, ns, best_texthl, i - 1, 0, -1)
-      end
-    else
-      M.vim.api.nvim_buf_add_highlight(bufnr, ns, best_linehl, i - 1, 0, -1)
-    end
-  end
-end
-
---- Refresh the content of the gutter.
-function M.set_gutter_lines(bufnr, lines, count_method, width)
-  local win_height = M.vim.api.nvim_win_get_height(0)
-
-  local strings = {}
-  for _, matches in ipairs(lines) do
-    local text = ' '
-    local non_empty_matches = 0
-    for _, match in ipairs(matches) do
-      if match.text ~= " " then
-        non_empty_matches = non_empty_matches + 1
-      end
-    end
-    if count_method ~= nil and non_empty_matches > 1 then
-      text = counters.count(non_empty_matches, count_method)
-    else
-      text = M.find_best_match(matches, "text")['text']
-    end
-
-    -- pad text to width
-    text = string.rep(' ', width - #text) .. text
-    table.insert(strings, text)
+    return true
   end
 
-  M.vim.api.nvim_buf_set_lines(bufnr, 0, win_height - 1, false, strings)
-end
-
-function M.get_gutter_column(gutters, gutter_index, layout)
-  local window_width = M.vim.api.nvim_win_get_width and M.vim.api.nvim_win_get_width(0) or
-  80                                                                                          -- Default to 80 if function not available
-  local column = 0
-  local gutter_count = #gutters
-  local config = require('sluice.config')
-
-  if layout == 'right' then
-    for i = gutter_count, gutter_index, -1 do
-      local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'right' then
-        column = column + gutter_settings.window.width
-      end
+  local function open_window(ht)
+    if not vim.api.nvim_buf_is_valid(window.bufnr) then
+      logger.log("window", "attempt to open a window for a buffer that no longer exists", "WARN")
+      return -1
     end
-    return window_width - column
-  else -- 'left' layout
-    for i = 1, gutter_index - 1 do
-      local gutter_settings = config.settings.gutters[i]
-      if gutter_settings and gutters[i] and gutters[i].enabled ~= false and gutter_settings.window.layout == 'left' then
-        column = column + gutter_settings.window.width
-      end
-    end
-    return column
-  end
-end
 
---- Create a gutter.
--- side effect: creates bufnr and ns
-function M.create_window(gutters, gutter_index)
-  local gutter = gutters[gutter_index]
-  local gutter_settings = require('sluice.config').settings.gutters[gutter_index]
-  local gutter_width = gutter_settings.window.width
-  local layout = gutter_settings.window.layout
-
-  local col = M.get_gutter_column(gutters, gutter_index, layout)
-  local height = M.vim.api.nvim_win_get_height(0)
-
-  if gutter.bufnr == nil then
-    gutter.bufnr = M.vim.api.nvim_create_buf(false, true)
-    gutter.ns = M.vim.api.nvim_create_namespace('sluice' .. gutter.bufnr)
-  end
-  if gutter.winid == nil or M.vim.fn.win_id2win(gutter.winid) == 0 then
-    gutter.winid = M.vim.api.nvim_open_win(gutter.bufnr, false, {
+    return vim.api.nvim_open_win(window.bufnr, false, {
       relative = 'win',
-      width = gutter_width,
-      height = height,
+      width = 1,
+      height = ht,
       row = 0,
-      col = col,
+      col = column,
       focusable = false,
       style = 'minimal',
     })
-  else
-    M.vim.api.nvim_win_set_config(gutter.winid, {
-      win = M.vim.api.nvim_get_current_win(),
+  end
+
+  local function update_config()
+    if not guard() then return end
+
+    -- in case the window size changed, we can keep up with it.
+    -- logger.log("window", "update_config: " .. window.win_id .. " height: " .. window.height .. " parent_winid: " .. window.parent_winid)
+    vim.api.nvim_win_set_config(window.win_id, {
+      win = window.parent_winid,
       relative = 'win',
-      width = gutter_width,
-      height = height,
+      width = 1,
+      height = window.height,
       row = 0,
-      col = col,
+      col = window.column,
+      focusable = false,
+      style = 'minimal',
+      hide = window.hide,
     })
   end
+
+  window.win_id = open_window(window.height)
+  window.winclosed_au_id = vim.api.nvim_create_autocmd("WinClosed", {
+    callback = function(args)
+      if tonumber(args.match) == window.win_id then
+        window.win_id = open_window(window.win_id)
+        update_config()
+      end
+    end,
+  })
+
+  --- Refresh the content of the gutter.
+  --- @param lines PluginLine[]
+  --- @param count_method table
+  function window:set_gutter_lines(lines, count_method)
+    if not guard() then return end
+
+    local win_height = vim.api.nvim_win_get_height(window.parent_winid)
+
+    local strings = {}
+    for _, matches in pairs(lines) do
+      local text = ' '
+      local non_empty_matches = 0
+      for _, match in pairs(matches) do
+        if match.text ~= " " then
+          non_empty_matches = non_empty_matches + 1
+        end
+      end
+      if count_method ~= nil and non_empty_matches > 1 then
+        text = counters.count(non_empty_matches, count_method)
+      else
+        text = M.find_best_match(matches, "text")['text']
+      end
+
+      table.insert(strings, text)
+    end
+
+    vim.api.nvim_buf_set_lines(window.bufnr, 0, win_height - 1, false, strings)
+  end
+
+  --- Add styling to the gutter.
+  function window:refresh_highlights(lines)
+    if not guard() then return end
+
+    vim.api.nvim_buf_clear_namespace(window.bufnr, window.ns_id, 0, -1)
+    for i2, matches in pairs(lines) do
+      local best_texthl_match = M.find_best_match(matches, "texthl")
+      local best_linehl_match = M.find_best_match(matches, "linehl")
+      local best_linehl = nil
+      local best_texthl = nil
+      if best_linehl_match ~= nil then
+        best_linehl = best_linehl_match.linehl
+      end
+      if best_texthl_match ~= nil then
+        best_texthl = best_texthl_match.texthl
+      end
+
+      if best_texthl ~= nil then
+        local mode = "cterm"
+        if vim.o.termguicolors then
+          mode = "gui"
+        end
+        if best_linehl ~= nil then
+          local line_bg = vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(best_linehl)), "bg", mode)
+          local highlight_name = highlight.copy_highlight(best_texthl, mode == "gui", line_bg)
+          vim.api.nvim_buf_add_highlight(window.bufnr, window.ns_id, highlight_name, i2 - 1, 0, -1)
+        else
+          vim.api.nvim_buf_add_highlight(window.bufnr, window.ns_id, best_texthl, i2 - 1, 0, -1)
+        end
+      else
+        vim.api.nvim_buf_add_highlight(window.bufnr, window.ns_id, best_linehl, i2 - 1, 0, -1)
+      end
+    end
+  end
+
+  --- Update the window options.
+  --- @param hidden boolean
+  --- @param col number|nil
+  function window:set_options(hidden, col)
+    if not guard() then return end
+
+    window.hide = hidden
+    if col ~= nil then
+      window.column = col
+    end
+    window.height = vim.api.nvim_win_get_height(window.parent_winid)
+    update_config()
+  end
+
+  function window:teardown()
+    vim.api.nvim_del_autocmd(window.winclosed_au_id)
+    vim.api.nvim_win_close(window.win_id, true)
+    vim.api.nvim_buf_delete(window.bufnr, { force = true })
+  end
+
+  return window
 end
 
 return M

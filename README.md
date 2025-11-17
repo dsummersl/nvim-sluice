@@ -7,6 +7,7 @@ Sluice:
 A neovim plugin that provides vertical channels along the sides of your window:
 - minimap of the +signs and extmarks for the side of the window.
 - replacement for the signcolumn: customize the width and contents of the column to your liking!
+new text here.
 
 ## Install
 
@@ -39,18 +40,18 @@ Default configuration:
 {
   enable = true,
   gutters = { {
-      plugins = { "viewport", "search" },
+      integrations = { "viewport", "search" },
       window = {
-        default_gutter_hl = "SluiceColumn",
-        enabled_fn = 'sluice.config.default_enabled_fn',
+        gutter_hl = "SluiceColumn",
+        enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
     }, {
-      plugins = { "viewport", "signs" },
+      integrations = { "viewport", "signs" },
       window = {
         count_method = "",
-        default_gutter_hl = "SluiceColumn",
-        enabled_fn = 'sluice.config.default_enabled_fn',
+        gutter_hl = "SluiceColumn",
+        enabled = 'sluice.config.default_enabled_fn',
         width = 1
       }
     } },
@@ -69,20 +70,20 @@ Example configuration with left and right gutters:
   enable = true,
   gutters = {
     left = { -- Define a gutter on the left side
-      plugins = { "gitsigns", "lsp" },
+      integrations = { "gitsigns", "lsp" },
       window = {
-        default_gutter_hl = "SluiceGutter",
-        enabled_fn = <function 1>,
+        gutter_hl = "SluiceGutter",
+        enabled = <function 1>,
         width = 2,
         whitelist = { "GitSignsAdd", "GitSignsChange", "LspDiagnosticsSignError" },
         blacklist = { "GitSignsDelete" }
       }
     },
     right = { -- Define a gutter on the right side (existing functionality)
-      plugins = { "viewport", "search" },
+      integrations = { "viewport", "search" },
       window = {
-        default_gutter_hl = "SluiceColumn",
-        enabled_fn = <function 2>,
+        gutter_hl = "SluiceColumn",
+        enabled = <function 2>,
         width = 1
       }
     }
@@ -118,8 +119,6 @@ Pre commit hooks:
 
 Thanks to [nvim-treesitter-context](https://github.com/romgrk/nvim-treesitter-context) which I based the lua windowing that this plugin uses.
 
-The idea behind this project is based on [vim-sluice](https://github.com/dsummersl/vim-sluice) -- a buggier and more feature-ful version of this plugin for vim/gvim.
-
 ## Features
 
 With the new configuration options, you can:
@@ -127,7 +126,9 @@ With the new configuration options, you can:
 - Define gutters on both the left and right sides of the screen.
 - Configure the symbols and width of each gutter.
 - Whitelist or blacklist specific highlight groups to fine-tune what is displayed in the gutters.
-- Create dedicated gutters for specific plugins like gitsigns or LSP messages.
+- Create dedicated gutters for specific integrations like gitsigns or LSP messages.
+
+TODO https://github.com/nvim-neorocks/nvim-best-practices?tab=readme-ov-file#white_check_mark-do-6
 
 These features provide greater flexibility in how you view and interact with different signs and messages within Neovim.
 

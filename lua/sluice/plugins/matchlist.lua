@@ -10,9 +10,8 @@ function M.update(settings, winid)
 
   local lines = M.vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
-  for lnum, line in ipairs(lines) do
+  for lnum, line in pairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
-      -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",
@@ -37,9 +36,8 @@ function M.update(settings, winid)
 
   local lines = M.vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
-  for lnum, line in ipairs(lines) do
+  for lnum, line in pairs(lines) do
     if M.vim.fn.match(line, pattern) ~= -1 then
-      -- TODO settings - read them in.
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",
