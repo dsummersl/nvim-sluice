@@ -11,7 +11,9 @@ function M.update(settings, winid)
   local lines = M.vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
   for lnum, line in pairs(lines) do
-    if M.vim.fn.match(line, pattern) ~= -1 then
+    -- Convert to string to handle special buffers (e.g., ex history) that may return Blob objects
+    local line_str = tostring(line)
+    if M.vim.fn.match(line_str, pattern) ~= -1 then
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",
@@ -37,7 +39,9 @@ function M.update(settings, winid)
   local lines = M.vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
   for lnum, line in pairs(lines) do
-    if M.vim.fn.match(line, pattern) ~= -1 then
+    -- Convert to string to handle special buffers (e.g., ex history) that may return Blob objects
+    local line_str = tostring(line)
+    if M.vim.fn.match(line_str, pattern) ~= -1 then
       table.insert(lines_with_matches, {
         lnum = lnum,
         text = "/ ",
