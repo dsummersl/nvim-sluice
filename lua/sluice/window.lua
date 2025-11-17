@@ -4,6 +4,7 @@ local logger = require('sluice.utils.logger')
 local guards = require('sluice.utils.guards')
 
 local M = {}
+-- TODO when the colorscheme changes, we need a refresh
 
 --- Find the best match, ordered by priority.
 -- @param matches List of matches from plugins.

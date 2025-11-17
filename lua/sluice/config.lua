@@ -58,6 +58,7 @@ local default_settings = {
   throttle_ms = 150,
   gutters = {
     {
+      defer_updates_ms = 50,
       plugins = { 'viewport', 'extmark', 'signs' },
     }
   }

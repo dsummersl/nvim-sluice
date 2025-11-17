@@ -79,6 +79,7 @@ function M.new(plugin_settings, winid)
         end
         table.insert(lines_with_matches, {
           lnum = lnum,
+          -- TODO make the text and texthl configurable
           text = "—",
           texthl = texthl,
           priority = search.settings.priority,

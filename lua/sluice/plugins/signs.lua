@@ -3,6 +3,7 @@ local logger = require('sluice.utils.logger')
 local guards = require('sluice.utils.guards')
 
 local M = {}
+-- TODO deprecated altogether in which version of nvim?
 
 ---@class SignsSettings : PluginSettings
 ---@field group string

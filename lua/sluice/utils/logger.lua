@@ -35,7 +35,9 @@ end
 -- @param message: string: The message to log
 -- @param level: string | nil: The log level (INFO, WARN, ERROR, nil)
 function M.log(context, message, level)
-  if not level_enabled(level) then
+  -- if not level_enabled(level) then
+  -- if not (context:find('extmark') or context:find('gutter')) then
+  if not (context:find('sluice')) then
     return
   end
 
