@@ -73,7 +73,7 @@ function M.new(plugin_settings, winid)
 
     for lnum, line in pairs(lines) do
       -- Convert to string to handle special buffers (e.g., ex history) that may return Blob objects
-      local line_str = tostring(line)
+      local line_str = type(line) == 'string' and line or tostring(line)
       if vim.fn.match(line_str, pattern) ~= -1 then
         local texthl = search.settings.match_hl
         if lnum == current_line then
