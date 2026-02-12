@@ -182,6 +182,10 @@ function M.new(i, gutter_settings, winid, column_fn)
 
   local function render_window()
     vim.schedule(function()
+      if not guards.win_exists(gutter.winid) then
+        gutter:log("render_window: " .. gutter.winid .. " not found", "WARN")
+        return
+      end
       gutter:log("render_window: " .. gutter.index .. " gutter_lines: " .. #gutter.gutter_lines)
       gutter.window:set_options(false, column_fn(gutter.settings.layout))
       gutter.window:set_gutter_lines(gutter.gutter_lines, gutter.settings.count_method)
